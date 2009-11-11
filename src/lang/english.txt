@@ -3242,6 +3242,7 @@ STR_GAME_SAVELOAD_ERROR_FILE_NOT_READABLE                       :File not readab
 STR_GAME_SAVELOAD_ERROR_FILE_NOT_WRITEABLE                      :File not writeable
 STR_GAME_SAVELOAD_ERROR_DATA_INTEGRITY_CHECK_FAILED             :Data integrity check failed
 STR_WARNING_LOADGAME_REMOVED_TRAMS                              :{WHITE}Game was saved in version without tram support. All trams have been removed.
+STR_WARNING_NONSTOP_CARGODIST                                   :{WHITE}You have set at least one cargo class to be automatically distributed in{}"Avanced Settings -> Link Graph"{}and disabled{}"New orders are 'non-stop' by default"{}in{}"Advanced Settings -> Vehicles"{}This is a BAD idea.
 
 # Map generation messages
 STR_ERROR_COULD_NOT_CREATE_TOWN                                 :{WHITE}Map generation aborted...{}... no suitable town locations
