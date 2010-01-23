@@ -689,6 +689,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\..\src\sprite.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\..\src\spritecache.cpp"
 				>
 			</File>
@@ -758,10 +762,6 @@
 			</File>
 			<File
 				RelativePath=".\..\src\airport.h"
-				>
-			</File>
-			<File
-				RelativePath=".\..\src\airport_movement.h"
 				>
 			</File>
 			<File
@@ -1093,7 +1093,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\..\src\linkgraph\linkgraph_types.h"
+				RelativePath=".\..\src\linkgraph\linkgraph_type.h"
 				>
 			</File>
 			<File
@@ -1110,6 +1110,14 @@
 			</File>
 			<File
 				RelativePath=".\..\src\mixer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\moving_average.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\moving_average.cpp"
 				>
 			</File>
 			<File
@@ -2196,6 +2204,18 @@
 		<Filter
 			Name="Tables"
 			>
+			<File
+				RelativePath=".\..\src\table\airport_defaults.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\table\airporttiles.h"
+				>
+			</File>
+			<File
+				RelativePath=".\..\src\table\airport_movement.h"
+				>
+			</File>
 			<File
 				RelativePath=".\..\src\table\animcursors.h"
 				>
