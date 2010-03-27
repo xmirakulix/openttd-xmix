@@ -1078,8 +1078,11 @@ void SwitchToMode(SwitchMode new_mode)
 
 	LinkGraphSettings &lg = _settings_game.linkgraph;
 	if (!_settings_client.gui.new_nonstop) {
-		if ((lg.demand_armoured | lg.demand_default | lg.demand_express | lg.demand_mail | lg.demand_pax) != DT_UNHANDLED) {
-			ShowErrorMessage(STR_WARNING_NONSTOP_CARGODIST, INVALID_STRING_ID, WL_WARNING, 0, true);
+		if ((lg.distribution_armoured | lg.distribution_default |
+				lg.distribution_express | lg.distribution_mail |
+				lg.distribution_pax) != DT_MANUAL) {
+			ShowErrorMessage(STR_WARNING_NONSTOP_CARGODIST, INVALID_STRING_ID,
+					WL_WARNING, 0, true);
 		}
 	}
 
