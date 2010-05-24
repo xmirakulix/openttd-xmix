@@ -1085,6 +1085,16 @@ void SwitchToMode(SwitchMode new_mode)
 		default: NOT_REACHED();
 	}
 
+	LinkGraphSettings &lg = _settings_game.linkgraph;
+	if (!_settings_client.gui.new_nonstop) {
+		if ((lg.distribution_armoured | lg.distribution_default |
+				lg.distribution_express | lg.distribution_mail |
+				lg.distribution_pax) != DT_MANUAL) {
+			ShowErrorMessage(STR_WARNING_NONSTOP_CARGODIST, INVALID_STRING_ID,
+					WL_WARNING, 0, true);
+		}
+	}
+
 	if (_switch_mode_errorstr != INVALID_STRING_ID) {
 		ShowErrorMessage(_switch_mode_errorstr, INVALID_STRING_ID, WL_CRITICAL);
 	}
