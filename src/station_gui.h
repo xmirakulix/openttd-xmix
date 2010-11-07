@@ -31,6 +31,7 @@ enum StationViewWidgets {
 	SVW_ROADVEHS,        ///< List of scheduled road vehs button
 	SVW_SHIPS,           ///< List of scheduled ships button
 	SVW_PLANES,          ///< List of scheduled planes button
+	SVW_CLOSEAIRPORT,    ///< Close airport button
 };
 
 /** Types of cargo to display for station coverage. */

@@ -174,6 +174,8 @@ CommandProc CmdSetVehicleOnTime;
 CommandProc CmdAutofillTimetable;
 CommandProc CmdSetTimetableStart;
 
+CommandProc CmdOpenCloseAirport;
+
 #define DEF_CMD(proc, flags) {proc, #proc, flags}
 
 /**
@@ -306,6 +308,8 @@ static const Command _command_proc_table[] = {
 	DEF_CMD(CmdSetVehicleOnTime,                               0), // CMD_SET_VEHICLE_ON_TIME
 	DEF_CMD(CmdAutofillTimetable,                              0), // CMD_AUTOFILL_TIMETABLE
 	DEF_CMD(CmdSetTimetableStart,                              0), // CMD_SET_TIMETABLE_START
+
+	DEF_CMD(CmdOpenCloseAirport,                               0), // CMD_OPEN_CLOSE_AIRPORT
 };
 
 /*!
