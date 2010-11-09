@@ -255,6 +255,72 @@ Order *OrderList::GetOrderAt(int index) const
 	return order;
 }
 
+/**
+ * Recursively determine the next deterministic station to stop at.
+ * @param next the first order to check
+ * @param hops the number of orders we have already checked.
+ * @param check_nonstop if true regard orders without non-stop flag as nondeterministic
+ * @return the next stoppping station or INVALID_STATION
+ */
+StationID OrderList::GetNextStoppingStation(const Order *next, uint hops, bool check_nonstop) const
+{
+	if (next == NULL || hops > this->GetNumOrders()) {
+		return INVALID_STATION;
+	}
+
+	if (next->GetType() == OT_CONDITIONAL) {
+		StationID skip_to = this->GetNextStoppingStation(this->GetOrderAt(next->GetConditionSkipToOrder()), hops + 1, check_nonstop);
+		StationID advance = this->GetNextStoppingStation(this->GetNext(next), hops + 1, check_nonstop);
+		if (skip_to == advance) {
+			return skip_to; // skipping over non-stopping orders
+		} else {
+			return INVALID_STATION; // nondeterministic
+		}
+	}
+
+	if (check_nonstop) {
+		switch(next->GetNonStopType()) {
+		case ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS:
+			if (next->GetType() == OT_GOTO_STATION) return next->GetDestination(); // else fall through
+		case ONSF_NO_STOP_AT_ANY_STATION:
+			return GetNextStoppingStation(this->GetNext(next), hops + 1, check_nonstop);
+		default: // nondeterministic
+			return INVALID_STATION;
+		}
+	} else if (next->GetType() == OT_GOTO_STATION) {
+		return next->GetDestination();
+	} else {
+		return this->GetNextStoppingStation(this->GetNext(next), hops + 1, check_nonstop);
+	}
+}
+
+/**
+ * Get the next station the vehicle will stop at, if that is deterministic.
+ * @param curr_order the ID of the current order
+ * @param curr_station the station the vehicle is just visiting or INVALID_STATION
+ * @param check_nonstop if true regard orders without non-stop flag as nondeterministic
+ * @return The ID of the next station the vehicle will stop at or INVALID_STATION
+ */
+StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, bool check_nonstop) const
+{
+	const Order *curr = this->GetOrderAt(curr_order);
+	if (curr == NULL) {
+		curr = this->GetFirstOrder();
+		if (curr == NULL) return INVALID_STATION;
+	}
+
+	/* If we're not at a station or the current order doesn't yield the station
+	 * we're at, we have to check the current order; otherwise we have to check
+	 * the next one.
+	 */
+	if (curr_station == INVALID_STATION || curr->GetType() != OT_GOTO_STATION ||
+			curr_station != curr->GetDestination()) {
+		return this->GetNextStoppingStation(curr, 0, check_nonstop);
+	} else {
+		return this->GetNextStoppingStation(this->GetNext(curr), 1, check_nonstop);
+	}
+}
+
 void OrderList::InsertOrderAt(Order *new_order, int index)
 {
 	if (this->first == NULL) {
@@ -691,6 +757,8 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			}
 			/* Update any possible open window of the vehicle */
 			InvalidateVehicleOrder(u, INVALID_VEH_ORDER_ID | (sel_ord << 8));
+
+			RecalcFrozenIfLoading(u);
 		}
 
 		/* As we insert an order, the order to skip to will be 'wrong'. */
@@ -726,6 +794,9 @@ static CommandCost DecloneOrder(Vehicle *dst, DoCommandFlag flags)
 	if (flags & DC_EXEC) {
 		DeleteVehicleOrders(dst);
 		InvalidateVehicleOrder(dst, -1);
+
+		RecalcFrozenIfLoading(dst);
+
 		InvalidateWindowClassesData(GetWindowClassForVehicleType(dst->type), 0);
 	}
 	return CommandCost();
@@ -780,6 +851,8 @@ CommandCost CmdDeleteOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 			/* Update any possible open window of the vehicle */
 			InvalidateVehicleOrder(u, sel_ord | (INVALID_VEH_ORDER_ID << 8));
+
+			RecalcFrozenIfLoading(u);
 		}
 
 		/* As we delete an order, the order to skip to will be 'wrong'. */
@@ -825,9 +898,9 @@ CommandCost CmdSkipToOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	if (ret.Failed()) return ret;
 
 	if (flags & DC_EXEC) {
-		v->cur_order_index = sel_ord;
-
 		if (v->current_order.IsType(OT_LOADING)) v->LeaveStation();
+
+		v->cur_order_index = sel_ord;
 
 		InvalidateVehicleOrder(v, -2);
 	}
@@ -893,6 +966,8 @@ CommandCost CmdMoveOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 			assert(v->orders.list == u->orders.list);
 			/* Update any possible open window of the vehicle */
 			InvalidateVehicleOrder(u, moving_order | (target_order << 8));
+
+			RecalcFrozenIfLoading(u);
 		}
 
 		/* As we move an order, the order to skip to will be 'wrong'. */
@@ -1149,6 +1224,8 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 				u->current_order.SetLoadType(order->GetLoadType());
 			}
 			InvalidateVehicleOrder(u, -2);
+
+			RecalcFrozenIfLoading(u);
 		}
 	}
 
@@ -1280,6 +1357,8 @@ CommandCost CmdCloneOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 		case CO_UNSHARE: return DecloneOrder(dst, flags);
 		default: return CMD_ERROR;
 	}
+
+	RecalcFrozenIfLoading(dst);
 
 	return CommandCost();
 }
@@ -1442,6 +1521,8 @@ void RemoveOrderFromAllVehicles(OrderType type, DestinationID destination)
 					/* In GUI, simulate by removing the order and adding it back */
 					InvalidateVehicleOrder(w, id | (INVALID_VEH_ORDER_ID << 8));
 					InvalidateVehicleOrder(w, (INVALID_VEH_ORDER_ID << 8) | id);
+
+					RecalcFrozenIfLoading(w);
 				}
 			}
 		}
@@ -1484,6 +1565,8 @@ void DeleteVehicleOrders(Vehicle *v, bool keep_orderlist)
 		v->orders.list->FreeChain(keep_orderlist);
 		if (!keep_orderlist) v->orders.list = NULL;
 	}
+
+	RecalcFrozenIfLoading(v);
 }
 
 uint16 GetServiceIntervalClamped(uint interval, CompanyID company_id)

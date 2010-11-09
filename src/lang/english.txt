@@ -23,6 +23,7 @@ STR_NULL                                                        :
 STR_EMPTY                                                       :
 STR_UNDEFINED                                                   :(undefined string)
 STR_JUST_NOTHING                                                :Nothing
+STR_TINY_NOTHING                                                :{TINYFONT}Nothing
 
 # Cargo related strings
 # Plural cargo name
@@ -222,6 +223,7 @@ STR_UNITS_HEIGHT_SI                                             :{COMMA} m
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Enter filter string
 STR_LIST_FILTER_TOOLTIP                                         :{BLACK}Enter a keyword to filter the list for
 
+STR_TOOLTIP_GROUP_ORDER                                         :{BLACK}Select grouping order
 STR_TOOLTIP_SORT_ORDER                                          :{BLACK}Select sorting order (descending/ascending)
 STR_TOOLTIP_SORT_CRITERIA                                       :{BLACK}Select sorting criteria
 STR_TOOLTIP_FILTER_CRITERIA                                     :{BLACK}Select filtering criteria
@@ -282,6 +284,8 @@ STR_SORT_BY_FACILITY                                            :Station type
 STR_SORT_BY_WAITING                                             :Waiting cargo value
 STR_SORT_BY_RATING_MAX                                          :Highest cargo rating
 STR_SORT_BY_RATING_MIN                                          :Lowest cargo rating
+STR_SORT_BY_AMOUNT                                              :{BLACK}Amount
+STR_SORT_BY_STATION                                             :{BLACK}Station
 STR_SORT_BY_ENGINE_ID                                           :EngineID (classic sort)
 STR_SORT_BY_COST                                                :Cost
 STR_SORT_BY_POWER                                               :Power
@@ -656,12 +660,14 @@ STR_SMALLMAP_CAPTION                                            :{WHITE}Map - {S
 STR_SMALLMAP_TYPE_CONTOURS                                      :Contours
 STR_SMALLMAP_TYPE_VEHICLES                                      :Vehicles
 STR_SMALLMAP_TYPE_INDUSTRIES                                    :Industries
+STR_SMALLMAP_TYPE_ROUTEMAP                                      :Link Statistics
 STR_SMALLMAP_TYPE_ROUTES                                        :Routes
 STR_SMALLMAP_TYPE_VEGETATION                                    :Vegetation
 STR_SMALLMAP_TYPE_OWNERS                                        :Owners
 STR_SMALLMAP_TOOLTIP_SHOW_LAND_CONTOURS_ON_MAP                  :{BLACK}Show land contours on map
 STR_SMALLMAP_TOOLTIP_SHOW_VEHICLES_ON_MAP                       :{BLACK}Show vehicles on map
 STR_SMALLMAP_TOOLTIP_SHOW_INDUSTRIES_ON_MAP                     :{BLACK}Show industries on map
+STR_SMALLMAP_TOOLTIP_SHOW_LINK_STATS_ON_MAP                     :{BLACK}Show link statistics on map
 STR_SMALLMAP_TOOLTIP_SHOW_TRANSPORT_ROUTES_ON                   :{BLACK}Show transport routes on map
 STR_SMALLMAP_TOOLTIP_SHOW_VEGETATION_ON_MAP                     :{BLACK}Show vegetation on map
 STR_SMALLMAP_TOOLTIP_SHOW_LAND_OWNERS_ON_MAP                    :{BLACK}Show land owners on map
@@ -694,10 +700,26 @@ STR_SMALLMAP_LEGENDA_TOWNS                                      :{TINYFONT}{BLAC
 STR_SMALLMAP_LEGENDA_INDUSTRIES                                 :{TINYFONT}{BLACK}Industries
 STR_SMALLMAP_LEGENDA_DESERT                                     :{TINYFONT}{BLACK}Desert
 STR_SMALLMAP_LEGENDA_SNOW                                       :{TINYFONT}{BLACK}Snow
+STR_SMALLMAP_LEGENDA_CAPACITY                                   :{TINYFONT}{BLACK}Capacity
+STR_SMALLMAP_LEGENDA_USAGE                                      :{TINYFONT}{BLACK}Usage
+STR_SMALLMAP_LEGENDA_PLANNED                                    :{TINYFONT}{BLACK}Planned Flow
+STR_SMALLMAP_LEGENDA_SENT                                       :{TINYFONT}{BLACK}Sent Cargo
+STR_SMALLMAP_LEGENDA_SHOW_TEXT                                  :{TINYFONT}{BLACK}As Text
+STR_SMALLMAP_LEGENDA_SHOW_GRAPH                                 :{TINYFONT}{BLACK}As Graphs
+
+STR_SMALLMAP_SUPPLY_CAPTION                                     :{BLACK}Monthly supply at {STATION}
+STR_SMALLMAP_SUPPLY                                             :{TINYFONT}{CARGO}
+STR_SMALLMAP_LINK_CAPTION                                       :{BLACK}Monthly traffic from {STATION} to {STATION}
+STR_SMALLMAP_LINK                                               :{TINYFONT}{STRING} -
+STR_SMALLMAP_LINK_CAPACITY                                      :{TINYFONT}  cap: {NUM}
+STR_SMALLMAP_LINK_USAGE                                         :{TINYFONT}  usg: {NUM}
+STR_SMALLMAP_LINK_PLANNED                                       :{TINYFONT}  pln: {NUM}
+STR_SMALLMAP_LINK_SENT                                          :{TINYFONT}  snt: {NUM}
 
 STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF                   :{BLACK}Toggle town names on/off on map
 STR_SMALLMAP_CENTER                                             :{BLACK}Centre the smallmap on the current position
 STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRING} ({NUM})
+STR_SMALLMAP_LINKSTATS_LEGEND                                   :{TINYFONT}{STRING}
 STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Disable all
 STR_SMALLMAP_ENABLE_ALL                                         :{BLACK}Enable all
@@ -1319,11 +1341,38 @@ STR_CONFIG_SETTING_LARGER_TOWNS_DISABLED                        :{LTBLUE}Proport
 STR_CONFIG_SETTING_CITY_SIZE_MULTIPLIER                         :{LTBLUE}Initial city size multiplier: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_MODIFIED_ROAD_REBUILD                        :{LTBLUE}Remove absurd road-elements during the road construction: {ORANGE}{STRING1}
 
+STR_CONFIG_SETTING_LINKGRAPH_INTERVAL                           :{LTBLUE}Link graph recalculation interval: {ORANGE}{STRING1} days
+STR_CONFIG_SETTING_DISTRIBUTION_PAX                             :{LTBLUE}Distribution for passengers: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DISTRIBUTION_PAX_SYMMETRIC                   :symmetric
+STR_CONFIG_SETTING_DISTRIBUTION_PAX_ASYMMETRIC                  :asymmetric
+STR_CONFIG_SETTING_DISTRIBUTION_PAX_MANUAL                      :manual
+STR_CONFIG_SETTING_DISTRIBUTION_MAIL                            :{LTBLUE}Distribution for mail: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DISTRIBUTION_MAIL_SYMMETRIC                  :symmetric
+STR_CONFIG_SETTING_DISTRIBUTION_MAIL_ASYMMETRIC                 :asymmetric
+STR_CONFIG_SETTING_DISTRIBUTION_MAIL_MANUAL                     :manual
+STR_CONFIG_SETTING_DISTRIBUTION_EXPRESS                         :{LTBLUE}Distribution for the EXPRESS cargo class: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DISTRIBUTION_EXPRESS_SYMMETRIC               :symmetric
+STR_CONFIG_SETTING_DISTRIBUTION_EXPRESS_ASYMMETRIC              :asymmetric
+STR_CONFIG_SETTING_DISTRIBUTION_EXPRESS_MANUAL                  :manual
+STR_CONFIG_SETTING_DISTRIBUTION_ARMOURED                        :{LTBLUE}Distribution for the ARMOURED cargo class: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DISTRIBUTION_ARMOURED_SYMMETRIC              :symmetric
+STR_CONFIG_SETTING_DISTRIBUTION_ARMOURED_ASYMMETRIC             :asymmetric
+STR_CONFIG_SETTING_DISTRIBUTION_ARMOURED_MANUAL                 :manual
+STR_CONFIG_SETTING_DISTRIBUTION_DEFAULT                         :{LTBLUE}Distribution for other cargo classes: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DISTRIBUTION_DEFAULT_SYMMETRIC               :symmetric
+STR_CONFIG_SETTING_DISTRIBUTION_DEFAULT_ASYMMETRIC              :asymmetric
+STR_CONFIG_SETTING_DISTRIBUTION_DEFAULT_MANUAL                  :manual
+STR_CONFIG_SETTING_LINKGRAPH_ACCURACY                           :{LTBLUE}Accuracy when calculating things on the link graph: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_DEMAND_DISTANCE                              :{LTBLUE}Effect of distance on demands: {ORANGE}{STRING1}%
+STR_CONFIG_SETTING_DEMAND_SIZE                                  :{LTBLUE}Effect of remote station's popularity on symmetric demands: {ORANGE}{STRING1}%
+STR_CONFIG_SETTING_SHORT_PATH_SATURATION                        :{LTBLUE}Saturation of short paths before using capacious paths: {ORANGE}{STRING1}%
+
 STR_CONFIG_SETTING_GUI                                          :{ORANGE}Interface
 STR_CONFIG_SETTING_CONSTRUCTION                                 :{ORANGE}Construction
 STR_CONFIG_SETTING_VEHICLES                                     :{ORANGE}Vehicles
 STR_CONFIG_SETTING_STATIONS                                     :{ORANGE}Stations
 STR_CONFIG_SETTING_ECONOMY                                      :{ORANGE}Economy
+STR_CONFIG_SETTING_LINKGRAPH                                    :{ORANGE}Link graph
 STR_CONFIG_SETTING_AI                                           :{ORANGE}Competitors
 STR_CONFIG_SETTING_DISPLAY_OPTIONS                              :{ORANGE}Display options
 STR_CONFIG_SETTING_INTERACTION                                  :{ORANGE}Interaction
@@ -2610,8 +2659,31 @@ STR_STATION_VIEW_ACCEPTS_CARGO                                  :{BLACK}Accepts:
 
 STR_STATION_VIEW_RATINGS_BUTTON                                 :{BLACK}Ratings
 STR_STATION_VIEW_RATINGS_TOOLTIP                                :{BLACK}Show station ratings
-STR_STATION_VIEW_CARGO_RATINGS_TITLE                            :{BLACK}Local rating of transport service:
+STR_STATION_VIEW_CARGO_RATINGS_TITLE                            :{BLACK}Monthly supply and local rating:
 STR_STATION_VIEW_CARGO_RATING                                   :{WHITE}{STRING}: {YELLOW}{STRING} ({COMMA}%)
+STR_STATION_VIEW_CARGO_SUPPLY_RATING                            :{WHITE}{STRING}: {YELLOW}{COMMA} / {STRING} ({COMMA}%)
+
+STR_STATION_VIEW_WAITING                                        :Waiting
+STR_STATION_VIEW_PLANNED                                        :Planned
+STR_STATION_VIEW_SENT                                           :Sent
+STR_STATION_VIEW_TOGGLE_CARGO_VIEW                              :{BLACK}Toggle between waiting, planned and sent cargo
+STR_STATION_VIEW_FROM                                           :{YELLOW}{SHORTCARGO} from {STATION}
+STR_STATION_VIEW_VIA                                            :{YELLOW}{SHORTCARGO} via {STATION}
+STR_STATION_VIEW_TO                                             :{YELLOW}{SHORTCARGO} to {STATION}
+STR_STATION_VIEW_FROM_ANY                                       :{RED}{SHORTCARGO} from unknown station
+STR_STATION_VIEW_TO_ANY                                         :{RED}{SHORTCARGO} to any station
+STR_STATION_VIEW_VIA_ANY                                        :{RED}{SHORTCARGO} via any station
+STR_STATION_VIEW_FROM_HERE                                      :{GREEN}{SHORTCARGO} from this station
+STR_STATION_VIEW_VIA_HERE                                       :{GREEN}{SHORTCARGO} stopping at this station
+STR_STATION_VIEW_TO_HERE                                        :{GREEN}{SHORTCARGO} to this station
+STR_STATION_VIEW_NONSTOP                                        :{YELLOW}{SHORTCARGO} non-stop
+
+STR_STATION_VIEW_GROUP_S_V_D                                    :Source-Via-Destination
+STR_STATION_VIEW_GROUP_S_D_V                                    :Source-Destination-Via
+STR_STATION_VIEW_GROUP_V_S_D                                    :Via-Source-Destination
+STR_STATION_VIEW_GROUP_V_D_S                                    :Via-Destination-Source
+STR_STATION_VIEW_GROUP_D_S_V                                    :Destination-Source-Via
+STR_STATION_VIEW_GROUP_D_V_S                                    :Destination-Via-Source
 
 STR_CLOSE_AIRPORT                                               :{BLACK}Close airport
 STR_CLOSE_AIRPORT_TIP                                           :{BLACK}Prevent aircraft from landing on this airport
@@ -3415,6 +3487,7 @@ STR_GAME_SAVELOAD_ERROR_FILE_NOT_WRITEABLE                      :File not writea
 STR_GAME_SAVELOAD_ERROR_DATA_INTEGRITY_CHECK_FAILED             :Data integrity check failed
 STR_GAME_SAVELOAD_NOT_AVAILABLE                                 :<not available>
 STR_WARNING_LOADGAME_REMOVED_TRAMS                              :{WHITE}Game was saved in version without tram support. All trams have been removed.
+STR_WARNING_NONSTOP_CARGODIST                                   :{WHITE}You have set at least one cargo class to be automatically distributed in{}"Avanced Settings -> Link Graph"{}and disabled{}"New orders are 'non-stop' by default"{}in{}"Advanced Settings -> Vehicles"{}This is a BAD idea.
 
 # Map generation messages
 STR_ERROR_COULD_NOT_CREATE_TOWN                                 :{WHITE}Map generation aborted...{}... no suitable town locations
@@ -4272,4 +4345,8 @@ STR_LORRY                                                       :{BLACK}{LORRY}
 STR_PLANE                                                       :{BLACK}{PLANE}
 STR_SHIP                                                        :{BLACK}{SHIP}
 
+STR_NUM                                                         :{NUM}
+STR_NUM_RELATION_2                                              :{NUM}/{NUM}
+STR_NUM_RELATION_3                                              :{NUM}/{NUM}/{NUM}
+STR_NUM_RELATION_4                                              :{NUM}/{NUM}/{NUM}/{NUM}
 STR_TOOLBAR_RAILTYPE_VELOCITY                                   :{STRING} ({VELOCITY})

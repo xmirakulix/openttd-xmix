@@ -175,6 +175,7 @@ public:
 	byte waiting_triggers;              ///< triggers to be yet matched
 
 	StationID last_station_visited;
+	StationID last_loading_station;
 
 	CargoID cargo_type;                 ///< type of cargo this vehicle is carrying
 	byte cargo_subtype;                 ///< Used for livery refits (NewGRF variations)
@@ -214,7 +215,8 @@ public:
 	/** We want to 'destruct' the right class. */
 	virtual ~Vehicle();
 
-	void BeginLoading();
+	void BeginLoading(StationID curr_station_id);
+	void CancelReservation(StationID next, Station *st);
 	void LeaveStation();
 
 	/**

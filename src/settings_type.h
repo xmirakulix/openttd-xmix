@@ -17,6 +17,8 @@
 #include "transport_type.h"
 #include "network/core/config.h"
 #include "company_type.h"
+#include "cargotype.h"
+#include "linkgraph/linkgraph_type.h"
 
 /** Settings related to the difficulty of the game */
 struct DifficultySettings {
@@ -102,6 +104,10 @@ struct GUISettings {
 
 	uint16 console_backlog_timeout;          ///< the minimum amount of time items should be in the console backlog before they will be removed in ~3 seconds granularity.
 	uint16 console_backlog_length;           ///< the minimum amount of items in the console backlog before items will be removed.
+
+	uint8  station_gui_group_order;          ///< the order of grouping cargo entries in the station gui
+	uint8  station_gui_sort_by;              ///< sort cargo entries in the station gui by station name or amount
+	uint8  station_gui_sort_order;           ///< the sort order of entries in the station gui - ascending or descending
 #ifdef ENABLE_NETWORK
 	uint16 network_chat_box_width;           ///< width of the chat box in pixels
 	uint8  network_chat_box_height;          ///< height of the chat box in lines
@@ -363,6 +369,33 @@ struct EconomySettings {
 	bool   allow_town_level_crossings;       ///< towns are allowed to build level crossings
 };
 
+struct LinkGraphSettings {
+	uint16 recalc_interval;                     ///< minimum interval (in days) between subsequent calculations of components in the same link graph
+	DistributionTypeByte distribution_pax;      ///< distribution type for passengers
+	DistributionTypeByte distribution_mail;     ///< distribution type for mail
+	DistributionTypeByte distribution_express;  ///< distribution type for express cargo class
+	DistributionTypeByte distribution_armoured; ///< distribution type for armoured cargo class
+	DistributionTypeByte distribution_default;  ///< distribution type for all other goods
+	uint8 accuracy;                             ///< accuracy when calculating things on the link graph. low accuracy => low running time
+	uint8 demand_size;                          ///< influence of supply ("station size") on the demand function
+	uint8 demand_distance;                      ///< influence of distance between stations on the demand function
+	uint8 short_path_saturation;                ///< percentage up to which short paths are saturated before saturating most capacious paths
+
+	FORCEINLINE DistributionType GetDistributionType(CargoID cargo) const {
+		if (IsCargoInClass(cargo, CC_PASSENGERS)) {
+			return this->distribution_pax;
+		} else if (IsCargoInClass(cargo, CC_MAIL)) {
+			return this->distribution_mail;
+		} else if (IsCargoInClass(cargo, CC_EXPRESS)) {
+			return this->distribution_express;
+		} else if (IsCargoInClass(cargo, CC_ARMOURED)) {
+			return this->distribution_armoured;
+		} else {
+			return this->distribution_default;
+		}
+	}
+};
+
 /** Settings related to stations. */
 struct StationSettings {
 	bool   modified_catchment;               ///< different-size catchment areas
@@ -403,6 +436,7 @@ struct GameSettings {
 	OrderSettings        order;              ///< settings related to orders
 	VehicleSettings      vehicle;            ///< options for vehicles
 	EconomySettings      economy;            ///< settings to change the economy
+	LinkGraphSettings    linkgraph;          ///< settings for link graph calculations
 	StationSettings      station;            ///< settings related to station management
 	LocaleSettings       locale;             ///< settings related to used currency/unit system in the current game
 };
