@@ -564,4 +564,27 @@ static inline void MakeRailDepot(TileIndex t, Owner o, DepotID did, DiagDirectio
 	_me[t].m7 = 0;
 }
 
+
+static inline void IncreaseStuckCounter(TileIndex t)
+{
+	if (!IsTileType(t, MP_RAILWAY)) return;
+	if (_me[t].m7 == 255) return;
+	_me[t].m7++;
+}
+
+
+static inline void ReduceStuckCounter(TileIndex t)
+{
+	if (!IsTileType(t, MP_RAILWAY)) return;
+	_me[t].m7 -= _me[t].m7/4;
+}
+
+
+static inline byte GetStuckCounter(TileIndex t)
+{
+	if (!IsTileType(t, MP_RAILWAY)) return 0;
+	return _me[t].m7;
+
+}
+
 #endif /* RAIL_MAP_H */

@@ -2357,6 +2357,8 @@ static void TileLoop_Track(TileIndex tile)
 	RailGroundType old_ground = GetRailGroundType(tile);
 	RailGroundType new_ground;
 
+	ReduceStuckCounter(tile);
+
 	if (old_ground == RAIL_GROUND_WATER) {
 		TileLoop_Water(tile);
 		return;
