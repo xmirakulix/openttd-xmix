@@ -818,6 +818,8 @@ static const NWidgetPart _nested_station_view_widgets[] = {
 		NWidget(NWID_VSCROLLBAR, COLOUR_GREY, SVW_SCROLLBAR),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_GREY, SVW_ACCEPTLIST), SetMinimalSize(249, 32), SetResize(1, 0), EndContainer(),
+	NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_CLOSEAIRPORT), SetMinimalSize(249, 0), SetResize(1, 0), SetFill(1, 1),
+				SetDataTip(STR_CLOSE_AIRPORT, STR_CLOSE_AIRPORT_TIP),
 	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, SVW_LOCATION), SetMinimalSize(60, 12), SetResize(1, 0), SetFill(1, 1),
 				SetDataTip(STR_BUTTON_LOCATION, STR_STATION_VIEW_CENTER_TOOLTIP),
@@ -925,6 +927,11 @@ struct StationViewWindow : public Window {
 			case SVW_ACCEPTLIST:
 				size->height = WD_FRAMERECT_TOP + ((this->GetWidget<NWidgetCore>(SVW_ACCEPTS)->widget_data == STR_STATION_VIEW_RATINGS_BUTTON) ? this->accepts_lines : this->rating_lines) * FONT_HEIGHT_NORMAL + WD_FRAMERECT_BOTTOM;
 				break;
+
+			case SVW_CLOSEAIRPORT:
+				size->height = Station::Get(this->window_number)->facilities & FACIL_AIRPORT ?
+					WD_FRAMERECT_TOP + FONT_HEIGHT_NORMAL + WD_FRAMERECT_BOTTOM : 0;
+				break;
 		}
 	}
 
@@ -943,6 +950,10 @@ struct StationViewWindow : public Window {
 		this->SetWidgetDisabledState(SVW_ROADVEHS, !(st->facilities & FACIL_TRUCK_STOP) && !(st->facilities & FACIL_BUS_STOP));
 		this->SetWidgetDisabledState(SVW_SHIPS,    !(st->facilities & FACIL_DOCK));
 		this->SetWidgetDisabledState(SVW_PLANES,   !(st->facilities & FACIL_AIRPORT));
+		if (st->facilities & FACIL_AIRPORT) {
+			this->SetWidgetDisabledState(SVW_CLOSEAIRPORT, st->owner != _local_company);
+			this->SetWidgetLoweredState(SVW_CLOSEAIRPORT, (st->airport.flags & AIRPORT_CLOSED_block) != 0);
+		}
 
 		this->DrawWidgets();
 
@@ -1195,6 +1206,29 @@ struct StationViewWindow : public Window {
 			case SVW_PLANES:   // Show list of scheduled aircraft to this station
 				ShowVehicleListWindow(this->owner, (VehicleType)(widget - SVW_TRAINS), (StationID)this->window_number);
 				break;
+
+			case SVW_CLOSEAIRPORT: { // Open/close airport
+				const Station *st = Station::Get(this->window_number);
+				DoCommandP(0, st->index, (st->airport.flags & AIRPORT_CLOSED_block) ? 0 : 1, CMD_OPEN_CLOSE_AIRPORT | CMD_MSG(STR_CLOSE_AIRPORT_ERROR));
+				break;
+			}
+		}
+	}
+
+	virtual void OnInvalidateData(int data)
+	{
+		/* called when an airport has been added or removed */
+		bool had_airport = this->GetWidget<NWidgetCore>(SVW_CLOSEAIRPORT)->pos_y !=
+			this->GetWidget<NWidgetCore>(SVW_LOCATION)->pos_y;
+
+		if (Station::Get(this->window_number)->facilities & FACIL_AIRPORT) {
+			if (!had_airport) {
+				this->ReInit(0, WD_FRAMERECT_TOP + FONT_HEIGHT_NORMAL + WD_FRAMERECT_BOTTOM);
+			}
+		} else {
+			if (had_airport) {
+				this->ReInit(0, -(WD_FRAMERECT_TOP + FONT_HEIGHT_NORMAL + WD_FRAMERECT_BOTTOM));
+			}
 		}
 	}
 

@@ -1418,7 +1418,7 @@ static void AircraftEventHandler_Flying(Aircraft *v, const AirportFTAClass *apc)
 	Station *st = Station::Get(v->targetairport);
 
 	/* runway busy or not allowed to use this airstation, circle */
-	if (CanVehicleUseStation(v, st) && (st->owner == OWNER_NONE || st->owner == v->owner)) {
+	if (CanVehicleUseStation(v, st) && (st->owner == OWNER_NONE || st->owner == v->owner) && !(st->airport.flags & AIRPORT_CLOSED_block)) {
 		/* {32,FLYING,NOTHING_block,37}, {32,LANDING,N,33}, {32,HELILANDING,N,41},
 		 * if it is an airplane, look for LANDING, for helicopter HELILANDING
 		 * it is possible to choose from multiple landing runways, so loop until a free one is found */

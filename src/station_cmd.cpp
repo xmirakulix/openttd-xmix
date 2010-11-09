@@ -2245,7 +2245,7 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 		st->RecomputeIndustriesNear();
 		InvalidateWindowData(WC_SELECT_STATION, 0, 0);
 		InvalidateWindowData(WC_STATION_LIST, st->owner, 0);
-		SetWindowWidgetDirty(WC_STATION_VIEW, st->index, SVW_PLANES);
+		InvalidateWindowData(WC_STATION_VIEW, st->index, 0);
 
 		if (_settings_game.economy.station_noise_level) {
 			SetWindowDirty(WC_TOWN_VIEW, st->town->index);
@@ -2314,8 +2314,9 @@ static CommandCost RemoveAirport(TileIndex tile, DoCommandFlag flags)
 
 		st->airport.Clear();
 		st->facilities &= ~FACIL_AIRPORT;
+		st->airport.flags = 0;
 
-		SetWindowWidgetDirty(WC_STATION_VIEW, st->index, SVW_PLANES);
+		InvalidateWindowData(WC_STATION_VIEW, st->index, 0);
 
 		if (_settings_game.economy.station_noise_level) {
 			SetWindowDirty(WC_TOWN_VIEW, st->town->index);
@@ -2328,6 +2329,34 @@ static CommandCost RemoveAirport(TileIndex tile, DoCommandFlag flags)
 	}
 
 	return cost;
+}
+
+/** Open/close an airport
+ * @param tile unused
+ * @param flags type of operation
+ * @param p1 station ID of the airport
+ * @param p2 new status (0 open, 1 closed)
+ */
+CommandCost CmdOpenCloseAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
+{
+	if (!Station::IsValidID(p1)) return CMD_ERROR;
+	Station *st = Station::Get(p1);
+
+	if (!(st->facilities & FACIL_AIRPORT)) return CMD_ERROR;
+
+	CommandCost ret = CheckOwnership(st->owner);
+	if (ret.Failed()) return ret;
+
+	if (flags & DC_EXEC) {
+		if (p2) {
+			SETBITS(st->airport.flags, AIRPORT_CLOSED_block);
+		} else {
+			CLRBITS(st->airport.flags, AIRPORT_CLOSED_block);
+		}
+		SetWindowWidgetDirty(WC_STATION_VIEW, st->index, SVW_CLOSEAIRPORT);
+	}
+
+	return CommandCost();
 }
 
 /**
