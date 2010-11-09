@@ -983,7 +983,7 @@ static const NWidgetPart _nested_select_company_manager_face_widgets[] = {
 			NWidget(NWID_VERTICAL),
 				NWidget(NWID_HORIZONTAL),
 					NWidget(NWID_SPACER), SetFill(1, 0),
-					NWidget(WWT_EMPTY, COLOUR_GREY, SCMFM_WIDGET_FACE), SetMinimalSize(92, 119),
+					NWidget(WWT_EMPTY, COLOUR_GREY, SCMFM_WIDGET_FACE), SetMinimalSize(210, 279),
 					NWidget(NWID_SPACER), SetFill(1, 0),
 				EndContainer(),
 				NWidget(NWID_SPACER), SetMinimalSize(0, 2),
@@ -1411,7 +1411,14 @@ public:
 				break;
 
 			case SCMFM_WIDGET_FACE:
+				DrawPixelInfo bk, *old_dpi;
+				old_dpi = _cur_dpi;
+				_cur_dpi = &bk;
+				*_cur_dpi = *old_dpi;
+				_cur_dpi->zoom = ZOOM_LVL_IN_2X;
+				/* Draw the company manager face picture */
 				DrawCompanyManagerFace(this->face, Company::Get((CompanyID)this->window_number)->colour, r.left, r.top);
+				_cur_dpi = old_dpi;
 				break;
 		}
 	}
@@ -1567,6 +1574,7 @@ static const WindowDesc _select_company_manager_face_desc(
 	WDF_UNCLICK_BUTTONS | WDF_CONSTRUCTION,
 	_nested_select_company_manager_face_widgets, lengthof(_nested_select_company_manager_face_widgets)
 );
+
 
 /**
  * Open the simple/advanced company manager face selection window
