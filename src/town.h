@@ -17,6 +17,9 @@
 #include "command_type.h"
 #include "town_map.h"
 #include "subsidy_type.h"
+#include "openttd.h"
+#include "table/strings.h"
+#include "company_func.h"
 
 template <typename T>
 struct BuildingCounts {
@@ -67,6 +70,7 @@ struct Town : TownPool::PoolItem<&_town_pool> {
 	CompanyByte exclusivity;       ///< which company has exclusivity
 	uint8 exclusive_counter;       ///< months till the exclusivity expires
 	int16 ratings[MAX_COMPANIES];  ///< Ratings of each company for this town.
+	StringID town_label;           ///< Label dependent on _local_company rating.
 
 	/* Maximum amount of passengers and mail that can be transported. */
 	uint32 max_pass;
@@ -121,6 +125,30 @@ struct Town : TownPool::PoolItem<&_town_pool> {
 	~Town();
 
 	void InitializeLayout(TownLayout layout);
+
+	void UpdateLabel();
+
+	/**
+	 * Returns the correct town label, based on rating.
+	 */
+	FORCEINLINE StringID Label() const{
+		if (!(_game_mode == GM_EDITOR) && (_local_company < MAX_COMPANIES)) {
+			return STR_VIEWPORT_TOWN_POP_VERY_POOR_RATING + this->town_label;
+		} else {
+			return _settings_client.gui.population_in_label ? STR_VIEWPORT_TOWN_POP : STR_VIEWPORT_TOWN;
+		}
+	}
+
+	/**
+	 * Returns the correct town small label, based on rating.
+	 */
+	FORCEINLINE StringID SmallLabel() const{
+		if (!(_game_mode == GM_EDITOR) && (_local_company < MAX_COMPANIES)) {
+			return STR_VIEWPORT_TOWN_TINY_VERY_POOR_RATING + this->town_label;
+		} else {
+			return STR_VIEWPORT_TOWN_TINY_WHITE;
+		}
+	}
 
 	/**
 	 * Calculate the max town noise.
