@@ -479,10 +479,14 @@ bool DoCommandP(TileIndex tile, uint32 p1, uint32 p2, uint32 cmd, CommandCallbac
 	 * However, in case of incoming network commands,
 	 * map generation of the pause button we do want
 	 * to execute. */
-	bool estimate_only = _shift_pressed && IsLocalCompany() &&
+	bool estimate_only =
+			_shift_pressed &&
+			IsLocalCompany() &&
 			!IsGeneratingWorld() &&
 			!(cmd & CMD_NETWORK_COMMAND) &&
-			(cmd & CMD_ID_MASK) != CMD_PAUSE;
+			(cmd & CMD_ID_MASK) != CMD_PAUSE &&
+			(cmd & CMD_ID_MASK) != CMD_INSERT_ORDER &&
+			(cmd & CMD_ID_MASK) != CMD_MODIFY_ORDER;
 
 	/* We're only sending the command, so don't do
 	 * fancy things for 'success'. */
