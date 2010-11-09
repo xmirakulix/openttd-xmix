@@ -65,6 +65,8 @@
 #include "town.h"
 #include "industry.h"
 
+#include "linkgraph/linkgraph.h"
+
 #include <stdarg.h>
 
 #include "table/strings.h"
@@ -332,6 +334,13 @@ static void ShutdownGame()
 
 	/* Uninitialize variables that are allocated dynamically */
 	GamelogReset();
+
+	/* Reinitialize the link graphs to forcibly stop the threads.
+	 * If a link graph thread is running while the link graph handlers are
+	 * deleted we get a crash.
+	 */
+	InitializeLinkGraphs();
+
 	_town_pool.CleanPool();
 	_industry_pool.CleanPool();
 	_station_pool.CleanPool();
@@ -1096,6 +1105,16 @@ void SwitchToMode(SwitchMode new_mode)
 			break;
 
 		default: NOT_REACHED();
+	}
+
+	LinkGraphSettings &lg = _settings_game.linkgraph;
+	if (!_settings_client.gui.new_nonstop) {
+		if ((lg.distribution_armoured | lg.distribution_default |
+				lg.distribution_express | lg.distribution_mail |
+				lg.distribution_pax) != DT_MANUAL) {
+			ShowErrorMessage(STR_WARNING_NONSTOP_CARGODIST, INVALID_STRING_ID,
+					WL_WARNING, 0, true);
+		}
 	}
 
 	if (_switch_mode_errorstr != INVALID_STRING_ID) {

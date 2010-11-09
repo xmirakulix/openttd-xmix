@@ -1,3 +1,7 @@
+gitmake-all
+gitmake-origin
+gitmake-build
+save
 bin/*
 !bin/ai
 bin/ai/*
@@ -35,6 +39,13 @@ projects/*.opensdf
 projects/*.vcproj.*.user
 projects/*.vcxproj.user
 src/rev.cpp
+.cproject
+.project
+data/
+patches/
+old/
+grf/
+docs/own
 src/os/windows/ottdres.rc
 
 /Makefile*
