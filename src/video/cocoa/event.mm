@@ -23,6 +23,10 @@
 #undef Rect
 #undef Point
 
+#ifndef ZOOM_GESTURE_SENSITIVITY
+#define ZOOM_GESTURE_SENSITIVITY 0.025
+#endif
+
 #include "../../openttd.h"
 #include "../../debug.h"
 #include "../../os/macosx/splash.h"
@@ -510,6 +514,42 @@ static bool QZ_PollEvent()
 			QZ_MouseButtonEvent(1, NO);
 			break;
 
+		case NSEventTypeRotate:
+			DEBUG(driver, 2, "Rotate gesture detected, amount: %f", [ event rotation ]);
+			break;
+
+		case NSEventTypeSwipe:
+			if (_cursor.zooming) {
+				/* we are already zooming, don't zoom twice */
+				break;
+			}
+			_cursor.zooming = TRUE;
+			DEBUG(driver, 2, "Swipe gesture detected, amount: %f", [ event deltaY ]);
+
+			if ([event deltaY ] > 0 && _settings_client.gui.zoom_gesture == 2) { /* swipe up */
+				_cursor.wheel--;
+			}
+			else if ([event deltaY ] < 0 && _settings_client.gui.zoom_gesture == 2) { /* swipe down */
+				_cursor.wheel++;
+			}
+			break;
+
+		case NSEventTypeMagnify:
+			if (_cursor.zooming) {
+				/* we are already zooming, don't zoom twice */
+				break;
+			}
+			_cursor.zooming = TRUE;
+			DEBUG(driver, 2, "Magnify gesture detected, magnification: %f", [ event magnification ]);
+
+			if ([event magnification] > ZOOM_GESTURE_SENSITIVITY && _settings_client.gui.zoom_gesture == 1) { /* zoom in */
+				_cursor.wheel--;
+			}
+			else if ([event magnification] < -ZOOM_GESTURE_SENSITIVITY && _settings_client.gui.zoom_gesture == 1) {	/* zoom out */
+				_cursor.wheel++;
+			}
+			break;
+
 #if 0
 		/* This is not needed since openttd currently only use two buttons */
 		case NSOtherMouseDown:
@@ -583,6 +623,9 @@ static bool QZ_PollEvent()
 			break;
 
 		case NSScrollWheel:
+			/* we now want to scroll, disable zooming */
+			_cursor.zooming = FALSE;
+
 			if ([ event deltaY ] > 0.0) { /* Scroll up */
 				_cursor.wheel--;
 			} else if ([ event deltaY ] < 0.0) { /* Scroll down */

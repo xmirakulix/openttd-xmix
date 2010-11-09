@@ -684,6 +684,8 @@ const SettingDesc _settings[] = {
 #ifdef __APPLE__
 	/* We might need to emulate a right mouse button on mac */
 	 SDTC_VAR(gui.right_mouse_btn_emulation, SLE_UINT8, S, MS, 0, 0, 2, 0, STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU, NULL),
+	/* Choose gesture for zooming */
+	 SDTC_VAR(gui.zoom_gesture,              SLE_UINT8, S, MS, 0, 0, 2, 0, STR_CONFIG_SETTING_ZOOM_GESTURE,        NULL),
 #endif
 
 	SDT_END()

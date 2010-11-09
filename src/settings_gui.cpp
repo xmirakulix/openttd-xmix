@@ -1283,6 +1283,8 @@ static SettingEntry _settings_ui_interaction[] = {
 #ifdef __APPLE__
 	/* We might need to emulate a right mouse button on mac */
 	SettingEntry("gui.right_mouse_btn_emulation"),
+	/* Choose gesture for zooming */
+	SettingEntry("gui.zoom_gesture"),
 #endif
 };
 /** Interaction sub-page */

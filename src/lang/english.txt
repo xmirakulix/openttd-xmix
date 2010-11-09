@@ -1226,6 +1226,11 @@ STR_CONFIG_SETTING_SCROLLWHEEL_SCROLL                           :Scroll map
 STR_CONFIG_SETTING_SCROLLWHEEL_OFF                              :Off
 STR_CONFIG_SETTING_SCROLLWHEEL_MULTIPLIER                       :{LTBLUE}Map scrollwheel speed: {ORANGE}{STRING1}
 
+STR_CONFIG_SETTING_ZOOM_GESTURE                                 :{LTBLUE}Use a gesture for zooming: {ORANGE}{STRING1}
+STR_CONFIG_SETTING_ZOOM_GESTURE_OFF                             :Off
+STR_CONFIG_SETTING_ZOOM_GESTURE_MAGNIFY                         :Zoom gesture (Pinch)
+STR_CONFIG_SETTING_ZOOM_GESTURE_SWIPE                           :Two fingers up/down (Swipe)
+
 STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU                          :{LTBLUE}Right-click emulation: {ORANGE}{STRING1}
 STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_COMMAND                  :Command+Click
 STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_CONTROL                  :Ctrl+Click
