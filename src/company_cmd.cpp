@@ -544,6 +544,8 @@ Company *DoStartupNewCompany(bool is_ai, CompanyID company = INVALID_COMPANY)
 
 	c->num_engines = CallocT<uint16>(Engine::GetPoolSize());
 
+	if (!is_ai) UpdateAllTownVirtCoords();
+
 	return c;
 }
 
