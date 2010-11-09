@@ -2201,6 +2201,11 @@ static void MouseLoop(MouseClick click, int mousewheel)
 			/* Send mousewheel event to window */
 			w->OnMouseWheel(mousewheel);
 		}
+		else if (_cursor.zooming == TRUE) {
+			/* zoom gesture detected, send mousewheel event to window */
+			w->OnMouseWheel(mousewheel);
+			_cursor.zooming = FALSE;
+		}
 
 		/* Dispatch a MouseWheelEvent for widgets if it is not a viewport */
 		if (vp == NULL) DispatchMouseWheelEvent(w, w->nested_root->GetWidgetFromPos(x - w->left, y - w->top), mousewheel);

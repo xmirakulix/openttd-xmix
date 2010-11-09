@@ -128,6 +128,8 @@ struct CursorVars {
 	int v_wheel;
 	int h_wheel;
 
+	bool zooming; ///< flag for OSX zoom gesture
+
 	const AnimCursor *animate_list; ///< in case of animated cursor, list of frames
 	const AnimCursor *animate_cur;  ///< in case of animated cursor, current frame
 	uint animate_timeout;           ///< in case of animated cursor, number of ticks to show the current cursor
