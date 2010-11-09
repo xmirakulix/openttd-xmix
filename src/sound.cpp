@@ -16,6 +16,7 @@
 #include "fios.h"
 #include "window_gui.h"
 #include "vehicle_base.h"
+#include "zoom_func.h"
 
 /* The type of set we're replacing */
 #define SET_TYPE "sounds"
@@ -178,7 +179,7 @@ static void StartSound(SoundID sound_id, float pan, uint volume)
 }
 
 
-static const byte _vol_factor_by_zoom[] = {255, 190, 134, 87};
+static const byte _vol_factor_by_zoom[] = {255, 255, 255, 190, 134, 87};
 assert_compile(lengthof(_vol_factor_by_zoom) == ZOOM_LVL_COUNT);
 
 static const byte _sound_base_vol[] = {
@@ -234,9 +235,9 @@ static void SndPlayScreenCoordFx(SoundID sound, int left, int right, int top, in
 		const ViewPort *vp = w->viewport;
 
 		if (vp != NULL &&
-				left < vp->virtual_left + vp->virtual_width && right > vp->virtual_left &&
-				top < vp->virtual_top + vp->virtual_height && bottom > vp->virtual_top) {
-			int screen_x = (left + right) / 2 - vp->virtual_left;
+				left < ScaleByZoom(vp->virtual_left, vp->zoom) + vp->virtual_width && right > ScaleByZoom(vp->virtual_left, vp->zoom) &&
+				top < ScaleByZoom(vp->virtual_top, vp->zoom) + vp->virtual_height && bottom > ScaleByZoom(vp->virtual_top, vp->zoom)) {
+			int screen_x = (left + right) / 2 - ScaleByZoom(vp->virtual_left, vp->zoom);
 			int width = (vp->virtual_width == 0 ? 1 : vp->virtual_width);
 			float panning = (float)screen_x / width;
 
