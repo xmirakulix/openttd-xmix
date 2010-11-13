@@ -5073,7 +5073,7 @@ static void SkipIf(ByteReader *buf)
 
 		GRFConfig *c = GetGRFConfig(cond_val, mask);
 
-		if (c != NULL && HasBit(c->flags, GCF_STATIC) && !HasBit(_cur_grfconfig->flags, GCF_STATIC) && c->status != GCS_DISABLED && _networking) {
+		if (c != NULL && HasBit(c->flags, GCF_STATIC) && !HasBit(_cur_grfconfig->flags, GCF_STATIC) && _networking) {
 			DisableStaticNewGRFInfluencingNonStaticNewGRFs(c);
 			c = NULL;
 		}
@@ -5230,7 +5230,11 @@ static void GRFInfo(ByteReader *buf)
 		return;
 	}
 
-	_cur_grffile->grfid = grfid;
+	if (_cur_grffile->grfid != grfid) {
+		DEBUG(grf, 0, "GRFInfo: GRFID %08X in FILESCAN stage does not match GRFID %08X in INIT/RESERVE/ACTIVATION stage", BSWAP32(_cur_grffile->grfid), BSWAP32(grfid));
+		_cur_grffile->grfid = grfid;
+	}
+
 	_cur_grffile->grf_version = version;
 	_cur_grfconfig->status = _cur_stage < GLS_RESERVE ? GCS_INITIALISED : GCS_ACTIVATED;
 
@@ -7134,6 +7138,7 @@ static void InitNewGRFFile(const GRFConfig *config, int sprite_offset)
 
 	newfile->filename = strdup(config->filename);
 	newfile->sprite_offset = sprite_offset;
+	newfile->grfid = config->ident.grfid;
 
 	/* Initialise local settings to defaults */
 	newfile->traininfo_vehicle_pitch = 0;
