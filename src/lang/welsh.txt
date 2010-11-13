@@ -1048,7 +1048,7 @@ STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Galluog
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL                     :{LTBLUE}Model cyflymu trenau: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_ORIGINAL            :Gwreiddiol
 STR_CONFIG_SETTING_TRAIN_ACCELERATION_MODEL_REALISTIC           :Realistig
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Rhwystro trenau a llongau rhag troi 90 gradd: {ORANGE}{STRING} {LTBLUE} (angen NPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Rhwystro trenau a llongau rhag troi 90 gradd: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Uno gorsafoedd trên sydd drws nesaf i'w gilydd: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Caniatáu cyfuno gorsafoedd nad ydynt yn union gyfochrog: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Defnyddio'r algorithm llwytho gwell: {ORANGE}{STRING}
@@ -2284,7 +2284,7 @@ STR_NEWGRF_ERROR_LOAD_AFTER                                     :Rhad i {1:STRIN
 STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :Mae {1:STRING} angen OpenTTD fersiwn {STRING} neu'n hwyrach.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :Cofodd y ffeil GRF hwn ei gynllunio i gyfieithu
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :mae gormod o NewGRFs wedi'u llwytho
-STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Gallai llwytho {STRING} fel NewGRF statig gyda {STRING} achosi dadsyncroneiddio.
+STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Gallai llwytho {2:STRING} fel NewGRF statig gyda {4:STRING} achosi dadsyncroneiddio.
 STR_NEWGRF_ERROR_UNEXPECTED_SPRITE                              :Corlun Annisgwyliedig
 STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Priodwedd Gweithred 0.
 STR_NEWGRF_ERROR_INVALID_ID                                     :Ceisio defnyddio ID annilys.

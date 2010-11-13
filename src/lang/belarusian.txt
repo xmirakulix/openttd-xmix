@@ -1420,7 +1420,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :арыгіна�
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :рэалістычная
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Крутасьць сьхілаў для цягнікоў: {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Крутасьць сьхілаў для аўтатранспарту: {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Забараніць цягнікам і караблям 90-градусныя павароты: {ORANGE}{STRING} {LTBLUE} (не для OPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Забараніць цягнікам і караблям 90-градусныя павароты: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Аб'ядноўваць пабудаваныя побач чыгуначныя станцыі: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Дазволіць аб'яднаньне станцыяў, не прымыкаючых адна да адной: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Выкарыстоўваць палепшаны алгарытм загрузкі: {ORANGE}{STRING}
@@ -2800,7 +2800,7 @@ STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} па
 STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} патрабуе OpenTTD вэрсіі {STRING} або вышэй.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :файл GRF, які ім перакладаецца.
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Загружана занадта шмат новай графікі.
-STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Загрузка {STRING} у якасьці статычнага NewGRF з {STRING} можа выклікаць памылку сынхранізацыі.
+STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Загрузка {2:STRING} у якасьці статычнага NewGRF з {4:STRING} можа выклікаць памылку сынхранізацыі.
 STR_NEWGRF_ERROR_UNEXPECTED_SPRITE                              :Нечаканы спрайт.
 STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Невядомая ўласьцівасьць для Action 0.
 STR_NEWGRF_ERROR_INVALID_ID                                     :Выкарыстоўваецца няправільны ID.

@@ -1102,7 +1102,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :اصلي
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :واقعي
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}تدرج ميلان سكة القطار {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}نسبة الميلان للعربات {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}منع القطارات والسفن من الدوران بزاوية تسعين درجة : {ORANGE}{STRING} {LTBLUE} (not with OPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}منع القطارات والسفن من الدوران بزاوية تسعين درجة : {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}ربط محطات القطار المبنيه بجوار بعض: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE} السماح بربط محطتين غير متجاورتين : {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}أستخدام خوارزمية التحميل المحسنه: {ORANGE}{STRING}
@@ -2462,7 +2462,7 @@ STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} يج
 STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} يتطلب نسخة {STRING} من النسخة المفتوحة او احدث .
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :تم تصميم ملف GRF بغرض الترجمة
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :العديد من NewGRF تم تحميلها
-STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :تحميل {STRING}كملف ثابت مع NewGRF {STRING}قد يتسبب بمشكلة توافق.
+STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :تحميل {2:STRING}كملف ثابت مع NewGRF {4:STRING}قد يتسبب بمشكلة توافق.
 STR_NEWGRF_ERROR_UNEXPECTED_SPRITE                              :خطأ غير متوقع
 STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :طلب غير معروف 0 بدون خصائص
 STR_NEWGRF_ERROR_INVALID_ID                                     :محاولة استخدام ID معرف غير معروف .

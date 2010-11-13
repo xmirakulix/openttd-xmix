@@ -232,7 +232,6 @@ CommandCost CmdBuildRoadVehicle(TileIndex tile, DoCommandFlag flags, const Engin
 		v->cargo_cap = rvi->capacity;
 
 		v->last_station_visited = INVALID_STATION;
-		v->max_speed = rvi->max_speed;
 		v->engine_type = e->index;
 		v->rcache.first_engine = INVALID_ENGINE; // needs to be set before first callback
 
@@ -670,7 +669,8 @@ static int RoadVehAccelerate(RoadVehicle *v)
 
 	/* Apply bridge speed limit */
 	if (v->state == RVSB_WORMHOLE && !(v->vehstatus & VS_HIDDEN)) {
-		v->cur_speed = min(v->cur_speed, GetBridgeSpec(GetBridgeType(v->tile))->speed * 2);
+		RoadVehicle *first = v->First();
+		first->cur_speed = min(first->cur_speed, GetBridgeSpec(GetBridgeType(v->tile))->speed * 2);
 	}
 
 	/* Update statusbar only if speed has changed to save CPU time */
@@ -756,7 +756,7 @@ static void RoadVehCheckOvertake(RoadVehicle *v, RoadVehicle *u)
 	od.v = v;
 	od.u = u;
 
-	if (u->max_speed >= v->vcache.cached_max_speed &&
+	if (u->vcache.cached_max_speed >= v->vcache.cached_max_speed &&
 			!(u->vehstatus & VS_STOPPED) &&
 			u->cur_speed != 0) {
 		return;

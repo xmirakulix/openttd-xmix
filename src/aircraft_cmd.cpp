@@ -269,7 +269,6 @@ CommandCost CmdBuildAircraft(TileIndex tile, DoCommandFlag flags, const Engine *
 		v->name = NULL;
 		v->last_station_visited = INVALID_STATION;
 
-		v->max_speed = avi->max_speed;
 		v->acceleration = avi->acceleration;
 		v->engine_type = e->index;
 		u->engine_type = e->index;
@@ -544,7 +543,7 @@ void UpdateAircraftCache(Aircraft *v)
 		v->vcache.cached_max_speed = max_speed;
 	} else {
 		/* Use the default max speed of the vehicle. */
-		v->vcache.cached_max_speed = v->max_speed;
+		v->vcache.cached_max_speed = AircraftVehInfo(v->engine_type)->max_speed;
 	}
 }
 
@@ -1151,6 +1150,7 @@ static void CrashAirplane(Aircraft *v)
 		v->index,
 		st != NULL ? st->index : INVALID_STATION);
 
+	ModifyStationRatingAround(v->tile, v->owner, -160, 30);
 	SndPlayVehicleFx(SND_12_EXPLOSION, v);
 }
 

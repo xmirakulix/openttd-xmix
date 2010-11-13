@@ -285,6 +285,7 @@ STR_SORT_BY_RATING_MIN                                          :Laagste vrachtw
 STR_SORT_BY_ENGINE_ID                                           :Voertuig-ID (klassieke sortering)
 STR_SORT_BY_COST                                                :Kosten
 STR_SORT_BY_POWER                                               :Vermogen
+STR_SORT_BY_TRACTIVE_EFFORT                                     :Trekkracht
 STR_SORT_BY_INTRO_DATE                                          :Introductiedatum
 STR_SORT_BY_RUNNING_COST                                        :Operationele kosten
 STR_SORT_BY_POWER_VS_RUNNING_COST                               :Vermogen/Operationele kosten
@@ -1102,7 +1103,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Origineel
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realistisch
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Hellingshoek voor treinen {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Hellingsgraad voor wegvoertuigen {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Verbied treinen en schepen om 90° te draaien: {ORANGE}{STRING} {LTBLUE} (niet met OPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Verbied treinen en schepen om 90° te draaien: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Stations samenvoegen als ze naast elkaar worden gebouwd: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Sta het samenvoegen van niet direct aaneensluitende stations toe: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Gebruik verbeterd laadalgoritme: {ORANGE}{STRING}
@@ -2462,7 +2463,7 @@ STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} moet
 STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} heeft OpenTTD versie {STRING} of beter nodig.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :het GRF-bestand die het probeert te vertalen
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Er zijn te veel NewGRFs geladen.
-STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Laden van {STRING} als statische NewGRF met {STRING} kan desynchronisatiefouten (desyncs) veroorzaken.
+STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Laden van {2:STRING} als statische NewGRF met {4:STRING} kan desynchronisatiefouten (desyncs) veroorzaken.
 STR_NEWGRF_ERROR_UNEXPECTED_SPRITE                              :Onverwachte afbeelding
 STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Onbekende 'Action 0'-eigenschap.
 STR_NEWGRF_ERROR_INVALID_ID                                     :Poging tot gebruik ongeldig ID.

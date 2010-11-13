@@ -1167,7 +1167,7 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Originalus
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realistiškas
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Atbrailų statumas traukiniams {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Nuokalnių statumas automobiliams {ORANGE}{STRING}%
-STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Drausti traukiniams/laivams pasisukti 90 laips.kampu: {ORANGE}{STRING} {LTBLUE} (be OPF)
+STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Drausti traukiniams/laivams pasisukti 90 laips.kampu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Leisti sujungti greta pastatytas stoteles: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Leidžia sujungti stoteles, kurios nėra šalia: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Naudoti patobulintą krovimo algoritmą: {ORANGE}{STRING}
@@ -2484,7 +2484,7 @@ STR_NEWGRF_ERROR_LOAD_AFTER                                     :{1:STRING} turi
 STR_NEWGRF_ERROR_OTTD_VERSION_NUMBER                            :{1:STRING} reikalauja OpenTTD versijos {STRING} ar naujesnės.
 STR_NEWGRF_ERROR_AFTER_TRANSLATED_FILE                          :GRF failas, kurį turėjo išversti
 STR_NEWGRF_ERROR_TOO_MANY_NEWGRFS_LOADED                        :Per daug NewGRF'ų įkelta.
-STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Įkėlimas {STRING} kaip statinio NewGRF su {STRING} gali sukelti desinchronizacija.
+STR_NEWGRF_ERROR_STATIC_GRF_CAUSES_DESYNC                       :Įkėlimas {2:STRING} kaip statinio NewGRF su {4:STRING} gali sukelti desinchronizacija.
 STR_NEWGRF_ERROR_UNEXPECTED_SPRITE                              :Nenumatytas spraitas.
 STR_NEWGRF_ERROR_UNKNOWN_PROPERTY                               :Nežinomas veiksmo (Action 0) nustatymas.
 STR_NEWGRF_ERROR_INVALID_ID                                     :Bandymas naudoti netinkamą ID.
