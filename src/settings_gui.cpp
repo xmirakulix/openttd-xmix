@@ -192,7 +192,7 @@ struct GameOptionsWindow : Window {
 			case GOW_TOWNNAME_DROPDOWN:   SetDParam(0, TownName(this->opt->game_creation.town_name)); break;
 			case GOW_AUTOSAVE_DROPDOWN:   SetDParam(0, _autosave_dropdown[_settings_client.gui.autosave]); break;
 			case GOW_LANG_DROPDOWN:       SetDParamStr(0, _current_language->own_name); break;
-			case GOW_RESOLUTION_DROPDOWN: SetDParam(0, GetCurRes() == _num_resolutions ? STR_RES_OTHER : SPECSTR_RESOLUTION_START + GetCurRes()); break;
+			case GOW_RESOLUTION_DROPDOWN: SetDParam(0, GetCurRes() == _num_resolutions ? STR_GAME_OPTIONS_RESOLUTION_OTHER : SPECSTR_RESOLUTION_START + GetCurRes()); break;
 			case GOW_SCREENSHOT_DROPDOWN: SetDParam(0, SPECSTR_SCREENSHOT_START + _cur_screenshot_format); break;
 			case GOW_BASE_GRF_DROPDOWN:   SetDParamStr(0, BaseGraphics::GetUsedSet()->name); break;
 			case GOW_BASE_GRF_STATUS:     SetDParam(0, BaseGraphics::GetUsedSet()->GetNumInvalid()); break;
@@ -317,7 +317,7 @@ struct GameOptionsWindow : Window {
 				/* Sort language names */
 				LangList langs;
 				int current_lang = 0;
-				for (size_t i = 0; i < _languages.Length(); i++) {
+				for (int i = 0; i < (int)_languages.Length(); i++) {
 					if (&_languages[i] == _current_language) current_lang = i;
 					langs[SPECSTR_LANGUAGE_START + i] = i;
 				}

@@ -354,6 +354,7 @@ static void EmitPlural(char *buf, int value)
 	}
 
 	PutUtf8(SCC_PLURAL_LIST);
+	PutByte(_lang.plural_form);
 	PutByte(TranslateArgumentIdx(argidx, offset));
 	EmitWordList(words, nw);
 }
@@ -928,9 +929,17 @@ static void WriteStringsH(const char *filename)
 
 	fprintf(_output_file, "\nstatic const StringID STR_LAST_STRINGID = 0x%X;\n\n", next - 1);
 
+	/* Find the plural form with the most amount of cases. */
+	int max_plural_forms = 0;
+	for (uint i = 0; i < lengthof(_plural_forms); i++) {
+		max_plural_forms = max(max_plural_forms, _plural_forms[i].plural_count);
+	}
+
 	fprintf(_output_file,
-		"static const uint LANGUAGE_PACK_VERSION = 0x%X;\n"
-		"static const uint LANGUAGE_MAX_PLURAL = %d;\n\n", (uint)_hash, (uint)lengthof(_plural_forms)
+		"static const uint LANGUAGE_PACK_VERSION     = 0x%X;\n"
+		"static const uint LANGUAGE_MAX_PLURAL       = %d;\n"
+		"static const uint LANGUAGE_MAX_PLURAL_FORMS = %d;\n\n",
+		(uint)_hash, (uint)lengthof(_plural_forms), max_plural_forms
 	);
 
 	fprintf(_output_file, "#endif /* TABLE_STRINGS_H */\n");
