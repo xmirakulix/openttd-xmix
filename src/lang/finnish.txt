@@ -165,12 +165,12 @@ STR_ABBREV_NONE                                                 :{TINYFONT}EI
 STR_ABBREV_ALL                                                  :{TINYFONT}KAIKKI
 
 # 'Mode' of transport for cargoes
-STR_PASSENGERS                                                  :{COMMA} matkustajaa
-STR_BAGS                                                        :{COMMA} säkkiä
-STR_TONS                                                        :{COMMA} tonnia
-STR_LITERS                                                      :{COMMA} litraa
-STR_ITEMS                                                       :{COMMA} erää
-STR_CRATES                                                      :{COMMA} laatikkoa
+STR_PASSENGERS                                                  :{COMMA} matkustaja{P "" a}
+STR_BAGS                                                        :{COMMA} säkki{P "" ä}
+STR_TONS                                                        :{COMMA} tonni{P "" a}
+STR_LITERS                                                      :{COMMA} litra{P "" a}
+STR_ITEMS                                                       :{COMMA} erä{P "" ä}
+STR_CRATES                                                      :{COMMA} laatikko{P "" a}
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Tummansininen
@@ -1090,7 +1090,7 @@ STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Salli m
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Realistisemman kokoiset vaikutusalueet: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Kaupungin omistamien teiden, siltojen, jne. raivaaminen sallittu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Erittäin pitkien junien rakentaminen: {ORANGE}{STRING}
-STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Veturin savun/kipinöiden määrä: {ORANGE}{STRING}
+STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Kulkuneuvon savun/kipinöiden määrä: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Ei yhtään
 STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Alkuperäinen
 STR_CONFIG_SETTING_SMOKE_AMOUNT_REALISTIC                       :Realistinen
@@ -1787,6 +1787,9 @@ STR_NETWORK_ERROR_CLIENT_CHEATER                                :yritti käyttä
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :palvelin täynnä
 STR_NETWORK_ERROR_CLIENT_TOO_MANY_COMMANDS                      :lähetti liian monta komentoa
 ############ End of leave-in-this-order
+
+STR_NETWORK_ERROR_CLIENT_GUI_LOST_CONNECTION_CAPTION            :{WHITE}Mahdollinen yhteyden menetys
+STR_NETWORK_ERROR_CLIENT_GUI_LOST_CONNECTION                    :{WHITE}Viimeisen {NUM} sekunnin{P "" ""} aikana palvelimelimelta ei ole vastaanotettu tietoja
 
 # Network related errors
 STR_NETWORK_SERVER_MESSAGE                                      :*** {1:STRING}
