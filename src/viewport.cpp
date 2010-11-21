@@ -1773,11 +1773,8 @@ static bool CheckClickOnViewportSign(const ViewPort *vp, int x, int y, const Vie
 	x = ScaleByZoom(x - vp->left + vp->virtual_left, vp->zoom);
 	y = ScaleByZoom(y - vp->top + vp->virtual_top, vp->zoom);
 
-	return
-			y >= sign->top &&
-			y <  sign->top + sign_height &&
-			x >= sign->center - sign_half_width &&
-			x <  sign->center + sign_half_width;
+	return y >= sign->top && y < sign->top + sign_height &&
+			x >= sign->center - sign_half_width && x < sign->center + sign_half_width;
 }
 
 static bool CheckClickOnTown(const ViewPort *vp, int x, int y)

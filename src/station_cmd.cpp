@@ -1472,13 +1472,13 @@ restart:
 
 /**
  * Remove a number of tiles from any rail station within the area.
- * @param ta the area to clear station tile from
- * @param affected_stations the stations affected
- * @param flags the command flags
- * @param removal_cost the cost for removing the tile
- * @param keep_rail whether to keep the rail of the station
- * @tparam T the type of station to remove
- * @return the number of cleared tiles or an error
+ * @param ta the area to clear station tile from.
+ * @param affected_stations the stations affected.
+ * @param flags the command flags.
+ * @param removal_cost the cost for removing the tile, including the rail.
+ * @param keep_rail whether to keep the rail of the station.
+ * @tparam T the type of station to remove.
+ * @return the number of cleared tiles or an error.
  */
 template <class T>
 CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected_stations, DoCommandFlag flags, Money removal_cost, bool keep_rail)
@@ -1512,6 +1512,12 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 
 		/* If we reached here, the tile is valid so increase the quantity of tiles we will remove */
 		quantity++;
+
+		if (keep_rail || IsStationTileBlocked(tile)) {
+			/* Don't refund the 'steel' of the track when we keep the
+			 *  rail, or when the tile didn't have any rail at all. */
+			total_cost.AddCost(-_price[PR_CLEAR_RAIL]);
+		}
 
 		if (flags & DC_EXEC) {
 			/* read variables before the station tile is removed */
@@ -1554,10 +1560,6 @@ CommandCost RemoveFromRailBaseStation(TileArea ta, SmallVector<T *, 4> &affected
 				for (; v->Next() != NULL; v = v->Next()) { }
 				if (IsRailStationTile(v->tile)) SetRailStationPlatformReservation(v->tile, TrackdirToExitdir(ReverseTrackdir(v->GetVehicleTrackdir())), true);
 			}
-		}
-		if (keep_rail) {
-			/* Don't refund the 'steel' of the track! */
-			total_cost.AddCost(-_price[PR_CLEAR_RAIL]);
 		}
 	}
 
@@ -1644,7 +1646,7 @@ CommandCost CmdRemoveFromRailWaypoint(TileIndex start, DoCommandFlag flags, uint
 
 
 /**
- * Remove a rail road station/waypoint
+ * Remove a rail station/waypoint
  * @param st The station/waypoint to remove the rail part from
  * @param flags operation to perform
  * @tparam T the type of station to remove
@@ -1712,7 +1714,7 @@ CommandCost RemoveRailStation(T *st, DoCommandFlag flags)
 }
 
 /**
- * Remove a rail road station
+ * Remove a rail station
  * @param tile TileIndex been queried
  * @param flags operation to perform
  * @return cost or failure of operation
