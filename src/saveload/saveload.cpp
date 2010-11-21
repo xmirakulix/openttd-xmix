@@ -13,8 +13,8 @@
  * are as follows for saving a game (loading is analogous):
  * <ol>
  * <li>initialize the writer by creating a temporary memory-buffer for it
- * <li>go through all to-be saved elements, each 'chunk' (ChunkHandler) prefixed by a label
- * <li>use their description array (SaveLoad) to know what elements to save and in what version
+ * <li>go through all to-be saved elements, each 'chunk' (#ChunkHandler) prefixed by a label
+ * <li>use their description array (#SaveLoad) to know what elements to save and in what version
  *    of the game it was active (used when loading)
  * <li>write all data byte-by-byte to the temporary buffer so it is endian-safe
  * <li>when the buffer is full; flush it to the output (eg save to file) (_sl.buf, _sl.bufp, _sl.bufe)
@@ -215,8 +215,9 @@
  *  150   20857
  *  151   20918
  *  152   21171
+ *  153   21263
  */
-extern const uint16 SAVEGAME_VERSION = 152; ///< Current savegame version of OpenTTD.
+extern const uint16 SAVEGAME_VERSION = 153; ///< Current savegame version of OpenTTD.
 
 SavegameType _savegame_type; ///< type of savegame we are loading
 
@@ -244,7 +245,7 @@ enum NeedLength {
 	NL_CALCLENGTH = 2, ///< need to calculate the length
 };
 
-/** The saveload struct, containing reader-writer functions, bufffer, version, etc. */
+/** The saveload struct, containing reader-writer functions, buffer, version, etc. */
 struct SaveLoadParams {
 	SaveLoadAction action;               ///< are we doing a save or a load atm.
 	NeedLength need_length;              ///< working in NeedLength (Autolength) mode?
@@ -270,7 +271,7 @@ struct SaveLoadParams {
 	FILE *fh;                            ///< the file from which is read or written to
 
 	void (*excpt_uninit)();              ///< the function to execute on any encountered error
-	StringID error_str;                  ///< the translateable error message to show
+	StringID error_str;                  ///< the translatable error message to show
 	char *extra_msg;                     ///< the error message
 };
 
