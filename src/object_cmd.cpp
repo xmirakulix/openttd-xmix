@@ -187,7 +187,7 @@ CommandCost CmdBuildObject(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 		bool allow_water = (spec->flags & (OBJECT_FLAG_BUILT_ON_WATER | OBJECT_FLAG_NOT_ON_LAND)) != 0;
 		bool allow_ground = (spec->flags & OBJECT_FLAG_NOT_ON_LAND) == 0;
 		TILE_AREA_LOOP(t, ta) {
-			if (HasTileWaterClass(t) && IsTileOnWater(t) && !IsCoastTile(t)) {
+			if (HasTileWaterGround(t)) {
 				if (!allow_water) return_cmd_error(STR_ERROR_CAN_T_BUILD_ON_WATER);
 				if (!IsWaterTile(t)) {
 					/* Normal water tiles don't have to be cleared. For all other tile types clear
@@ -202,18 +202,20 @@ CommandCost CmdBuildObject(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 		}
 
 		/* So, now the surface is checked... check the slope of said surface. */
-		if (HasBit(spec->callback_mask, CBM_OBJ_SLOPE_CHECK)) {
-			TILE_AREA_LOOP(t, ta) {
+		int allowed_z;
+		if (GetTileSlope(tile, (uint*)&allowed_z) != SLOPE_FLAT) allowed_z += TILE_HEIGHT;
+
+		TILE_AREA_LOOP(t, ta) {
+			uint16 callback = CALLBACK_FAILED;
+			if (HasBit(spec->callback_mask, CBM_OBJ_SLOPE_CHECK)) {
 				TileIndex diff = t - tile;
-				uint16 callback = GetObjectCallback(CBID_OBJECT_LAND_SLOPE_CHECK, GetTileSlope(t, NULL), TileY(diff) << 4 | TileX(diff), spec, NULL, t);
-				if (callback != 0) return_cmd_error(STR_ERROR_LAND_SLOPED_IN_WRONG_DIRECTION);
+				callback = GetObjectCallback(CBID_OBJECT_LAND_SLOPE_CHECK, GetTileSlope(t, NULL), TileY(diff) << 4 | TileX(diff), spec, NULL, t);
 			}
-		} else {
-			/* Check whether the ground is flat enough. */
-			int allowed_z = -1;
-			TILE_AREA_LOOP(t, ta) {
-				/* We'll do the bridge test later; it's quite custom. */
+
+			if (callback == CALLBACK_FAILED) {
 				cost.AddCost(CheckBuildableTile(t, 0, allowed_z, false));
+			} else if (callback != 0) {
+				return_cmd_error(STR_ERROR_LAND_SLOPED_IN_WRONG_DIRECTION);
 			}
 		}
 	}
@@ -370,6 +372,23 @@ static void ReallyClearObjectTile(Object *o)
 }
 
 SmallVector<ClearedObjectArea, 4> _cleared_object_areas;
+
+/**
+ * Find the entry in _cleared_object_areas which occupies a certain tile.
+ * @param tile Tile of interest
+ * @return Occupying entry, or NULL if none
+ */
+ClearedObjectArea *FindClearedObject(TileIndex tile)
+{
+	TileArea ta = TileArea(tile, 1, 1);
+
+	const ClearedObjectArea *end = _cleared_object_areas.End();
+	for (ClearedObjectArea *coa = _cleared_object_areas.Begin(); coa != end; coa++) {
+		if (coa->area.Intersects(ta)) return coa;
+	}
+
+	return NULL;
+}
 
 static CommandCost ClearTile_Object(TileIndex tile, DoCommandFlag flags)
 {
