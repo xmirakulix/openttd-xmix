@@ -1143,7 +1143,7 @@ static void GrowTownInTile(TileIndex *tile_ptr, RoadBits cur_rb, DiagDirection t
 		TileIndex house_tile = TileAddByDiagDir(tile, target_dir); // position of a possible house
 
 		/* Don't walk into water. */
-		if (IsWaterTile(house_tile)) return;
+		if (HasTileWaterGround(house_tile)) return;
 
 		if (!IsValidTile(house_tile)) return;
 
@@ -1192,7 +1192,7 @@ static void GrowTownInTile(TileIndex *tile_ptr, RoadBits cur_rb, DiagDirection t
 	}
 
 	/* Return if a water tile */
-	if (IsWaterTile(tile)) return;
+	if (HasTileWaterGround(tile)) return;
 
 	/* Make the roads look nicer */
 	rcmd = CleanUpRoadBits(tile, rcmd);
