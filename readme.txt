@@ -9,6 +9,7 @@ Table of Contents:
 1.0) About
 2.0) Contacting
  * 2.1 Reporting Bugs
+ * 2.2 Reporting Desyncs
 3.0) Supported Platforms
 4.0) Installing and running OpenTTD
  * 4.1 (Required) 3rd party files
@@ -132,8 +133,8 @@ a bug report with the following files attached:
    reproduction of the desync, but we should be able to reproduce these
    savegames based on the first savegame and commands-out.log.
  - in case you use any NewGRFs you should attach the ones you used unless
-   we can easily find them ourselves via e.g. grfcrawler or when they are
-   in the OpenTTDCoop pack.
+   we can easily find them ourselves via bananas or when they are in the
+   #openttdcoop pack.
 
 Do NOT remove the dmp_cmds savegames of a desync you have reported until the
 desync has been fixed; if you, by accident, send us the wrong savegames we
@@ -447,19 +448,26 @@ you remove the graphics file using "make maintainer-clean".
 7.2) Supported compilers:
 ---- -------------------
 The following compilers are known to compile OpenTTD:
-  - Microsoft Visual C++ (MSVC) 2005 and 2008.
+  - Microsoft Visual C++ (MSVC) 2005, 2008 and 2010.
     Version 2005 gives bogus warnings about scoping issues.
-  - GNU Compiler Collection (GCC) 3.3 - 4.5.
+  - GNU Compiler Collection (GCC) 3.3 - 4.6.
     Versions 4.1 and earlier give bogus warnings about uninitialised variables.
     Versions 4.4 and later give bogus warnings about freeing heap objects.
-  - Intel C++ Compiler (ICC) 11.0 and 11.1.
+  - Intel C++ Compiler (ICC) 12.0.
 
 The following compilers are known not to compile OpenTTD:
   - Microsoft Visual C++ (MSVC) 2003 and earlier.
   - GNU Compiler Collection (GCC) 3.2 and earlier.
+    These old versions fail due to OpenTTD's template usage.
+  - Intel C++ Compiler (ICC) 11.1 and earlier.
+    Version 10.0 and earlier fail a configure check and fail with recent system headers.
+    Version 10.1 fails to compile station_gui.cpp.
+    Version 11.1 fails with internal error when compiling network.cpp.
+  - Clang/LLVM 2.8 and earlier.
   - (Open) Watcom.
 
 If any of these compilers can compile OpenTTD again, please let us know.
+Patches to support more compilers are welcome.
 
 8.0) Translating:
 ---- -------------------

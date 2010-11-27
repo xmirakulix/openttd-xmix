@@ -2387,7 +2387,7 @@ CommandCost CmdBuildDock(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 	direction = ReverseDiagDir(direction);
 
 	/* Docks cannot be placed on rapids */
-	if (IsWaterTile(tile)) return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
+	if (HasTileWaterGround(tile)) return_cmd_error(STR_ERROR_SITE_UNSUITABLE);
 
 	CommandCost ret = CheckIfAuthorityAllowsNewStation(tile, flags);
 	if (ret.Failed()) return ret;
@@ -3042,9 +3042,12 @@ static void UpdateStationRating(Station *st)
 			bool skip = false;
 			int rating = 0;
 			uint waiting = ge->cargo.Count();
+			uint num_dests = ge->cargo.Packets()->MapSize();
 
-			/* average amount of cargo per destination */
-			uint waiting_avg = waiting / max(1U, (uint)ge->cargo.Packets()->MapSize());
+			/* average amount of cargo per next hop, but prefer solitary stations
+			 * with only one or two next hops. They are allowed to have more
+			 * cargo waiting per next hop. */
+			uint waiting_avg = waiting / (num_dests + 1);
 
 			if (HasBit(cs->callback_mask, CBM_CARGO_STATION_RATING_CALC)) {
 				/* Perform custom station rating. If it succeeds the speed, days in transit and
@@ -3101,12 +3104,12 @@ static void UpdateStationRating(Station *st)
 				/* only modify rating in steps of -2, -1, 0, 1 or 2 */
 				ge->rating = rating = or_ + Clamp(Clamp(rating, 0, 255) - or_, -2, 2);
 
-				/* if rating is <= 64 and more than 200 items waiting on average per destination,
+				/* if rating is <= 64 and more than 100 items waiting on average per destination,
 				 * remove some random amount of goods from the station */
-				if (rating <= 64 && waiting_avg >= 200) {
+				if (rating <= 64 && waiting_avg >= 100) {
 					int dec = Random() & 0x1F;
-					if (waiting_avg < 400) dec &= 7;
-					waiting -= dec + 1;
+					if (waiting_avg < 200) dec &= 7;
+					waiting -= (dec + 1) * num_dests;
 					waiting_changed = true;
 				}
 
@@ -3115,7 +3118,7 @@ static void UpdateStationRating(Station *st)
 					uint32 r = Random();
 					if (rating <= (int)GB(r, 0, 7)) {
 						/* Need to have int, otherwise it will just overflow etc. */
-						waiting = max((int)waiting - (int)GB(r, 8, 2) - 1, 0);
+						waiting = max((int)waiting - (int)((GB(r, 8, 2) - 1) * num_dests), 0);
 						waiting_changed = true;
 					}
 				}
@@ -3127,7 +3130,7 @@ static void UpdateStationRating(Station *st)
 				static const uint WAITING_CARGO_CUT_FACTOR = 1 <<  6;
 				static const uint MAX_WAITING_CARGO        = 1 << 15;
 
-				if (waiting_avg > WAITING_CARGO_THRESHOLD || waiting > MAX_WAITING_CARGO) {
+				if (waiting > WAITING_CARGO_THRESHOLD) {
 					uint difference = waiting - WAITING_CARGO_THRESHOLD;
 					waiting -= (difference / WAITING_CARGO_CUT_FACTOR);
 
