@@ -51,6 +51,7 @@ enum GroupListWidgets {
 	GRP_WIDGET_DELETE_GROUP,
 	GRP_WIDGET_RENAME_GROUP,
 	GRP_WIDGET_REPLACE_PROTECTION,
+	GRP_WIDGET_GROUP_INFO,
 };
 
 static const NWidgetPart _nested_group_widgets[] = {
@@ -71,6 +72,7 @@ static const NWidgetPart _nested_group_widgets[] = {
 						SetFill(1, 0), SetResize(0, 1), SetScrollbar(GRP_WIDGET_LIST_GROUP_SCROLLBAR),
 				NWidget(NWID_VSCROLLBAR, COLOUR_GREY, GRP_WIDGET_LIST_GROUP_SCROLLBAR),
 			EndContainer(),
+			NWidget(WWT_PANEL, COLOUR_GREY, GRP_WIDGET_GROUP_INFO), SetMinimalSize(200, 25), SetFill(1, 0), EndContainer(),
 			NWidget(NWID_HORIZONTAL),
 				NWidget(WWT_PUSHIMGBTN, COLOUR_GREY, GRP_WIDGET_CREATE_GROUP), SetMinimalSize(24, 25), SetFill(0, 1),
 						SetDataTip(SPR_GROUP_CREATE_TRAIN, STR_GROUP_CREATE_TOOLTIP),
@@ -214,6 +216,40 @@ public:
 		*this->sorting = this->vehicles.GetListing();
 	}
 
+	/** draw the group profit button in the group list window. */
+	virtual void DrawGroupProfitButton(int x, int y, GroupID gid, VehicleType vtype) const
+	{
+		Date max_age = 0;									///< Age of the oldest vehicle in the group
+		Money this_year_profit = 0;							///< Total profit for the group this year
+		int vehicle_count = 0;								///< Vehicle count in the group
+
+		const Vehicle *v;
+		FOR_ALL_VEHICLES(v) {
+			if (v->owner == this->owner) {
+				if ((gid == ALL_GROUP && v->type == vtype) || v->group_id == gid) {
+					this_year_profit += v->GetDisplayProfitLastYear();
+					if (v->age > max_age) max_age = v->age;
+					vehicle_count++;
+				}
+			}
+		}
+
+		// Draw button
+		SpriteID spr;
+
+		/* draw profit-based coloured icons */
+		if (max_age <= DAYS_IN_YEAR * 2) {
+			spr = SPR_PROFIT_NA;
+		} else if (this_year_profit < 0) {
+			spr = SPR_PROFIT_NEGATIVE;
+		} else if (this_year_profit < 10000 * vehicle_count) {
+			spr = SPR_PROFIT_SOME;
+		} else {
+			spr = SPR_PROFIT_LOT;
+		}
+		DrawSprite(spr, PAL_NONE, x, y);
+	}
+
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
@@ -221,7 +257,7 @@ public:
 				this->tiny_step_height = FONT_HEIGHT_NORMAL + WD_MATRIX_TOP;
 				resize->height = this->tiny_step_height;
 				/* Minimum height is the height of the list widget minus all and default vehicles and a bit for the bottom bar */
-				size->height =  4 * GetVehicleListHeight(this->vli.vtype, this->tiny_step_height) - (this->tiny_step_height > 25 ? 2 : 3) * this->tiny_step_height;
+				size->height =  (4 * GetVehicleListHeight(this->vli.vtype, this->tiny_step_height) - (this->tiny_step_height > 25 ? 2 : 3) * this->tiny_step_height) - 25;
 				break;
 
 			case GRP_WIDGET_ALL_VEHICLES:
@@ -362,14 +398,39 @@ public:
 	{
 		switch (widget) {
 			case GRP_WIDGET_ALL_VEHICLES:
-				DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT - 8, r.top + WD_FRAMERECT_TOP + 1,
+				DrawString(r.left + WD_FRAMERECT_LEFT + 10, r.right - WD_FRAMERECT_RIGHT - 10, r.top + WD_FRAMERECT_TOP + 1,
 						STR_GROUP_ALL_TRAINS + this->vli.vtype, IsAllGroupID(this->vli.index) ? TC_WHITE : TC_BLACK);
+				this->DrawGroupProfitButton(r.left + WD_FRAMERECT_LEFT, r.top + WD_FRAMERECT_TOP + 1, ALL_GROUP, this->vli.vtype);
 				break;
 
 			case GRP_WIDGET_DEFAULT_VEHICLES:
-				DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT - 8, r.top + WD_FRAMERECT_TOP + 1,
+				DrawString(r.left + WD_FRAMERECT_LEFT + 10, r.right - WD_FRAMERECT_RIGHT - 8, r.top + WD_FRAMERECT_TOP + 1,
 						STR_GROUP_DEFAULT_TRAINS + this->vli.vtype, IsDefaultGroupID(this->vli.index) ? TC_WHITE : TC_BLACK);
+				this->DrawGroupProfitButton(r.left + WD_FRAMERECT_LEFT, r.top + WD_FRAMERECT_TOP + 1, DEFAULT_GROUP, this->vli.vtype);
 				break;
+
+			case GRP_WIDGET_GROUP_INFO: {
+				Money this_year = 0;
+				Money last_year = 0;
+
+				for (uint i = 0, vehicle_count = this->vehicles.Length(); i < vehicle_count; i++) {
+					const Vehicle *v = this->vehicles[i];
+
+					assert(v->owner == this->owner);
+
+					if (this->vli.index == ALL_GROUP || v->group_id == this->vli.index) {
+						this_year += v->GetDisplayProfitThisYear();
+						last_year += v->GetDisplayProfitLastYear();
+					}
+				}
+
+				SetDParam(0, this_year);
+				DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT - 8, r.top + WD_FRAMERECT_TOP + 1, STR_GROUP_PROFIT_THIS_YEAR, TC_BLACK);
+				SetDParam(0, last_year);
+				DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT - 8, r.top + WD_FRAMERECT_TOP + FONT_HEIGHT_NORMAL + 2, STR_GROUP_PROFIT_LAST_YEAR, TC_BLACK);
+
+				break;
+			}
 
 			case GRP_WIDGET_LIST_GROUP: {
 				int y1 = r.top + WD_FRAMERECT_TOP + 1;
@@ -381,11 +442,13 @@ public:
 
 					/* draw the selected group in white, else we draw it in black */
 					SetDParam(0, g->index);
-					DrawString(r.left + WD_FRAMERECT_LEFT + 8, r.right - WD_FRAMERECT_RIGHT - 8, y1, STR_GROUP_NAME, (this->vli.index == g->index) ? TC_WHITE : TC_BLACK);
+					DrawString(r.left + WD_FRAMERECT_LEFT + 10, r.right - WD_FRAMERECT_RIGHT - 10, y1, STR_GROUP_NAME, (this->vli.index == g->index) ? TC_WHITE : TC_BLACK);
 
 					/* draw the number of vehicles of the group */
 					SetDParam(0, g->num_vehicle);
 					DrawString(r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, y1 + 1, STR_TINY_COMMA, (this->vli.index == g->index) ? TC_WHITE : TC_BLACK, SA_RIGHT);
+
+					this->DrawGroupProfitButton(r.left + WD_FRAMERECT_LEFT, y1, g->index, this->vli.vtype);
 
 					y1 += this->tiny_step_height;
 				}
@@ -638,7 +701,6 @@ public:
 		if (this->vehicle_sel == vehicle) ResetObjectToPlace();
 	}
 };
-
 
 static WindowDesc _other_group_desc(
 	WDP_AUTO, 460, 246,
