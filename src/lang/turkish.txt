@@ -1423,7 +1423,6 @@ STR_CHEAT_MONEY                                                 :{LTBLUE}Parayı
 STR_CHEAT_CHANGE_COMPANY                                        :{LTBLUE}Oynanan şirket: {ORANGE}{COMMA}
 STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Sihirli buldozer (fabrikaları, silinemeyen nesneleri siler): {ORANGE}{STRING}
 STR_CHEAT_CROSSINGTUNNELS                                       :{LTBLUE}Tüneller kesişebilir: {ORANGE}{STRING}
-STR_CHEAT_BUILD_IN_PAUSE                                        :{LTBLUE}Duraklama zamanında inşaat yap: {ORANGE}{STRING}
 STR_CHEAT_NO_JETCRASH                                           :{LTBLUE}Jetler küçük havalimanlarında (sıklıkla) düşmesin: {ORANGE}{STRING}
 STR_CHEAT_SWITCH_CLIMATE                                        :{LTBLUE}İklimi değiştir: {ORANGE}{STRING}
 STR_CHEAT_SWITCH_CLIMATE_TEMPERATE_LANDSCAPE                    :Ilıman iklim
@@ -1694,7 +1693,7 @@ STR_NETWORK_CONNECTING_SPECIAL_1                                :{BLACK}Oyun bil
 STR_NETWORK_CONNECTING_SPECIAL_2                                :{BLACK}Şirket bilgisi aliniyor..
 ############ End of leave-in-this-order
 STR_NETWORK_CONNECTING_WAITING                                  :{BLACK}{NUM} -> önünde olan oyuncular
-STR_NETWORK_CONNECTING_DOWNLOADING                              :{BLACK}{BYTES} / {BYTES} indirildi
+STR_NETWORK_CONNECTING_DOWNLOADING_2                            :{BLACK}{BYTES} / {BYTES} indirildi
 
 STR_NETWORK_CONNECTION_DISCONNECT                               :{BLACK}Bağlantıyı kes
 

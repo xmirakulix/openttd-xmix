@@ -1089,7 +1089,7 @@ STR_NUM_VERY_LOW                                                :Nagyon kevés
 STR_NUM_LOW                                                     :Kevés
 STR_NUM_NORMAL                                                  :Normál
 STR_NUM_HIGH                                                    :Sok
-STR_NUM_CUSTOM                                                  :Saját
+STR_NUM_CUSTOM                                                  :Egyedi
 STR_NUM_CUSTOM_NUMBER                                           :Egyedi ({NUM})
 
 STR_VARIETY_NONE                                                :Nincs
@@ -1280,6 +1280,11 @@ STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_SHORT              :rövid (31-12-2
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_ISO                :ISO (2008-12-31)
 
 STR_CONFIG_SETTING_PAUSE_ON_NEW_GAME                            :{LTBLUE}Automatikus szünettel kezdés új játék esetén: {ORANGE}{STRING}
+STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL                          :{LTBLUE}Szünetben engedélyezett: {ORANGE}{STRING}
+STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_NO_ACTIONS               :semmilyen cselekvés
+STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_ALL_NON_CONSTRUCTION     :minden ami nem építés
+STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_ALL_NON_LANDSCAPING      :minden ami nem tájrendezés
+STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL_ALL_ACTIONS              :minden cselekvés
 STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS                       :{LTBLUE}Továbbfejlesztett járműlista használata: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS_OFF                   :Kikapcsolva
 STR_CONFIG_SETTING_ADVANCED_VEHICLE_LISTS_OWN                   :Saját vállalat
@@ -1486,7 +1491,6 @@ STR_CHEAT_MONEY                                                 :{LTBLUE}Tőkeem
 STR_CHEAT_CHANGE_COMPANY                                        :{LTBLUE}Irányított vállalat: {ORANGE}{COMMA}
 STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Csodabuldózer (lerombol gazdasági épületeket, mozgathatatlan objektumokat): {ORANGE}{STRING}
 STR_CHEAT_CROSSINGTUNNELS                                       :{LTBLUE}Alagutak keresztezhessék egymást: {ORANGE}{STRING}
-STR_CHEAT_BUILD_IN_PAUSE                                        :{LTBLUE}Építés szünet módban: {ORANGE}{STRING}
 STR_CHEAT_NO_JETCRASH                                           :{LTBLUE}Jet-repülők nem fognak (gyakran) lezuhanni a kis repülőtereken: {ORANGE} {STRING}
 STR_CHEAT_SWITCH_CLIMATE                                        :{LTBLUE}Klíma változtatás: {ORANGE} {STRING}
 STR_CHEAT_SWITCH_CLIMATE_TEMPERATE_LANDSCAPE                    :Mérsékelt táj
@@ -1494,6 +1498,7 @@ STR_CHEAT_SWITCH_CLIMATE_SUB_ARCTIC_LANDSCAPE                   :Szubarktikus t�
 STR_CHEAT_SWITCH_CLIMATE_SUB_TROPICAL_LANDSCAPE                 :Szubtrópusi táj
 STR_CHEAT_SWITCH_CLIMATE_TOYLAND_LANDSCAPE                      :Játékvilág táj
 STR_CHEAT_CHANGE_DATE                                           :{LTBLUE}Dátum módosítás: {ORANGE} {DATE_SHORT}
+STR_CHEAT_CHANGE_DATE_QUERY_CAPT                                :{WHITE}Aktuális év megváltoztatása
 STR_CHEAT_SETUP_PROD                                            :{LTBLUE}A nyersanyagüzemek termelése változtatható: {ORANGE}{STRING}
 
 # Livery window
@@ -1757,7 +1762,8 @@ STR_NETWORK_CONNECTING_SPECIAL_1                                :{BLACK}Játéki
 STR_NETWORK_CONNECTING_SPECIAL_2                                :{BLACK}Vállalat infó lekérése..
 ############ End of leave-in-this-order
 STR_NETWORK_CONNECTING_WAITING                                  :{BLACK}{NUM} kliensre várunk, hogy befejezze
-STR_NETWORK_CONNECTING_DOWNLOADING                              :{BLACK}{BYTES} / {BYTES} lett eddig letöltve
+STR_NETWORK_CONNECTING_DOWNLOADING_1                            :{BLACK}{BYTES} lett eddig letöltve
+STR_NETWORK_CONNECTING_DOWNLOADING_2                            :{BLACK}{BYTES} / {BYTES} lett eddig letöltve
 
 STR_NETWORK_CONNECTION_DISCONNECT                               :{BLACK}Megszakít
 
@@ -3521,6 +3527,7 @@ STR_ERROR_OWNED_BY                                              :{WHITE}... {STR
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}... a terület más vállalaté
 STR_ERROR_NAME_MUST_BE_UNIQUE                                   :{WHITE}A névnek egyedinek kell lennie
 STR_ERROR_GENERIC_OBJECT_IN_THE_WAY                             :{WHITE}...{1:STRING} van az útban
+STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}Szünet közben nem megengedett
 
 # Local authority errors
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}{TOWN} önkormányzata nem engedélyezi

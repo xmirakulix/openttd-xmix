@@ -1422,7 +1422,6 @@ STR_CHEAT_MONEY                                                 :{LTBLUE}Öka pe
 STR_CHEAT_CHANGE_COMPANY                                        :{LTBLUE}Spelar som företag:: {ORANGE}{COMMA}
 STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Magisk Bulldozer (ta bort industrier, oflyttbara objekt etc.): {ORANGE}{STRING}
 STR_CHEAT_CROSSINGTUNNELS                                       :{LTBLUE}Tunnlar kan korsa varandra: {ORANGE}{STRING}
-STR_CHEAT_BUILD_IN_PAUSE                                        :{LTBLUE}Bygga i pause-läge: {ORANGE}{STRING}
 STR_CHEAT_NO_JETCRASH                                           :{LTBLUE}Jetplan kommer inte att störta (frekvent) på små flygplatser: {ORANGE} {STRING}
 STR_CHEAT_SWITCH_CLIMATE                                        :{LTBLUE}Byt klimat: {ORANGE} {STRING}
 STR_CHEAT_SWITCH_CLIMATE_TEMPERATE_LANDSCAPE                    :Tempererat landskap
@@ -1693,7 +1692,7 @@ STR_NETWORK_CONNECTING_SPECIAL_1                                :{BLACK}Hämtar 
 STR_NETWORK_CONNECTING_SPECIAL_2                                :{BLACK}Hämtar företagsinfo..
 ############ End of leave-in-this-order
 STR_NETWORK_CONNECTING_WAITING                                  :{BLACK}{NUM} klient{P "" er} före oss
-STR_NETWORK_CONNECTING_DOWNLOADING                              :{BLACK}{BYTES} / {BYTES} nerladdat hittills
+STR_NETWORK_CONNECTING_DOWNLOADING_2                            :{BLACK}{BYTES} / {BYTES} nerladdat hittills
 
 STR_NETWORK_CONNECTION_DISCONNECT                               :{BLACK}Koppla ifrån
 

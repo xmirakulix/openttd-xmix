@@ -173,7 +173,6 @@ STR_TONS                                                        :{COMMA} tonnu
 STR_LITERS                                                      :{COMMA} litri
 STR_ITEMS                                                       :{COMMA} lietas
 STR_CRATES                                                      :{COMMA} kastes
-STR_GAME_OPTIONS_RESOLUTION_OTHER                               :cita
 
 # Colours, do not shuffle
 STR_COLOUR_DARK_BLUE                                            :Tumši zils
@@ -215,6 +214,7 @@ STR_UNITS_VOLUME_LONG_METRIC                                    :{COMMA} litr{P 
 STR_UNITS_VOLUME_LONG_SI                                        :{COMMA} m³
 
 STR_UNITS_FORCE_SI                                              :{COMMA} kN
+
 
 # Common window strings
 STR_LIST_FILTER_OSKTITLE                                        :{BLACK}Ievadīt filtra stīgu
@@ -920,6 +920,7 @@ STR_GAME_OPTIONS_FULLSCREEN_TOOLTIP                             :{BLACK}Iezīmē
 
 STR_GAME_OPTIONS_RESOLUTION                                     :{BLACK}Ekrāna izšķirtspēja
 STR_GAME_OPTIONS_RESOLUTION_TOOLTIP                             :{BLACK}Ekrāna izšķirtspējas izvēle
+STR_GAME_OPTIONS_RESOLUTION_OTHER                               :cita
 
 STR_GAME_OPTIONS_SCREENSHOT_FORMAT                              :{BLACK}Ekrāna kopijas formāts
 STR_GAME_OPTIONS_SCREENSHOT_FORMAT_TOOLTIP                      :{BLACK}Ekrāna kopijas formāta izvēle
@@ -1286,7 +1287,6 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Oriģinālais {
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(Nav ieteicams)
 
-
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Mainīt iestatījuma vērtību
 
 # Intro window
@@ -1357,7 +1357,6 @@ STR_CHEAT_MONEY                                                 :{LTBLUE}Palieli
 STR_CHEAT_CHANGE_COMPANY                                        :{LTBLUE}Spēlēt kā kompānija: {ORANGE}{COMMA}
 STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Maģiskais buldozers (nojauc industrijas, nenojaucamos): {ORANGE}{STRING}
 STR_CHEAT_CROSSINGTUNNELS                                       :{LTBLUE}Tuneļi drīkst krustoties: {ORANGE}{STRING}
-STR_CHEAT_BUILD_IN_PAUSE                                        :{LTBLUE}Būvniecība pauzes režīmā: {ORANGE}{STRING}
 STR_CHEAT_NO_JETCRASH                                           :{LTBLUE}Reaktīvās lidmašīnas mazajās lidostās neavarēs (bieži): {ORANGE}{STRING}
 STR_CHEAT_SWITCH_CLIMATE                                        :{LTBLUE}Nomainīt klimatu: {ORANGE} {STRING}
 STR_CHEAT_SWITCH_CLIMATE_TEMPERATE_LANDSCAPE                    :Mērenais klimats
@@ -1628,7 +1627,7 @@ STR_NETWORK_CONNECTING_SPECIAL_1                                :{BLACK}Pieņemu
 STR_NETWORK_CONNECTING_SPECIAL_2                                :{BLACK}Pieņemu kompānijas informāciju..
 ############ End of leave-in-this-order
 STR_NETWORK_CONNECTING_WAITING                                  :{BLACK}{NUM} klient{P s i u} tavā priekšā
-STR_NETWORK_CONNECTING_DOWNLOADING                              :{BLACK}{BYTES} / {BYTES} lejuplādēti līdz šim
+STR_NETWORK_CONNECTING_DOWNLOADING_2                            :{BLACK}{BYTES} / {BYTES} lejuplādēti līdz šim
 
 STR_NETWORK_CONNECTION_DISCONNECT                               :{BLACK}Atvienoties
 
@@ -1715,6 +1714,7 @@ STR_NETWORK_ERROR_CLIENT_KICKED                                 :serveris tevi i
 STR_NETWORK_ERROR_CLIENT_CHEATER                                :mēģināja krāpties
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :serveris pilns
 ############ End of leave-in-this-order
+
 
 # Network related errors
 ############ Leave those lines in this order!!
@@ -1985,6 +1985,9 @@ STR_LANDSCAPING_TOOLTIP_RAISE_A_CORNER_OF_LAND                  :{BLACK}Pacelt z
 STR_LANDSCAPING_LEVEL_LAND_TOOLTIP                              :{BLACK}Izlīdzināt zemi
 STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Pirkt zemi vēlākai lietošanai
 
+# Object construction window
+
+
 # Tree planting window (last two for SE only)
 STR_PLANT_TREE_CAPTION                                          :{WHITE}Koki
 STR_PLANT_TREE_TOOLTIP                                          :{BLACK}Izvēlies koka tipu stādīšanai
@@ -2043,6 +2046,8 @@ STR_FUND_INDUSTRY_INDUSTRY_BUILD_COST                           :{BLACK}Izmaksā
 STR_FUND_INDUSTRY_PROSPECT_NEW_INDUSTRY                         :{BLACK}Pētīt
 STR_FUND_INDUSTRY_BUILD_NEW_INDUSTRY                            :{BLACK}Būvēt
 STR_FUND_INDUSTRY_FUND_NEW_INDUSTRY                             :{BLACK}Ieguldīt
+
+# Industry cargoes window
 
 # Land area window
 STR_LAND_AREA_INFORMATION_CAPTION                               :{WHITE}Zemes laukuma informācija
@@ -2287,6 +2292,15 @@ STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Atspējots
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Ievadi NewGRF parametrus
 
+# NewGRF parameters window
+
+# NewGRF inspect window
+
+
+
+# Sprite aligner window
+
+
 # NewGRF (self) generated warnings/errors
 STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Brīdinājums: {SILVER}{STRING}
@@ -2320,6 +2334,8 @@ STR_NEWGRF_DISABLED_WARNING                                     :{WHITE}Trūksto
 STR_NEWGRF_UNPAUSE_WARNING_TITLE                                :{YELLOW}Trūkst GRF fails/i
 STR_NEWGRF_UNPAUSE_WARNING                                      :{WHITE}Atpauzēšana var izraisīt OpenTTD avāriju. Neziņot izstrādātājiem par šo kļudu.{}Vai patiešām vēlies atpauzēt?
 
+# NewGRF status
+
 # NewGRF 'it's broken' warnings
 STR_NEWGRF_BROKEN                                               :{WHITE}NewGRF uzvedība '{0:STRING}' visticamāk notikusi desinhronizācijas vai avārijas dēļ
 STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Tas maina transportlīdzekļa garumu par '{1:ENGINE}' kad tas neatrodas depo ēkā.
@@ -2328,6 +2344,8 @@ STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Vilciens
 STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '{0:STRING}' sniedz nekorektu informāciju.
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}'{1:ENGINE}' kravas pielāgošanas informācija pēc izbūves atšķiras no pārdošanas sarakstā norādītās. Tas var liegt autorenew/-replace pareizi pielāgot kravas!
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' izrasīja bezgalīgu ražošanas izsaukumu ciklu.
+
+# 'User removed essential NewGRFs'-placeholders for stuff without specs.
 
 # Sign list window
 STR_SIGN_LIST_CAPTION                                           :{WHITE}Zīmju saraksts- {COMMA} Zīm{P e es ju}
@@ -2675,6 +2693,7 @@ STR_QUERY_RENAME_AIRCRAFT_TYPE_CAPTION                          :{WHITE}Pārsauk
 
 # Depot window
 
+
 STR_DEPOT_NO_ENGINE                                             :{BLACK}-
 STR_DEPOT_VEHICLE_TOOLTIP                                       :{BLACK}{ENGINE}{STRING}
 STR_DEPOT_VEHICLE_TOOLTIP_CHAIN                                 :{BLACK}{NUM} transportlīdzek{P lis ļi ļu}{STRING}
@@ -2853,6 +2872,8 @@ STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT                         :{LTBLUE}Dodas u
 STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL                     :{LTBLUE}Dodas uz {WAYPOINT}, {VELOCITY}
 
 
+
+# Vehicle stopped/started animations
 
 # Vehicle details
 STR_VEHICLE_DETAILS_CAPTION                                     :{WHITE}{VEHICLE} (Sīkāka informācija)
@@ -3338,6 +3359,7 @@ STR_ERROR_CAN_T_BUILD_ROAD_DEPOT                                :{WHITE}Šeit ne
 STR_ERROR_CAN_T_BUILD_TRAM_DEPOT                                :{WHITE}Šeit nav iespējams uzbūvēt tramvaja depo...
 STR_ERROR_CAN_T_BUILD_SHIP_DEPOT                                :{WHITE}Šeit nevar būvēt ķuģu depo...
 
+
 STR_ERROR_TRAIN_MUST_BE_STOPPED_INSIDE_DEPOT                    :{WHITE}Vilciens ja'apsta'dina kad tas ierodas depo
 STR_ERROR_ROAD_VEHICLE_MUST_BE_STOPPED_INSIDE_DEPOT             :{WHITE}... jābūt apstādinātam depo iekšpusē
 STR_ERROR_SHIP_MUST_BE_STOPPED_INSIDE_DEPOT                     :{WHITE}Kuģim jābūt apstādinātam depo
@@ -3514,6 +3536,8 @@ STR_ERROR_TOO_MANY_SIGNS                                        :{WHITE}... pār
 STR_ERROR_CAN_T_PLACE_SIGN_HERE                                 :{WHITE}Šeit nevar novietot zīmi...
 STR_ERROR_CAN_T_CHANGE_SIGN_NAME                                :{WHITE}Nevar izmainīt zīmes vārdu...
 STR_ERROR_CAN_T_DELETE_SIGN                                     :{WHITE}Nevar dzēst zīmi...
+
+# Translatable comment for OpenTTD's desktop shortcut
 
 ##id 0x2000
 # Town building names
@@ -3904,6 +3928,7 @@ STR_FORMAT_GROUP_NAME                                           :Grupa {COMMA}
 STR_FORMAT_INDUSTRY_NAME                                        :{TOWN} {STRING}
 STR_FORMAT_WAYPOINT_NAME                                        :Kontrolpunkts {TOWN}
 STR_FORMAT_WAYPOINT_NAME_SERIAL                                 :Kontrolpunkts {TOWN} #{COMMA}
+
 
 STR_UNKNOWN_STATION                                             :nezināma stacija
 STR_DEFAULT_SIGN_NAME                                           :Zīme
