@@ -319,7 +319,7 @@ static StringID GenerateStationName(Station *st, TileIndex tile, int width, int 
 					strecpy(buf, ind_t->name, lastof(buf));
 				} else if (grfid == 0) {
 					/* Original town name */
-					GetStringWithArgs(buf, ind_t->townnametype, temp, lastof(buf));
+					GetStringWithArgs(buf, ind_t->townnametype, temp, endof(temp), lastof(buf));
 				} else {
 					/* Newgrf town name */
 					if (GetGRFTownName(grfid) != NULL) {
@@ -327,7 +327,7 @@ static StringID GenerateStationName(Station *st, TileIndex tile, int width, int 
 						GRFTownNameGenerate(buf, ind_t->townnamegrfid, ind_t->townnametype, ind_t->townnameparts, lastof(buf));
 					} else {
 						/* Fallback to english original */
-						GetStringWithArgs(buf, SPECSTR_TOWNNAME_ENGLISH, temp, lastof(buf));
+						GetStringWithArgs(buf, SPECSTR_TOWNNAME_ENGLISH, temp, endof(temp), lastof(buf));
 					}
 				}
 				// End of get town name
