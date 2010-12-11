@@ -331,6 +331,28 @@ enum CommandFlags {
 	CMD_CLIENT_ID = 0x80, ///< set p2 with the ClientID of the sending client.
 };
 
+/** Types of commands we have. */
+enum CommandType {
+	CMDT_LANDSCAPE_CONSTRUCTION, ///< Construction and destruction of objects on the map.
+	CMDT_VEHICLE_CONSTRUCTION,   ///< Construction, modification (incl. refit) and destruction of vehicles.
+	CMDT_MONEY_MANAGEMENT,       ///< Management of money, i.e. loans and shares.
+	CMDT_VEHICLE_MANAGEMENT,     ///< Stopping, starting, sending to depot, turning around, replace orders etc.
+	CMDT_ROUTE_MANAGEMENT,       ///< Modifications to route management (orders, groups, etc).
+	CMDT_OTHER_MANAGEMENT,       ///< Renaming stuff, changing company colours, placing signs, etc.
+	CMDT_COMPANY_SETTING,        ///< Changing settings related to a company.
+	CMDT_SERVER_SETTING,         ///< Pausing/removing companies/server settings.
+
+	CMDT_END,                    ///< Magic end marker.
+};
+
+/** Different command pause levels. */
+enum CommandPauseLevel {
+	CMDPL_NO_ACTIONS,      ///< No user actions may be executed.
+	CMDPL_NO_CONSTRUCTION, ///< No construction actions may be executed.
+	CMDPL_NO_LANDSCAPING,  ///< No landscaping actions may be executed.
+	CMDPL_ALL_ACTIONS,     ///< All actions may be executed.
+};
+
 /**
  * Defines the callback type for all command handler functions.
  *
@@ -361,6 +383,7 @@ struct Command {
 	CommandProc *proc; ///< The procedure to actually executing
 	const char *name;  ///< A human readable name for the procedure
 	byte flags;        ///< The (command) flags to that apply to this command
+	CommandType type;  ///< The type of command.
 };
 
 /**
@@ -382,12 +405,12 @@ typedef void CommandCallback(const CommandCost &result, TileIndex tile, uint32 p
  * Structure for buffering the build command when selecting a station to join.
  */
 struct CommandContainer {
-	TileIndex tile;            ///< tile command being executed on
-	uint32 p1;                 ///< parameter p1
-	uint32 p2;                 ///< parameter p2
-	uint32 cmd;                ///< command being executed
-	CommandCallback *callback; ///< any callback function executed upon successful completion of the command
-	char text[80];             ///< possible text sent for name changes etc
+	TileIndex tile;                  ///< tile command being executed on.
+	uint32 p1;                       ///< parameter p1.
+	uint32 p2;                       ///< parameter p2.
+	uint32 cmd;                      ///< command being executed.
+	CommandCallback *callback;       ///< any callback function executed upon successful completion of the command.
+	char text[32 * MAX_CHAR_LENGTH]; ///< possible text sent for name changes etc, in bytes including '\0'.
 };
 
 #endif /* COMMAND_TYPE_H */

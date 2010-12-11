@@ -49,8 +49,8 @@ TownNameParams::TownNameParams(const Town *t) :
 char *GetTownName(char *buff, const TownNameParams *par, uint32 townnameparts, const char *last)
 {
 	if (par->grfid == 0) {
-		int64 temp[1] = { townnameparts };
-		return GetStringWithArgs(buff, par->type, temp, last);
+		int64 args[1] = { townnameparts };
+		return GetStringWithArgs(buff, par->type, args, endof(args), last);
 	}
 
 	return GRFTownNameGenerate(buff, par->grfid, par->type, townnameparts, last);
@@ -80,13 +80,13 @@ char *GetTownName(char *buff, const Town *t, const char *last)
 bool VerifyTownName(uint32 r, const TownNameParams *par)
 {
 	/* reserve space for extra unicode character and terminating '\0' */
-	char buf1[MAX_LENGTH_TOWN_NAME_BYTES + MAX_CHAR_LENGTH];
-	char buf2[MAX_LENGTH_TOWN_NAME_BYTES + MAX_CHAR_LENGTH];
+	char buf1[(MAX_LENGTH_TOWN_NAME_CHARS + 1) * MAX_CHAR_LENGTH];
+	char buf2[(MAX_LENGTH_TOWN_NAME_CHARS + 1) * MAX_CHAR_LENGTH];
 
 	GetTownName(buf1, par, r, lastof(buf1));
 
 	/* Check size and width */
-	if (strlen(buf1) >= MAX_LENGTH_TOWN_NAME_BYTES) return false;
+	if (Utf8StringLength(buf1) >= MAX_LENGTH_TOWN_NAME_CHARS) return false;
 
 	const Town *t;
 	FOR_ALL_TOWNS(t) {
