@@ -1563,7 +1563,7 @@ CommandCost CmdFoundTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 		if (!VerifyTownName(townnameparts, &par)) return_cmd_error(STR_ERROR_NAME_MUST_BE_UNIQUE);
 	} else {
 		/* If name is not empty, it has to be unique custom name */
-		if (strlen(text) >= MAX_LENGTH_TOWN_NAME_BYTES) return CMD_ERROR;
+		if (Utf8StringLength(text) >= MAX_LENGTH_TOWN_NAME_CHARS) return CMD_ERROR;
 		if (!IsUniqueTownName(text)) return_cmd_error(STR_ERROR_NAME_MUST_BE_UNIQUE);
 	}
 
@@ -1616,7 +1616,7 @@ CommandCost CmdFoundTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 		if (_game_mode != GM_EDITOR) {
 			/* 't' can't be NULL since 'random' is false outside scenedit */
 			assert(!random);
-			char company_name[MAX_LENGTH_COMPANY_NAME_BYTES];
+			char company_name[MAX_LENGTH_COMPANY_NAME_CHARS * MAX_CHAR_LENGTH];
 			SetDParam(0, _current_company);
 			GetString(company_name, STR_COMPANY_NAME, lastof(company_name));
 
@@ -2315,7 +2315,7 @@ CommandCost CmdRenameTown(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 	bool reset = StrEmpty(text);
 
 	if (!reset) {
-		if (strlen(text) >= MAX_LENGTH_TOWN_NAME_BYTES) return CMD_ERROR;
+		if (Utf8StringLength(text) >= MAX_LENGTH_TOWN_NAME_CHARS) return CMD_ERROR;
 		if (!IsUniqueTownName(text)) return_cmd_error(STR_ERROR_NAME_MUST_BE_UNIQUE);
 	}
 
@@ -2486,7 +2486,7 @@ static CommandCost TownActionRoadRebuild(Town *t, DoCommandFlag flags)
 	if (flags & DC_EXEC) {
 		t->road_build_months = 6;
 
-		char company_name[MAX_LENGTH_COMPANY_NAME_BYTES];
+		char company_name[MAX_LENGTH_COMPANY_NAME_CHARS * MAX_CHAR_LENGTH];
 		SetDParam(0, _current_company);
 		GetString(company_name, STR_COMPANY_NAME, lastof(company_name));
 

@@ -271,7 +271,7 @@ private:
 	 */
 	inline const Order *GetNext(const Order *curr) const { return (curr->next == NULL) ? this->GetFirstOrder() : curr->next; }
 
-	StationID GetNextStoppingStation(const Order *next, uint hops) const;
+	StationID GetNextStoppingStation(const Order *next, StationID curr_station, uint hops) const;
 
 	Order *first;                   ///< First order of the order list
 	VehicleOrderID num_orders;      ///< NOSAVE: How many orders there are in the list
@@ -322,7 +322,7 @@ public:
 	 */
 	inline Order *GetLastOrder() const { return this->GetOrderAt(this->num_orders - 1); }
 
-	StationID GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station) const;
+	StationID GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, bool ignore_more_stops = true) const;
 
 	/**
 	 * Get number of orders in the order list.

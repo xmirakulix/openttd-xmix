@@ -320,7 +320,7 @@ static StringID GenerateStationName(Station *st, TileIndex tile, int width, int 
 					strecpy(buf, ind_t->name, lastof(buf));
 				} else if (grfid == 0) {
 					/* Original town name */
-					GetStringWithArgs(buf, ind_t->townnametype, temp, lastof(buf));
+					GetStringWithArgs(buf, ind_t->townnametype, temp, endof(temp), lastof(buf));
 				} else {
 					/* Newgrf town name */
 					if (GetGRFTownName(grfid) != NULL) {
@@ -328,7 +328,7 @@ static StringID GenerateStationName(Station *st, TileIndex tile, int width, int 
 						GRFTownNameGenerate(buf, ind_t->townnamegrfid, ind_t->townnametype, ind_t->townnameparts, lastof(buf));
 					} else {
 						/* Fallback to english original */
-						GetStringWithArgs(buf, SPECSTR_TOWNNAME_ENGLISH, temp, lastof(buf));
+						GetStringWithArgs(buf, SPECSTR_TOWNNAME_ENGLISH, temp, endof(temp), lastof(buf));
 					}
 				}
 				// End of get town name
@@ -3678,7 +3678,7 @@ CommandCost CmdRenameStation(TileIndex tile, DoCommandFlag flags, uint32 p1, uin
 	bool reset = StrEmpty(text);
 
 	if (!reset) {
-		if (strlen(text) >= MAX_LENGTH_STATION_NAME_BYTES) return CMD_ERROR;
+		if (Utf8StringLength(text) >= MAX_LENGTH_STATION_NAME_CHARS) return CMD_ERROR;
 		if (!IsUniqueStationName(text)) return_cmd_error(STR_ERROR_NAME_MUST_BE_UNIQUE);
 	}
 

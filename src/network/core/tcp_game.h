@@ -73,6 +73,7 @@ enum PacketGameType {
 	PACKET_CLIENT_GETMAP,                ///< Client requests the actual map.
 	PACKET_SERVER_WAIT,                  ///< Server tells the client there are some people waiting for the map as well.
 	PACKET_SERVER_MAP_BEGIN,             ///< Server tells the client that it is beginning to send the map.
+	PACKET_SERVER_MAP_SIZE,              ///< Server tells the client what the (compressed) size of the map is.
 	PACKET_SERVER_MAP_DATA,              ///< Server sends bits of the map to the client.
 	PACKET_SERVER_MAP_DONE,              ///< Server tells it has just sent the last bits of the map to the client.
 	PACKET_CLIENT_MAP_OK,                ///< Client tells the server that it received the whole map.
@@ -140,8 +141,8 @@ public:
 	/** Clear the command queue. */
 	~CommandQueue() { this->Free(); }
 	void Append(CommandPacket *p);
-	CommandPacket *Pop();
-	CommandPacket *Peek();
+	CommandPacket *Pop(bool ignore_paused = false);
+	CommandPacket *Peek(bool ignore_paused = false);
 	void Free();
 	/** Get the number of items in the queue. */
 	uint Count() const { return this->count; }
@@ -272,9 +273,14 @@ protected:
 	/**
 	 * Sends that the server will begin with sending the map to the client:
 	 * uint32  Current frame.
-	 * uint32  Size of the map (in bytes).
 	 */
 	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_MAP_BEGIN);
+
+	/**
+	 * Sends the size of the map to the client.
+	 * uint32  Size of the (compressed) map (in bytes).
+	 */
+	DECLARE_GAME_RECEIVE_COMMAND(PACKET_SERVER_MAP_SIZE);
 
 	/**
 	 * Sends the data of the map to the client:

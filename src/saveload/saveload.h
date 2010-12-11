@@ -55,6 +55,8 @@ SaveOrLoadResult SaveOrLoad(const char *filename, int mode, Subdirectory sb, boo
 void WaitTillSaved();
 void DoExitSave();
 
+SaveOrLoadResult SaveWithFilter(struct SaveFilter *writer, bool threaded);
+SaveOrLoadResult LoadWithFilter(struct LoadFilter *reader);
 
 typedef void ChunkSaveLoadProc();
 typedef void AutolengthProc(void *arg);
@@ -546,7 +548,7 @@ extern bool _do_autosave;
  * SL_TRUNK is always the current trunk version.
  */
 enum SaveLoadVersions {
-	SL_TRUNK = 153,
+	SL_TRUNK = 155,
 	SL_RESERVATION = SL_TRUNK + 10,
 	SL_CAPACITIES = SL_TRUNK + 20,
 	SL_COMPONENTS,

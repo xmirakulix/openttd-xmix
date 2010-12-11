@@ -254,24 +254,26 @@ Order *OrderList::GetOrderAt(int index) const
 /**
  * Recursively determine the next deterministic station to stop at.
  * @param next the first order to check
+ * @param curr_station the station the vehicle is just visiting or INVALID_STATION
  * @param hops the number of orders we have already checked.
  * @return the next stoppping station or INVALID_STATION
  */
-StationID OrderList::GetNextStoppingStation(const Order *next, uint hops) const
+StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_station, uint hops) const
 {
 	if (next == NULL || hops > this->GetNumOrders()) {
 		return INVALID_STATION;
 	}
 
 	if (next->GetType() == OT_CONDITIONAL) {
-		StationID skip_to = this->GetNextStoppingStation(this->GetOrderAt(next->GetConditionSkipToOrder()), hops + 1);
-		StationID advance = this->GetNextStoppingStation(this->GetNext(next), hops + 1);
+		StationID skip_to = this->GetNextStoppingStation(this->GetOrderAt(next->GetConditionSkipToOrder()), curr_station, hops + 1);
+		StationID advance = this->GetNextStoppingStation(this->GetNext(next), curr_station, hops + 1);
 		return (skip_to == advance) ? skip_to : INVALID_STATION;
 	}
 
 	if (next->GetType() != OT_GOTO_STATION ||
-			(next->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) != 0) {
-		return GetNextStoppingStation(this->GetNext(next), hops + 1);
+			(next->GetNonStopType() & ONSF_NO_STOP_AT_DESTINATION_STATION) != 0 ||
+			next->GetDestination() == curr_station) {
+		return GetNextStoppingStation(this->GetNext(next), curr_station, hops + 1);
 	}
 
 	return next->GetDestination();
@@ -281,9 +283,10 @@ StationID OrderList::GetNextStoppingStation(const Order *next, uint hops) const
  * Get the next station the vehicle will stop at, if that is deterministic.
  * @param curr_order the ID of the current order
  * @param curr_station the station the vehicle is just visiting or INVALID_STATION
+ * @param ignore_more_stops if set and the next stop is the same as curr_station return the one after it
  * @return The ID of the next station the vehicle will stop at or INVALID_STATION
  */
-StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station) const
+StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station, bool ignore_more_stops) const
 {
 	const Order *curr = this->GetOrderAt(curr_order);
 	if (curr == NULL) {
@@ -297,9 +300,9 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID
 	 */
 	if (curr_station == INVALID_STATION || curr->GetType() != OT_GOTO_STATION ||
 			curr_station != curr->GetDestination()) {
-		return this->GetNextStoppingStation(curr, 0);
+		return this->GetNextStoppingStation(curr, ignore_more_stops ? curr_station : INVALID_STATION, 0);
 	} else {
-		return this->GetNextStoppingStation(this->GetNext(curr), 1);
+		return this->GetNextStoppingStation(this->GetNext(curr), ignore_more_stops ? curr_station : INVALID_STATION, 1);
 	}
 }
 
