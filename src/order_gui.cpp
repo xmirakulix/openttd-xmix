@@ -40,6 +40,7 @@ enum OrderWindowWidgets {
 	ORDER_WIDGET_SCROLLBAR,
 	ORDER_WIDGET_SKIP,
 	ORDER_WIDGET_DELETE,
+	ORDER_WIDGET_STOP_SHARING,
 	ORDER_WIDGET_NON_STOP,
 	ORDER_WIDGET_GOTO,
 	ORDER_WIDGET_FULL_LOAD,
@@ -53,6 +54,7 @@ enum OrderWindowWidgets {
 	ORDER_WIDGET_SEL_TOP_MIDDLE, ///< #NWID_SELECTION widget for middle part of the top row of the 'your train' order window.
 	ORDER_WIDGET_SEL_TOP_RIGHT,  ///< #NWID_SELECTION widget for right part of the top row of the 'your train' order window.
 	ORDER_WIDGET_SEL_TOP_ROW,    ///< #NWID_SELECTION widget for the top row of the 'your non-trains' order window.
+	ORDER_WIDGET_SEL_BOTTOM_MIDDLE, ///< #NWID_SELECTION widget for the middle part of the bottom row of the 'your train' order window.
 	ORDER_WIDGET_SHARED_ORDER_LIST,
 };
 
@@ -121,6 +123,7 @@ static const StringID _order_goto_dropdown[] = {
 	STR_ORDER_GO_TO,
 	STR_ORDER_GO_TO_NEAREST_DEPOT,
 	STR_ORDER_CONDITIONAL,
+	STR_ORDER_SHARE,
 	INVALID_STRING_ID
 };
 
@@ -128,6 +131,7 @@ static const StringID _order_goto_dropdown_aircraft[] = {
 	STR_ORDER_GO_TO,
 	STR_ORDER_GO_TO_NEAREST_HANGAR,
 	STR_ORDER_CONDITIONAL,
+	STR_ORDER_SHARE,
 	INVALID_STRING_ID
 };
 
@@ -436,6 +440,7 @@ private:
 	enum OrderPlaceObjectState {
 		OPOS_GOTO,
 		OPOS_CONDITIONAL,
+		OPOS_SHARE,
 	};
 
 	/** Displayed planes of the #NWID_SELECTION widgets. */
@@ -458,6 +463,10 @@ private:
 		DP_ROW_LOAD        = 0, ///< Display 'load' / 'unload' buttons in the top row of the ship/airplane order window.
 		DP_ROW_DEPOT       = 1, ///< Display 'refit' / 'service' buttons in the top row of the ship/airplane order window.
 		DP_ROW_CONDITIONAL = 2, ///< Display the conditional order buttons in the top row of the ship/airplane order window.
+
+		/* ORDER_WIDGET_SEL_BOTTOM_MIDDLE */
+		DP_BOTTOM_MIDDLE_DELETE       = 0, ///< Display 'delete' in the middle button of the bottom row of the vehicle order window.
+		DP_BOTTOM_MIDDLE_STOP_SHARING = 1, ///< Display 'stop sharing' in the middle button of the bottom row of the vehicle order window.
 	};
 
 	int selected_order;
@@ -575,10 +584,22 @@ private:
 	 */
 	void OrderClick_Conditional(int i)
 	{
-		this->SetWidgetDirty(ORDER_WIDGET_GOTO);
 		this->LowerWidget(ORDER_WIDGET_GOTO);
+		this->SetWidgetDirty(ORDER_WIDGET_GOTO);
 		SetObjectToPlaceWnd(ANIMCURSOR_PICKSTATION, PAL_NONE, HT_RECT, this);
 		this->goto_type = OPOS_CONDITIONAL;
+	}
+
+	/**
+	 * Handle the click on the share button.
+	 * @param i Dummy parameter.
+	 */
+	void OrderClick_Share(int i)
+	{
+		this->LowerWidget(ORDER_WIDGET_GOTO);
+		this->SetWidgetDirty(ORDER_WIDGET_GOTO);
+		SetObjectToPlaceWnd(ANIMCURSOR_PICKSTATION, PAL_NONE, HT_RECT | HT_VEHICLE, this);
+		this->goto_type = OPOS_SHARE;
 	}
 
 	/**
@@ -668,6 +689,31 @@ private:
 
 		if (DoCommandP(this->vehicle->tile, this->vehicle->index, this->OrderGetSel(), CMD_DELETE_ORDER | CMD_MSG(STR_ERROR_CAN_T_DELETE_THIS_ORDER))) {
 			this->selected_order = selected >= this->vehicle->GetNumOrders() ? -1 : selected;
+			this->UpdateButtonState();
+		}
+	}
+
+	/**
+	 * Handle the click on the 'stop sharing' button.
+	 * If 'End of Shared Orders' isn't selected, do nothing. If Ctrl is pressed, call OrderClick_Delete and exit.
+	 * To stop sharing this vehicle order list, we copy the orders of a vehicle that share this order list. That way we
+	 * exit the group of shared vehicles while keeping the same order list.
+	 * @param i Dummy parameter.
+	 */
+	void OrderClick_StopSharing(int i)
+	{
+		/* Don't try to stop sharing orders if 'End of Shared Orders' isn't selected. */
+		if (!this->vehicle->IsOrderListShared() || this->selected_order != this->vehicle->GetNumOrders()) return;
+		/* If Ctrl is pressed, delete the order list as if we clicked the 'Delete' button. */
+		if (_ctrl_pressed) {
+			this->OrderClick_Delete(i);
+			return;
+		}
+
+		/* Get another vehicle that share orders with this vehicle. */
+		Vehicle *other_shared = (this->vehicle->FirstShared() == this->vehicle) ? this->vehicle->NextShared() : this->vehicle->PreviousShared();
+		/* Copy the order list of the other vehicle. */
+		if (DoCommandP(this->vehicle->tile, this->vehicle->index | CO_COPY << 30, other_shared->index, CMD_CLONE_ORDER | CMD_MSG(STR_ERROR_CAN_T_STOP_SHARING_ORDER_LIST))) {
 			this->UpdateButtonState();
 		}
 	}
@@ -823,9 +869,17 @@ public:
 		/* skip */
 		this->SetWidgetDisabledState(ORDER_WIDGET_SKIP, this->vehicle->GetNumOrders() <= 1);
 
-		/* delete */
-		this->SetWidgetDisabledState(ORDER_WIDGET_DELETE,
+		/* delete / stop sharing */
+		NWidgetStacked *delete_sel = this->GetWidget<NWidgetStacked>(ORDER_WIDGET_SEL_BOTTOM_MIDDLE);
+		if (shared_orders && this->selected_order == this->vehicle->GetNumOrders()) {
+			/* The 'End of Shared Orders' order is selected, show the 'stop sharing' button. */
+			delete_sel->SetDisplayedPlane(DP_BOTTOM_MIDDLE_STOP_SHARING);
+		} else {
+			/* The 'End of Shared Orders' order isn't selected, show the 'delete' button. */
+			delete_sel->SetDisplayedPlane(DP_BOTTOM_MIDDLE_DELETE);
+			this->SetWidgetDisabledState(ORDER_WIDGET_DELETE,
 				(uint)this->vehicle->GetNumOrders() + ((shared_orders || this->vehicle->GetNumOrders() != 0) ? 1 : 0) <= (uint)this->selected_order);
+		}
 
 		/* First row. */
 		this->RaiseWidget(ORDER_WIDGET_FULL_LOAD);
@@ -1072,6 +1126,10 @@ public:
 				this->OrderClick_Delete(0);
 				break;
 
+			case ORDER_WIDGET_STOP_SHARING:
+				this->OrderClick_StopSharing(0);
+				break;
+
 			case ORDER_WIDGET_NON_STOP:
 				if (this->GetWidget<NWidgetLeaf>(widget)->ButtonHit(pt)) {
 					this->OrderClick_Nonstop(-1);
@@ -1189,6 +1247,7 @@ public:
 					case 0: this->OrderClick_Goto(0); break;
 					case 1: this->OrderClick_NearestDepot(0); break;
 					case 2: this->OrderClick_Conditional(0); break;
+					case 3: this->OrderClick_Share(0); break;
 					default: NOT_REACHED();
 				}
 				break;
@@ -1225,6 +1284,10 @@ public:
 			case ORDER_WIDGET_DELETE:
 				this->OrderClick_Delete(0);
 				break;
+
+			case ORDER_WIDGET_STOP_SHARING:
+				this->OrderClick_StopSharing(0);
+				break;
 		}
 
 		ResetObjectToPlace();
@@ -1259,13 +1322,16 @@ public:
 
 	virtual void OnVehicleSelect(const Vehicle *v)
 	{
-		/* v is vehicle getting orders. Only copy/clone orders if vehicle doesn't have any orders yet
-		 * obviously if you press CTRL on a non-empty orders vehicle you know what you are doing
+		/* v is vehicle getting orders. Only copy/clone orders if vehicle doesn't have any orders yet.
+		 * We disallow copying orders of other vehicles if we already have at least one order entry
+		 * ourself as it easily copies orders of vehicles within a station when we mean the station.
+		 * Obviously if you press CTRL on a non-empty orders vehicle you know what you are doing
 		 * TODO: give a warning message */
-		if (this->vehicle->GetNumOrders() != 0 && _ctrl_pressed == 0) return;
+		bool share_order = _ctrl_pressed || this->goto_type == OPOS_SHARE;
+		if (this->vehicle->GetNumOrders() != 0 && !share_order) return;
 
-		if (DoCommandP(this->vehicle->tile, this->vehicle->index | (_ctrl_pressed ? CO_SHARE : CO_COPY) << 30, v->index,
-				_ctrl_pressed ? CMD_CLONE_ORDER | CMD_MSG(STR_ERROR_CAN_T_SHARE_ORDER_LIST) : CMD_CLONE_ORDER | CMD_MSG(STR_ERROR_CAN_T_COPY_ORDER_LIST))) {
+		if (DoCommandP(this->vehicle->tile, this->vehicle->index | (share_order ? CO_SHARE : CO_COPY) << 30, v->index,
+				share_order ? CMD_CLONE_ORDER | CMD_MSG(STR_ERROR_CAN_T_SHARE_ORDER_LIST) : CMD_CLONE_ORDER | CMD_MSG(STR_ERROR_CAN_T_COPY_ORDER_LIST))) {
 			this->selected_order = -1;
 			ResetObjectToPlace();
 		}
@@ -1327,7 +1393,7 @@ public:
 	virtual void OnTimeout()
 	{
 		static const int raise_widgets[] = {
-			ORDER_WIDGET_TIMETABLE_VIEW, ORDER_WIDGET_SKIP, ORDER_WIDGET_DELETE, ORDER_WIDGET_REFIT, ORDER_WIDGET_SHARED_ORDER_LIST, WIDGET_LIST_END,
+			ORDER_WIDGET_TIMETABLE_VIEW, ORDER_WIDGET_SKIP, ORDER_WIDGET_DELETE, ORDER_WIDGET_STOP_SHARING, ORDER_WIDGET_REFIT, ORDER_WIDGET_SHARED_ORDER_LIST, WIDGET_LIST_END,
 		};
 
 		/* Unclick all buttons in raise_widgets[]. */
@@ -1407,8 +1473,12 @@ static const NWidgetPart _nested_orders_train_widgets[] = {
 		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
 			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ORDER_WIDGET_SKIP), SetMinimalSize(124, 12), SetFill(1, 0),
 													SetDataTip(STR_ORDERS_SKIP_BUTTON, STR_ORDERS_SKIP_TOOLTIP), SetResize(1, 0),
-			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ORDER_WIDGET_DELETE), SetMinimalSize(124, 12), SetFill(1, 0),
-													SetDataTip(STR_ORDERS_DELETE_BUTTON, STR_ORDERS_DELETE_TOOLTIP), SetResize(1, 0),
+			NWidget(NWID_SELECTION, INVALID_COLOUR, ORDER_WIDGET_SEL_BOTTOM_MIDDLE),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ORDER_WIDGET_DELETE), SetMinimalSize(124, 12), SetFill(1, 0),
+														SetDataTip(STR_ORDERS_DELETE_BUTTON, STR_ORDERS_DELETE_TOOLTIP), SetResize(1, 0),
+				NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ORDER_WIDGET_STOP_SHARING), SetMinimalSize(124, 12), SetFill(1, 0),
+														SetDataTip(STR_ORDERS_STOP_SHARING_BUTTON, STR_ORDERS_STOP_SHARING_TOOLTIP), SetResize(1, 0),
+			EndContainer(),
 			NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_GOTO), SetMinimalSize(124, 12), SetFill(1, 0),
 													SetDataTip(STR_ORDERS_GO_TO_BUTTON, STR_ORDERS_GO_TO_TOOLTIP), SetResize(1, 0),
 		EndContainer(),
@@ -1473,8 +1543,12 @@ static const NWidgetPart _nested_orders_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ORDER_WIDGET_SKIP), SetMinimalSize(124, 12), SetFill(1, 0),
 											SetDataTip(STR_ORDERS_SKIP_BUTTON, STR_ORDERS_SKIP_TOOLTIP), SetResize(1, 0),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ORDER_WIDGET_DELETE), SetMinimalSize(124, 12), SetFill(1, 0),
-											SetDataTip(STR_ORDERS_DELETE_BUTTON, STR_ORDERS_DELETE_TOOLTIP), SetResize(1, 0),
+		NWidget(NWID_SELECTION, INVALID_COLOUR, ORDER_WIDGET_SEL_BOTTOM_MIDDLE),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ORDER_WIDGET_DELETE), SetMinimalSize(124, 12), SetFill(1, 0),
+													SetDataTip(STR_ORDERS_DELETE_BUTTON, STR_ORDERS_DELETE_TOOLTIP), SetResize(1, 0),
+			NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, ORDER_WIDGET_STOP_SHARING), SetMinimalSize(124, 12), SetFill(1, 0),
+													SetDataTip(STR_ORDERS_STOP_SHARING_BUTTON, STR_ORDERS_STOP_SHARING_TOOLTIP), SetResize(1, 0),
+		EndContainer(),
 		NWidget(NWID_BUTTON_DROPDOWN, COLOUR_GREY, ORDER_WIDGET_GOTO), SetMinimalSize(124, 12), SetFill(1, 0),
 											SetDataTip(STR_ORDERS_GO_TO_BUTTON, STR_ORDERS_GO_TO_TOOLTIP), SetResize(1, 0),
 		NWidget(WWT_RESIZEBOX, COLOUR_GREY),
