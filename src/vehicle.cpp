@@ -52,6 +52,7 @@
 #include "vehiclelist.h"
 #include "tunnel_map.h"
 #include "depot_map.h"
+#include "ground_vehicle.hpp"
 
 #include "table/strings.h"
 
@@ -621,6 +622,39 @@ bool Vehicle::IsEngineCountable() const
 		case VEH_ROAD: return RoadVehicle::From(this)->IsRoadVehFront();
 		case VEH_SHIP: return true;
 		default: return false; // Only count company buildable vehicles
+	}
+}
+
+/**
+ * Handle the pathfinding result, especially the lost status.
+ * If the vehicle is now lost and wasn't previously fire an
+ * event to the AIs and a news message to the user. If the
+ * vehicle is not lost anymore remove the news message.
+ * @param path_found Whether the vehicle has a path to its destination.
+ */
+void Vehicle::HandlePathfindingResult(bool path_found)
+{
+	if (path_found) {
+		/* Route found, is the vehicle marked with "lost" flag? */
+		if (!HasBit(this->vehicle_flags, VF_PATHFINDER_LOST)) return;
+
+		/* Clear the flag as the PF's problem was solved. */
+		ClrBit(this->vehicle_flags, VF_PATHFINDER_LOST);
+		/* Delete the news item. */
+		DeleteVehicleNews(this->index, STR_NEWS_VEHICLE_IS_LOST);
+		return;
+	}
+
+	/* Were we already lost? */
+	if (HasBit(this->vehicle_flags, VF_PATHFINDER_LOST)) return;
+
+	/* It is first time the problem occurred, set the "lost" flag. */
+	SetBit(this->vehicle_flags, VF_PATHFINDER_LOST);
+	/* Notify user about the event. */
+	AI::NewEvent(this->owner, new AIEventVehicleLost(this->index));
+	if (_settings_client.gui.lost_vehicle_warn && this->owner == _local_company) {
+		SetDParam(0, this->index);
+		AddVehicleNewsItem(STR_NEWS_VEHICLE_IS_LOST, NS_ADVICE, this->index);
 	}
 }
 
@@ -1631,10 +1665,8 @@ PaletteID GetEnginePalette(EngineID engine_type, CompanyID company)
 
 PaletteID GetVehiclePalette(const Vehicle *v)
 {
-	if (v->type == VEH_TRAIN) {
-		return GetEngineColourMap(v->engine_type, v->owner, Train::From(v)->tcache.first_engine, v);
-	} else if (v->type == VEH_ROAD) {
-		return GetEngineColourMap(v->engine_type, v->owner, RoadVehicle::From(v)->rcache.first_engine, v);
+	if (v->IsGroundVehicle()) {
+		return GetEngineColourMap(v->engine_type, v->owner, v->GetGroundVehicleCache()->first_engine, v);
 	}
 
 	return GetEngineColourMap(v->engine_type, v->owner, INVALID_ENGINE, v);
@@ -1999,7 +2031,7 @@ void Vehicle::ShowVisualEffect() const
 				 * - in Chance16 - the last value is 512 / 2^smoke_amount (max. smoke when 128 = smoke_amount of 2). */
 				int power_weight_effect = 0;
 				if (v->type == VEH_TRAIN) {
-					power_weight_effect = (32 >> (Train::From(this)->acc_cache.cached_power >> 10)) - (32 >> (Train::From(this)->acc_cache.cached_weight >> 9));
+					power_weight_effect = (32 >> (Train::From(this)->gcache.cached_power >> 10)) - (32 >> (Train::From(this)->gcache.cached_weight >> 9));
 				}
 				if (this->cur_speed < (this->vcache.cached_max_speed >> (2 >> _settings_game.vehicle.smoke_amount)) &&
 						Chance16((64 - ((this->cur_speed << 5) / this->vcache.cached_max_speed) + power_weight_effect), (512 >> _settings_game.vehicle.smoke_amount))) {
@@ -2194,4 +2226,34 @@ bool CanVehicleUseStation(const Vehicle *v, const Station *st)
 	if (v->type == VEH_ROAD) return st->GetPrimaryRoadStop(RoadVehicle::From(v)) != NULL;
 
 	return CanVehicleUseStation(v->engine_type, st);
+}
+
+/**
+ * Access the ground vehicle cache of the vehicle.
+ * @pre The vehicle is a #GroundVehicle.
+ * @return #GroundVehicleCache of the vehicle.
+ */
+GroundVehicleCache *Vehicle::GetGroundVehicleCache()
+{
+	assert(this->IsGroundVehicle());
+	if (this->type == VEH_TRAIN) {
+		return &Train::From(this)->gcache;
+	} else {
+		return &RoadVehicle::From(this)->gcache;
+	}
+}
+
+/**
+ * Access the ground vehicle cache of the vehicle.
+ * @pre The vehicle is a #GroundVehicle.
+ * @return #GroundVehicleCache of the vehicle.
+ */
+const GroundVehicleCache *Vehicle::GetGroundVehicleCache() const
+{
+	assert(this->IsGroundVehicle());
+	if (this->type == VEH_TRAIN) {
+		return &Train::From(this)->gcache;
+	} else {
+		return &RoadVehicle::From(this)->gcache;
+	}
 }

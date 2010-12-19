@@ -1025,7 +1025,7 @@ bool AfterLoadGame()
 		}
 
 		FOR_ALL_VEHICLES(v) {
-			if (v->type != VEH_TRAIN && v->type != VEH_ROAD) continue;
+			if (!v->IsGroundVehicle()) continue;
 			if (IsBridgeTile(v->tile)) {
 				DiagDirection dir = GetTunnelBridgeDirection(v->tile);
 
@@ -2389,6 +2389,17 @@ bool AfterLoadGame()
 			} else if (HasBit(rv->state, RVS_IN_DT_ROAD_STOP)) {
 				SB(rv->state, RVS_ENTERED_STOP, 1, loading || rv->frame > RVC_DRIVE_THROUGH_STOP_FRAME);
 			}
+		}
+	}
+
+	if (IsSavegameVersionBefore(156)) {
+		/* The train's pathfinder lost flag got moved. */
+		Train *t;
+		FOR_ALL_TRAINS(t) {
+			if (!HasBit(t->flags, 5)) continue;
+
+			ClrBit(t->flags, 5);
+			SetBit(t->vehicle_flags, VF_PATHFINDER_LOST);
 		}
 	}
 
