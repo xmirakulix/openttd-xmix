@@ -2386,6 +2386,7 @@ CommandCost CmdBuildAirport(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			}
 
 			st->rect.AfterRemoveRect(st, st->airport);
+			st->airport.Clear();
 
 			Town *old_nearest = AirportGetNearestTown(oas, otile);
 			if (old_nearest != nearest) {
