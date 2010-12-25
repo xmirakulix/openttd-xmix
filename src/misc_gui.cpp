@@ -329,20 +329,10 @@ public:
 	}
 };
 
-static void Place_LandInfo(TileIndex tile)
+void ShowLandInfo(TileIndex tile)
 {
 	DeleteWindowById(WC_LAND_INFO, 0);
 	new LandInfoWindow(tile);
-}
-
-void PlaceLandBlockInfo()
-{
-	if (_cursor.sprite == SPR_CURSOR_QUERY) {
-		ResetObjectToPlace();
-	} else {
-		_place_proc = Place_LandInfo;
-		SetObjectToPlace(SPR_CURSOR_QUERY, PAL_NONE, HT_RECT, WC_MAIN_TOOLBAR, 0);
-	}
 }
 
 /** Widgets for the land info window. */
@@ -822,8 +812,9 @@ struct TooltipsWindow : public Window
 	uint64 params[5];                 ///< The string parameters.
 	TooltipCloseCondition close_cond; ///< Condition for closing the window.
 
-	TooltipsWindow(StringID str, uint paramcount, const uint64 params[], TooltipCloseCondition close_tooltip) : Window()
+	TooltipsWindow(Window *parent, StringID str, uint paramcount, const uint64 params[], TooltipCloseCondition close_tooltip) : Window()
 	{
+		this->parent = parent;
 		this->string_id = str;
 		assert_compile(sizeof(this->params[0]) == sizeof(params[0]));
 		assert(paramcount <= lengthof(this->params));
@@ -901,18 +892,19 @@ struct TooltipsWindow : public Window
 
 /**
  * Shows a tooltip
+ * @param parent The window this tooltip is related to.
  * @param str String to be displayed
  * @param paramcount number of params to deal with
  * @param params (optional) up to 5 pieces of additional information that may be added to a tooltip
  * @param use_left_mouse_button close the tooltip when the left (true) or right (false) mousebutton is released
  */
-void GuiShowTooltips(StringID str, uint paramcount, const uint64 params[], TooltipCloseCondition close_tooltip)
+void GuiShowTooltips(Window *parent, StringID str, uint paramcount, const uint64 params[], TooltipCloseCondition close_tooltip)
 {
 	DeleteWindowById(WC_TOOLTIPS, 0);
 
 	if (str == STR_NULL) return;
 
-	new TooltipsWindow(str, paramcount, params, close_tooltip);
+	new TooltipsWindow(parent, str, paramcount, params, close_tooltip);
 }
 
 /* Delete a character at the caret position in a text buf.
@@ -1311,6 +1303,12 @@ struct QueryStringWindow : public QueryStringBaseWindow
 	{
 		GetString(this->edit_str_buf, str, &this->edit_str_buf[max_bytes - 1]);
 		str_validate(this->edit_str_buf, &this->edit_str_buf[max_bytes - 1], false, true);
+
+		/* Make sure the name isn't too long for the text buffer in the number of
+		 * characters (not bytes). max_chars also counts the '\0' characters. */
+		while (Utf8StringLength(this->edit_str_buf) + 1 > max_chars) {
+			*Utf8PrevChar(this->edit_str_buf + strlen(this->edit_str_buf)) = '\0';
+		}
 
 		if ((flags & QSF_ACCEPT_UNCHANGED) == 0) this->orig = strdup(this->edit_str_buf);
 

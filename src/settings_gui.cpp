@@ -430,6 +430,7 @@ struct GameOptionsWindow : Window {
 
 			case GOW_LANG_DROPDOWN: // Change interface language
 				ReadLanguagePack(&_languages[index]);
+				DeleteWindowByClass(WC_QUERY_STRING);
 				CheckForMissingGlyphsInLoadedLanguagePack();
 				UpdateAllVirtCoords();
 				ReInitAllWindows();
@@ -1473,7 +1474,6 @@ static SettingEntry _settings_vehicles_trains[] = {
 	SettingEntry("vehicle.train_acceleration_model"),
 	SettingEntry("vehicle.train_slope_steepness"),
 	SettingEntry("vehicle.mammoth_trains"),
-	SettingEntry("gui.lost_train_warn"),
 	SettingEntry("vehicle.wagon_speed_limits"),
 	SettingEntry("vehicle.disable_elrails"),
 	SettingEntry("vehicle.freight_trains"),
@@ -1491,6 +1491,7 @@ static SettingEntry _settings_vehicles[] = {
 	SettingEntry("gui.new_nonstop"),
 	SettingEntry("gui.order_review_system"),
 	SettingEntry("gui.vehicle_income_warn"),
+	SettingEntry("gui.lost_vehicle_warn"),
 	SettingEntry("vehicle.never_expire_vehicles"),
 	SettingEntry("vehicle.max_trains"),
 	SettingEntry("vehicle.max_roadveh"),

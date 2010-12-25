@@ -549,7 +549,7 @@ STR_TOOLTIP_RESIZE                                              :{BLACK}Наці
 STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW                           :{BLACK}Вялікае/маленькае вакно
 STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST                            :{BLACK}Пракрутка ўверх/уніз
 STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST                            :{BLACK}Пракрутка налева/направа
-STR_TOOLTIP_DEMOLISH_BUILDINGS_ETC                              :{BLACK}Поўная ачыстка квадрата зямлі
+STR_TOOLTIP_DEMOLISH_BUILDINGS_ETC                              :{BLACK}Поўная ачыстка прамавугольнага ўчастка зямлі. Ctrl выбірае вобласьць па дыяганалі
 
 # Query window
 STR_BUTTON_DEFAULT                                              :{BLACK}Па змоўчаньнi
@@ -1115,7 +1115,7 @@ STR_NEWS_ROAD_VEHICLE_IS_WAITING                                :{WHITE}{VEHICLE
 STR_NEWS_SHIP_IS_WAITING                                        :{WHITE}{VEHICLE} чакае ў дэпо
 STR_NEWS_AIRCRAFT_IS_WAITING                                    :{WHITE}{VEHICLE} чакае ў самалётным ангары
 
-# Start of order review system.
+# Start of order review system
 # DON'T ADD OR REMOVE LINES HERE
 STR_NEWS_VEHICLE_HAS_TOO_FEW_ORDERS                             :{WHITE}У ТС «{VEHICLE}» не хапае заданьняў у раскладзе
 STR_NEWS_VEHICLE_HAS_VOID_ORDER                                 :{WHITE}{VEHICLE} не мае заданьняў
@@ -1127,7 +1127,7 @@ STR_NEWS_VEHICLE_IS_GETTING_OLD                                 :{WHITE}{VEHICLE
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD                            :{WHITE}{VEHICLE} цалкам састарэў
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD_AND                        :{WHITE}{VEHICLE} цалкам састарэў і патрабуе безадкладнай замены
 STR_NEWS_TRAIN_IS_STUCK                                         :{WHITE}{VEHICLE} ня можа знайсьці шлях, каб працягнуць рух.
-STR_NEWS_TRAIN_IS_LOST                                          :{WHITE}{VEHICLE} заблудзіў.
+STR_NEWS_VEHICLE_IS_LOST                                        :{WHITE}{VEHICLE} заблудзіў.
 STR_NEWS_VEHICLE_IS_UNPROFITABLE                                :{WHITE}{VEHICLE}: леташні прыбытак склаў {CURRENCY}
 
 STR_NEWS_ORDER_REFIT_FAILED                                     :{WHITE}{VEHICLE} спынены, паколькі пераабсталяваньне не ўдалося
@@ -1462,7 +1462,7 @@ STR_CONFIG_SETTING_DYNAMIC_ENGINES_EXISTING_VEHICLES            :{WHITE}Зьме
 
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :{LTBLUE}Малыя аэрапорты ніколі не састарэюць: {ORANGE}{STRING}
 
-STR_CONFIG_SETTING_WARN_LOST_TRAIN                              :{LTBLUE}Папярэджваць, калі цягнік заблудзіў: {ORANGE}{STRING}
+STR_CONFIG_SETTING_WARN_LOST_VEHICLE                            :{LTBLUE}Папярэджваць, калі ТС згубiўся: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ORDER_REVIEW                                 :{LTBLUE}Праверка заданьняў транспарту: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ORDER_REVIEW_OFF                             :не правяраць
 STR_CONFIG_SETTING_ORDER_REVIEW_EXDEPOT                         :правяраць, акрамя тых, што стаяць
@@ -2406,9 +2406,9 @@ STR_STATION_BUILD_NOISE                                         :{BLACK}Узро
 
 # Landscaping toolbar
 STR_LANDSCAPING_TOOLBAR                                         :{WHITE}Земляныя работы
-STR_LANDSCAPING_TOOLTIP_LOWER_A_CORNER_OF_LAND                  :{BLACK}Панізіць вугал зямлі
-STR_LANDSCAPING_TOOLTIP_RAISE_A_CORNER_OF_LAND                  :{BLACK}Падвысіць вугал зямлі
-STR_LANDSCAPING_LEVEL_LAND_TOOLTIP                              :{BLACK}Выраўнаваць зямлю
+STR_LANDSCAPING_TOOLTIP_LOWER_A_CORNER_OF_LAND                  :{BLACK}Апусціць кут зямлі. Перацягванне апускае першы абраны кут і выраўноўвае выбраную вобласьць да новай вышыні кута. Ctrl выбірае вобласьць па дыяганалі
+STR_LANDSCAPING_TOOLTIP_RAISE_A_CORNER_OF_LAND                  :{BLACK}Падняць кут зямлі. Перацягванне падымае першы абраны кут і выраўноўвае выбраную вобласьць да новай вышыні кута. Ctrl выбірае вобласьць па дыяганалі
+STR_LANDSCAPING_LEVEL_LAND_TOOLTIP                              :{BLACK}Выраўнаваць зямлю да вышыні першага абранага кута. Ctrl выбірае вобласьць па дыяганалі
 STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Выкупіць зямлю для выкарыстаньня ў будучым
 
 # Object construction window
@@ -2846,7 +2846,7 @@ STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF �
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}Інфармацыя аб умяшчальнасьці/пераабсталяваньнi для лякаматыва «{1:ENGINE}» пасля пабудовы адрозніваецца ад зьвестак у сьпісе пакупкі, што можа перашкодзіць функцыі аўтаабнаўленьня/аўтазамены карэктна зрабіць пераабсталяваньне.
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}«{1:STRING}» выклікаў бясконцы цыкл.
 
-# 'User removed essential NewGRFs'-placeholders for stuff without specs.
+# 'User removed essential NewGRFs'-placeholders for stuff without specs
 STR_NEWGRF_INVALID_CARGO                                        :<невядомы груз>
 STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
 STR_NEWGRF_INVALID_CARGO_QUANTITY                               :{COMMA} <невядомага грузу>
@@ -3509,7 +3509,7 @@ STR_ORDERS_CAPTION                                              :{WHITE}{VEHICLE
 STR_ORDERS_TIMETABLE_VIEW                                       :{BLACK}Расклад
 STR_ORDERS_TIMETABLE_VIEW_TOOLTIP                               :{BLACK}Прагляд раскладу руху
 
-STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Паказ сьпісу заданьняў - пстрыкніце для вылучэньня. Калі заціснуць Ctrl - агляд станцыі.
+STR_ORDERS_LIST_TOOLTIP                                         :{BLACK}Сьпіс заданьняў - пстрыкніце заданьне для вылучэньня. Ctrl+пстрычка - агляд станцыі прызначэння.
 STR_ORDER_INDEX                                                 :{COMMA}:{NBSP}
 STR_ORDER_TEXT                                                  :{STRING} {STRING}
 
@@ -3573,12 +3573,16 @@ STR_ORDERS_SKIP_TOOLTIP                                         :{BLACK}Пера
 
 STR_ORDERS_DELETE_BUTTON                                        :{BLACK}Выдалiць
 STR_ORDERS_DELETE_TOOLTIP                                       :{BLACK}Выдаліць вылучанае заданьне
+STR_ORDERS_DELETE_ALL_TOOLTIP                                   :{BLACK}Выдалiць усе заданьнi
+STR_ORDERS_STOP_SHARING_BUTTON                                  :{BLACK}Індывідуальны сьпіс
+STR_ORDERS_STOP_SHARING_TOOLTIP                                 :{BLACK}Зрабіць агульны сьпіс заданьняў індывідуальным. Ctrl+пстрычка ачысьціць сьпіс заданьняў.
 
 STR_ORDERS_GO_TO_BUTTON                                         :{BLACK}Iсьцi
 STR_ORDER_GO_TO_NEAREST_DEPOT                                   :Ісьці да бліжэйшага дэпо
 STR_ORDER_GO_TO_NEAREST_HANGAR                                  :Ісьці да бліжэйшага ангара
 STR_ORDER_CONDITIONAL                                           :Умоўны пераход да заданьня
-STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Уставіць новае заданьне перад вылучаным, або ў канец сьпісу. Ctrl дадае на станцыях «поўная пагрузка любым грузам», на пунктах шляху - «без прыпынку», на дэпо - «абслугоўваньне».
+STR_ORDER_SHARE                                                 :Агульныя заданьнi
+STR_ORDERS_GO_TO_TOOLTIP                                        :{BLACK}Уставіць новае заданьне перад вылучаным, або ў канец сьпісу. Ctrl дадае на станцыях «поўная пагрузка любым грузам», на пунктах шляху - «без прыпынку», на дэпо - «абслугоўваньне». «Агульныя заданьнi» або Ctrl дазваляюць гэтаму транспарту мець агульныя заданьнi з вылучаным транспартам. Пстрычка па транспарце капiруе заданьнi гэтага транспарту.
 STR_ORDERS_GO_TO_DROPDOWN_TOOLTIP                               :{BLACK}Дадаць пашыранае заданьне
 
 STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP                  :{BLACK}Паказаць ўвесь транспарт з агульнымі заданьнямі
@@ -4022,6 +4026,7 @@ STR_ERROR_BRIDGE_TOO_LOW_FOR_TERRAIN                            :{WHITE}Зана
 STR_ERROR_START_AND_END_MUST_BE_IN                              :{WHITE}Пачатак і канец павінны быць на адной лініі
 STR_ERROR_ENDS_OF_BRIDGE_MUST_BOTH                              :{WHITE}... абодва канца моста павінны абапірацца на зямлю
 STR_ERROR_BRIDGE_TOO_LONG                                       :{WHITE}... мост занадта доўгі
+STR_ERROR_BRIDGE_THROUGH_MAP_BORDER                             :{WHITE}Мост выходзіць за межы мапы
 
 # Tunnel related errors
 STR_ERROR_CAN_T_BUILD_TUNNEL_HERE                               :{WHITE}Тут немагчыма пабудаваць тунэль...
@@ -4121,6 +4126,7 @@ STR_ERROR_CAN_T_ADD_ORDER                                       :{WHITE}... ТС
 STR_ERROR_CAN_T_ADD_ORDER_SHARED                                :{WHITE}... ТС з агульным заданьнем ня можа дасягнуць гэтай станцыі
 
 STR_ERROR_CAN_T_SHARE_ORDER_LIST                                :{WHITE}Немагчыма выкарыстоўваць агульны сьпіс заданьняў
+STR_ERROR_CAN_T_STOP_SHARING_ORDER_LIST                         :{WHITE}Немагчыма стварыць індывідуальны сьпіс заданьняў...
 STR_ERROR_CAN_T_COPY_ORDER_LIST                                 :{WHITE}Немагчыма скапіяаваць сьпіс заданьняў
 STR_ERROR_TOO_FAR_FROM_PREVIOUS_DESTINATION                     :{WHITE}... занадта далёка ад папярэдняй кропкі
 

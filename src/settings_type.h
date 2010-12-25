@@ -45,7 +45,7 @@ struct DifficultySettings {
 struct GUISettings {
 	bool   vehicle_speed;                    ///< show vehicle speed
 	bool   sg_full_load_any;                 ///< new full load calculation, any cargo must be full read from pre v93 savegames
-	bool   lost_train_warn;                  ///< if a train can't find its destination, show a warning
+	bool   lost_vehicle_warn;                ///< if a vehicle can't find its destination, show a warning
 	uint8  order_review_system;              ///< perform order reviews on vehicles
 	bool   vehicle_income_warn;              ///< if a vehicle isn't generating income, show a warning
 	bool   status_long_date;                 ///< always show long date in status bar
@@ -113,6 +113,7 @@ struct GUISettings {
 #ifdef ENABLE_NETWORK
 	uint16 network_chat_box_width;           ///< width of the chat box in pixels
 	uint8  network_chat_box_height;          ///< height of the chat box in lines
+	uint16 network_chat_timeout;             ///< timeout of chat messages in seconds
 #endif
 
 	uint8  developer;                        ///< print non-fatal warnings in console (>= 1), copy debug output to console (== 2)

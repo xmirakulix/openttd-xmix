@@ -2,7 +2,7 @@
 
 VPATH=.:./.git/refs/heads/
 
-gitmake-all: cd diaglvl
+gitmake-all: cd
 	touch gitmake-all
 	git checkout patches
 	mv patches/current/* current/
@@ -59,11 +59,7 @@ demands: components
 
 components: capacities
 
-capacities: moving-average
-
-diaglvl: tileiter
-
-tileiter: gitmake 
+capacities: moving-average auto-orders
 
 selfaware-stationcargo: gitmake 
 
@@ -75,6 +71,8 @@ multimap: gitmake
 
 moving-average: gitmake 
 
-push: master gitmake patches cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in diaglvl tileiter texteff cargomap multimap reservation moving-average selfaware-stationcargo
+auto-orders: gitmake
+
+push: master gitmake patches cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in texteff cargomap multimap reservation moving-average selfaware-stationcargo auto-orders
 	git push github $(^F)
 

@@ -801,7 +801,7 @@ STR_NEWS_ROAD_VEHICLE_IS_WAITING                                :{WHITE}{VEHICLE
 STR_NEWS_SHIP_IS_WAITING                                        :{WHITE}{VEHICLE} deposituan itxaroten dago
 STR_NEWS_AIRCRAFT_IS_WAITING                                    :{WHITE}{VEHICLE} hegazkin deposituan itxaroten dago
 
-# Start of order review system.
+# Start of order review system
 # DON'T ADD OR REMOVE LINES HERE
 STR_NEWS_VEHICLE_HAS_TOO_FEW_ORDERS                             :{WHITE}{VEHICLE} agindu gutxiegi ditu zerrendan
 STR_NEWS_VEHICLE_HAS_VOID_ORDER                                 :{WHITE}{VEHICLE} agindu zerrenda hutsik du
@@ -813,7 +813,7 @@ STR_NEWS_VEHICLE_IS_GETTING_OLD                                 :{WHITE}{VEHICLE
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD                            :{WHITE}{VEHICLE} oso zaharra bihurtzen ari da
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD_AND                        :{WHITE}{VEHICLE} oso zaharra bihurtzen ari da eta premiaz ordeztu behar da
 STR_NEWS_TRAIN_IS_STUCK                                         :{WHITE}{VEHICLE} ezin du biderik aurkitu jarraitzeko.
-STR_NEWS_TRAIN_IS_LOST                                          :{WHITE}{VEHICLE} galduta dago.
+STR_NEWS_VEHICLE_IS_LOST                                        :{WHITE}{VEHICLE} galduta dago.
 STR_NEWS_VEHICLE_IS_UNPROFITABLE                                :{WHITE}{VEHICLE}-ren irabazia aurreko urtean {CURRENCY} izan da
 
 STR_NEWS_ORDER_REFIT_FAILED                                     :{WHITE}{VEHICLE} gelditua izan da agindutako eraldaketa tronpatu eta gero
@@ -1550,7 +1550,7 @@ STR_NEWGRF_LIST_MISSING                                         :{RED}Artxiboak 
 # NewGRF 'it's broken' warnings
 
 
-# 'User removed essential NewGRFs'-placeholders for stuff without specs.
+# 'User removed essential NewGRFs'-placeholders for stuff without specs
 STR_NEWGRF_INVALID_CARGO                                        :<karga baliogabea>
 STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
 STR_NEWGRF_INVALID_CARGO_QUANTITY                               :{COMMA} of <baliogabeko zama>
