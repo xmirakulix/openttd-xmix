@@ -14,9 +14,7 @@
 
 #include "window_type.h"
 
-bool IsDraggingDiagonal();
-
 Window *ShowTerraformToolbar(Window *link = NULL);
 Window *ShowEditorTerraformToolbar();
 
-#endif /* GUI_H */
+#endif /* TERRAFORM_GUI_H */

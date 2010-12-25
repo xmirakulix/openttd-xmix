@@ -236,7 +236,7 @@ STR_TOOLTIP_RESIZE                                              :{BLACK}Klik dan
 STR_TOOLTIP_TOGGLE_LARGE_SMALL_WINDOW                           :{BLACK}Tandai besar/kecil ukuran jendela
 STR_TOOLTIP_VSCROLL_BAR_SCROLLS_LIST                            :{BLACK}Batang Geser - Geser daftar ke atas/bawah
 STR_TOOLTIP_HSCROLL_BAR_SCROLLS_LIST                            :{BLACK}Batang Geser - Geser daftar ke kiri/kanan
-STR_TOOLTIP_DEMOLISH_BUILDINGS_ETC                              :{BLACK}Runtuhkan bangunan, dll dalam area kotak
+STR_TOOLTIP_DEMOLISH_BUILDINGS_ETC                              :{BLACK}Runtuhkan bangunan, dll dalam area kotak. Ctrl untuk memilih secara diagonal. Shift untuk menampilkan perkiraan biaya
 
 # Query window
 STR_BUTTON_DEFAULT                                              :{BLACK}Standar
@@ -813,8 +813,8 @@ STR_NEWS_VEHICLE_HAS_INVALID_ENTRY                              :{WHITE}{VEHICLE
 STR_NEWS_VEHICLE_IS_GETTING_OLD                                 :{WHITE}{VEHICLE} mulai menua
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD                            :{WHITE}{VEHICLE} sudah sangat tua
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD_AND                        :{WHITE}{VEHICLE} sudah sangat tua dan perlu segera diganti
-STR_NEWS_TRAIN_IS_STUCK                                         :{WHITE}{VEHICLE} tidak menemukan arah selanjutnya.
-STR_NEWS_VEHICLE_IS_LOST                                        :{WHITE}{VEHICLE} kehilangan arah.
+STR_NEWS_TRAIN_IS_STUCK                                         :{WHITE}{VEHICLE} tidak menemukan arah selanjutnya
+STR_NEWS_VEHICLE_IS_LOST                                        :{WHITE}{VEHICLE} kehilangan arah
 STR_NEWS_VEHICLE_IS_UNPROFITABLE                                :{WHITE}Tahun lalu {VEHICLE} merugi sebanyak {CURRENCY}
 
 STR_NEWS_ORDER_REFIT_FAILED                                     :{WHITE}{VEHICLE} berhenti karena proses ubah kargonya gagal
@@ -829,8 +829,8 @@ STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO_OR_CARGO               :{WHITE}{STATION
 STR_NEWS_STATION_NOW_ACCEPTS_CARGO                              :{WHITE}{STATION} Sekarang menerima {STRING}
 STR_NEWS_STATION_NOW_ACCEPTS_CARGO_AND_CARGO                    :{WHITE}{STATION} Sekarang menerima {STRING} dan {STRING}
 
-STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIGFONT}{BLACK}Penawaran subsidi berakhir:{}{}Jasa transportasi {STRING} dari {STRING} ke {STRING} mulai sekarang tidak lagi mendapat subsidi.
-STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIGFONT}{BLACK}Subsidi selesai:{}{}Jasa transportasi {STRING} dari {STRING} ke {STRING} tidak lagi mendapat subsidi.
+STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIGFONT}{BLACK}Penawaran subsidi berakhir:{}{}Jasa transportasi {STRING} dari {STRING} ke {STRING} mulai sekarang tidak lagi mendapat subsidi
+STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIGFONT}{BLACK}Subsidi berakhir:{}{}Jasa transportasi {STRING} dari {STRING} ke {STRING} tidak lagi mendapat subsidi
 STR_NEWS_SERVICE_SUBSIDY_OFFERED                                :{BIGFONT}{BLACK}Penawaran subsidi:{}{}Jasa transportasi {STRING} pertama dari {STRING} ke {STRING} akan mendapat subsidi selama setahun dari pemkot setempat!
 STR_NEWS_SERVICE_SUBSIDY_AWARDED_HALF                           :{BIGFONT}{BLACK}Subsidi diberikan kepada {STRING}!{}{}Jasa transportasi {STRING} dari {STRING} ke {STRING} akan dibayar 50% lebih banyak hingga tahun depan!
 STR_NEWS_SERVICE_SUBSIDY_AWARDED_DOUBLE                         :{BIGFONT}{BLACK}Subsidi diberikan kepada {STRING}!{}{}Jasa transportasi {STRING} dari {STRING} ke {STRING} akan dibayar dua kali lipat hingga tahun depan!
@@ -1088,7 +1088,7 @@ STR_CONFIG_SETTING_VEHICLESPEED                                 :{LTBLUE}Tampilk
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Ijinkan pembangunan di lereng dan pantai: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Ijinkan pembentukan slop dibawah bangunan, rel, dsb. : {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Ijinkan ukuran jangkauan wilayah lebih realistik: {ORANGE}{STRING}
-STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Ijinkan menggusur lebih banyak jalan/jembatan kota, dsb: {ORANGE}{STRING}
+STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Ijinkan menggusur lebih banyak jalan, jembatan, terowongan milik kota, dsb: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Ijinkan membuat rangkaian gerbong yang sangat panjang: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Banyaknya asap / percikan lokomotif: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Tidak ada
@@ -1210,7 +1210,7 @@ STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_OFF                      :Non-aktifkan
 
 STR_CONFIG_SETTING_LEFT_MOUSE_BTN_SCROLLING                     :{LTBLUE}Geser dgn klik-kiri: {ORANGE}{STRING}
 
-STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES                    :{LTBLUE}Gunakan format tanggal {ORANGE}{STRING}{LTBLUE} untuk berkas simpanan.
+STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES                    :{LTBLUE}Gunakan format tanggal {ORANGE}{STRING}{LTBLUE} untuk berkas simpanan
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_LONG               :panjang (31st Dec 2008)
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_SHORT              :pendek (31-12-2008)
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_ISO                :ISO (2008-12-31)
@@ -1422,7 +1422,7 @@ STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Apa and
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Kode Curang
 STR_CHEATS_TOOLTIP                                              :{BLACK}Daftar cek ini mengindikasikan bahwa anda telah menggunakan kode curang ini sebelumnya
-STR_CHEATS_WARNING                                              :{BLACK}Peringatan! Anda akan mencurangi pemain lainnya. Kecurangan ini akan tetap tercatat selama game berjalan.
+STR_CHEATS_WARNING                                              :{BLACK}Peringatan! Anda akan mencurangi pemain lainnya. Kecurangan ini akan tetap tercatat selama game berjalan
 STR_CHEAT_MONEY                                                 :{LTBLUE}Tambah uang sebanyak {CURRENCY}
 STR_CHEAT_CHANGE_COMPANY                                        :{LTBLUE}Bermain sebagai pemain: {ORANGE}{COMMA}
 STR_CHEAT_EXTRA_DYNAMITE                                        :{LTBLUE}Buldozer ajaib (hancurkan industri, objek tidak bergerak): {ORANGE}{STRING}
@@ -1485,16 +1485,16 @@ STR_FACE_FEMALE_TOOLTIP                                         :{BLACK}Pilih wa
 STR_FACE_NEW_FACE_BUTTON                                        :{BLACK}Ganti Wajah
 STR_FACE_NEW_FACE_TOOLTIP                                       :{BLACK}Buat wajah baru secara acak
 STR_FACE_ADVANCED                                               :{BLACK}Lebih Lanjut
-STR_FACE_ADVANCED_TOOLTIP                                       :{BLACK}Pengaturan Wajah lebih lanjut.
+STR_FACE_ADVANCED_TOOLTIP                                       :{BLACK}Pengaturan wajah lebih lanjut
 STR_FACE_SIMPLE                                                 :{BLACK}Sederhana
-STR_FACE_SIMPLE_TOOLTIP                                         :{BLACK}Memilih wajah secara sederhana.
+STR_FACE_SIMPLE_TOOLTIP                                         :{BLACK}Memilih wajah secara sederhana
 STR_FACE_LOAD                                                   :{BLACK}Ambil simpanan
 STR_FACE_LOAD_TOOLTIP                                           :{BLACK}Baca simpanan wajah terpilih
 STR_FACE_LOAD_DONE                                              :{WHITE}Wajah favorit anda telah dimuat kembali dari berkas config OpenTTD.
 STR_FACE_FACECODE                                               :{BLACK}Wajah pemain no.
 STR_FACE_FACECODE_TOOLTIP                                       :{BLACK}Lihat/ubah nomor wajah pemain
 STR_FACE_FACECODE_CAPTION                                       :{WHITE}Lihat/ubah nomer wajah pemain
-STR_FACE_FACECODE_SET                                           :{WHITE}Kode jumlah wajah baru telah diatur.
+STR_FACE_FACECODE_SET                                           :{WHITE}Nomer kode wajah baru telah diatur
 STR_FACE_FACECODE_ERR                                           :{WHITE}Tidak dapat mengubah nomer wajah pemain - haruslah angka antara 0 dan 4,294,967,295!
 STR_FACE_SAVE                                                   :{BLACK}Simpan
 STR_FACE_SAVE_TOOLTIP                                           :{BLACK}Simpan wajah kesukaanmu
@@ -1687,15 +1687,15 @@ STR_NETWORK_GAME_LOBBY_JOIN_COMPANY_TOOLTIP                     :{BLACK}Membantu
 STR_NETWORK_CONNECTING_CAPTION                                  :{WHITE}Menghubungkan...
 
 ############ Leave those lines in this order!!
-STR_NETWORK_CONNECTING_1                                        :{BLACK}(1/6) Mencoba menghubungkan..
-STR_NETWORK_CONNECTING_2                                        :{BLACK}(2/6) Meminta kewenangan..
-STR_NETWORK_CONNECTING_3                                        :{BLACK}(3/6) Menunggu..
-STR_NETWORK_CONNECTING_4                                        :{BLACK}(4/6) Mengunduh Peta..
-STR_NETWORK_CONNECTING_5                                        :{BLACK}(5/6) Memroses data..
-STR_NETWORK_CONNECTING_6                                        :{BLACK}(6/6) Mendaftarkan..
+STR_NETWORK_CONNECTING_1                                        :{BLACK}(1/6) Menghubungkan...
+STR_NETWORK_CONNECTING_2                                        :{BLACK}(2/6) Meminta kewenangan...
+STR_NETWORK_CONNECTING_3                                        :{BLACK}(3/6) Menunggu...
+STR_NETWORK_CONNECTING_4                                        :{BLACK}(4/6) Mengunduh peta...
+STR_NETWORK_CONNECTING_5                                        :{BLACK}(5/6) Memroses data...
+STR_NETWORK_CONNECTING_6                                        :{BLACK}(6/6) Mendaftarkan...
 
-STR_NETWORK_CONNECTING_SPECIAL_1                                :{BLACK}Mengambil informasi permainan..
-STR_NETWORK_CONNECTING_SPECIAL_2                                :{BLACK}Mengambil informasi perusahaan..
+STR_NETWORK_CONNECTING_SPECIAL_1                                :{BLACK}Mengambil informasi permainan...
+STR_NETWORK_CONNECTING_SPECIAL_2                                :{BLACK}Mengambil informasi perusahaan...
 ############ End of leave-in-this-order
 STR_NETWORK_CONNECTING_WAITING                                  :{BLACK}{NUM} klien di depanmu
 STR_NETWORK_CONNECTING_DOWNLOADING_1                            :{BLACK}{BYTES} sudah terunduh
@@ -1736,7 +1736,7 @@ STR_COMPANY_PASSWORD_MAKE_DEFAULT_TOOLTIP                       :{BLACK}Pergunak
 STR_COMPANY_VIEW_JOIN                                           :{BLACK}Gabung
 STR_COMPANY_VIEW_JOIN_TOOLTIP                                   :{BLACK}Gabung dan bermain sebagai perush. ini
 STR_COMPANY_VIEW_PASSWORD                                       :{BLACK}Kata Sandi
-STR_COMPANY_VIEW_PASSWORD_TOOLTIP                               :{BLACK}Kata Sandi-Melindungi perusahaanmu dari pemakai yang tidak bewenang untuk bergabung.
+STR_COMPANY_VIEW_PASSWORD_TOOLTIP                               :{BLACK}Kata Sandi-Melindungi perusahaanmu dari pemakai yang tidak bewenang untuk bergabung
 STR_COMPANY_VIEW_SET_PASSWORD                                   :{BLACK}Atur Kata Sandi Perusahaan
 
 # Network chat
@@ -1881,15 +1881,15 @@ STR_CONTENT_ERROR_COULD_NOT_EXTRACT                             :{WHITE}Tak dapa
 
 # Transparency settings window
 STR_TRANSPARENCY_CAPTION                                        :{WHITE}Pengaturan Transparasi
-STR_TRANSPARENT_SIGNS_TOOLTIP                                   :{BLACK}Hidup/matikan transparansi sinyal stasiun. CTRL+klik untuk mengunci.
-STR_TRANSPARENT_TREES_TOOLTIP                                   :{BLACK}Hidup/matikan transparansi pepohonan. CTRL+klik untuk mengunci.
-STR_TRANSPARENT_HOUSES_TOOLTIP                                  :{BLACK}Hidup/matikan transparansi perumahan. CTRL+klik untuk mengunci.
-STR_TRANSPARENT_INDUSTRIES_TOOLTIP                              :{BLACK}Hidup/matikan transparansi industri. CTRL+klik untuk mengunci.
-STR_TRANSPARENT_BUILDINGS_TOOLTIP                               :{BLACK}Hidup/matikan transparansi bangunan seperti stasiun, depo dan waypoint. CTRL+klik untuk mengunci.
-STR_TRANSPARENT_BRIDGES_TOOLTIP                                 :{BLACK}Hidup/matikan transparansi jembatan. CTRL+klik untuk mengunci.
-STR_TRANSPARENT_STRUCTURES_TOOLTIP                              :{BLACK}Hidup/matikan transparansi struktur bangunan semacam mercusuar dan antena. CTRL+klik untuk mengunci.
-STR_TRANSPARENT_CATENARY_TOOLTIP                                :{BLACK}Hidup/matikan transparansi katenari CTRL+klik untuk mengunci.
-STR_TRANSPARENT_LOADING_TOOLTIP                                 :{BLACK}Hidup/matikan indikator proses pemuatan kargo. CTRL+klik untuk mengunci.
+STR_TRANSPARENT_SIGNS_TOOLTIP                                   :{BLACK}Hidup/matikan transparansi sinyal stasiun. CTRL+klik untuk mengunci
+STR_TRANSPARENT_TREES_TOOLTIP                                   :{BLACK}Hidup/matikan transparansi pepohonan. CTRL+klik untuk mengunci
+STR_TRANSPARENT_HOUSES_TOOLTIP                                  :{BLACK}Hidup/matikan transparansi perumahan. CTRL+klik untuk mengunci
+STR_TRANSPARENT_INDUSTRIES_TOOLTIP                              :{BLACK}Hidup/matikan transparansi industri. CTRL+klik untuk mengunci
+STR_TRANSPARENT_BUILDINGS_TOOLTIP                               :{BLACK}Hidup/matikan transparansi bangunan seperti stasiun, depo dan waypoint. CTRL+klik untuk mengunci
+STR_TRANSPARENT_BRIDGES_TOOLTIP                                 :{BLACK}Hidup/matikan transparansi jembatan. CTRL+klik untuk mengunci
+STR_TRANSPARENT_STRUCTURES_TOOLTIP                              :{BLACK}Hidup/matikan transparansi struktur bangunan semacam mercusuar dan antena. CTRL+klik untuk mengunci
+STR_TRANSPARENT_CATENARY_TOOLTIP                                :{BLACK}Hidup/matikan transparansi katenari CTRL+klik untuk mengunci
+STR_TRANSPARENT_LOADING_TOOLTIP                                 :{BLACK}Hidup/matikan indikator proses pemuatan kargo. CTRL+klik untuk mengunci
 STR_TRANSPARENT_INVISIBLE_TOOLTIP                               :{BLACK}Atur obyek menjadi sama sekali tidak nampak daripada transparan.
 
 # Base for station construction window(s)
@@ -1952,7 +1952,7 @@ STR_STATION_CLASS_WAYP                                          :Waypoint
 
 # Signal window
 STR_BUILD_SIGNAL_CAPTION                                        :{WHITE}Pemilihan Sinyal
-STR_BUILD_SIGNAL_SEMAPHORE_NORM_TOOLTIP                         :{BLACK}Sinyal Blok (semaphore){}Ini adalah jenis sinyal yang umum, hanya memperbolehkan satu kereta berada pada satu blok yang sama dalam waktu yang sama.
+STR_BUILD_SIGNAL_SEMAPHORE_NORM_TOOLTIP                         :{BLACK}Sinyal Blok (semaphore){}Ini adalah jenis sinyal yang umum, hanya memperbolehkan satu kereta berada pada satu blok yang sama dalam waktu yang sama
 STR_BUILD_SIGNAL_SEMAPHORE_ENTRY_TOOLTIP                        :{BLACK}Sinyal Masuk(semaphore){}Akan berwarna hijau jika ada satu atau lebih Sinyal Keluar yang berwarna hijau pada jalur berikutnya. Jika tidak, akan berwarna merah
 STR_BUILD_SIGNAL_SEMAPHORE_EXIT_TOOLTIP                         :{BLACK}Sinyal Keluar (semaphore){}Cara kerjanya sama dengan Sinyal Blok, akan tetapi penggunaanya lebih ditujukan untuk menghasilkan warna yang benar pada Sinyal Masuk dan Sinyal Kombo
 STR_BUILD_SIGNAL_SEMAPHORE_COMBO_TOOLTIP                        :{BLACK}Sinyal Kombo (semaphore){}Sinyal Kombo berfungsi ganda, sebagai Sinyal Masuk sekaligus Sinyal keluar. Sehingga kita bisa membuat rangkaian sinyal-sinyal
@@ -2069,9 +2069,9 @@ STR_STATION_BUILD_NOISE                                         :{BLACK}Tingkat 
 
 # Landscaping toolbar
 STR_LANDSCAPING_TOOLBAR                                         :{WHITE}Proses Lansekap
-STR_LANDSCAPING_TOOLTIP_LOWER_A_CORNER_OF_LAND                  :{BLACK}Rendahkan sudut area
-STR_LANDSCAPING_TOOLTIP_RAISE_A_CORNER_OF_LAND                  :{BLACK}Naikkan sudut dataran tanah
-STR_LANDSCAPING_LEVEL_LAND_TOOLTIP                              :{BLACK}Permukaan tanah
+STR_LANDSCAPING_TOOLTIP_LOWER_A_CORNER_OF_LAND                  :{BLACK}Turunkan penjuru dataran. Drag untuk menurunkan penjuru pertama dan meratakan area setinggi penjuru yg baru. Ctrl untuk memilih secara diagonal. Shift untuk menampilkan perkiraan biaya
+STR_LANDSCAPING_TOOLTIP_RAISE_A_CORNER_OF_LAND                  :{BLACK}Naikkan penjuru dataran. Drag untuk menaikkan penjuru pertama dan meratakan area setinggi penjuru yg baru. Ctrl untuk memilih secara diagonal. Shift untuk menampilkan perkiraan biaya
+STR_LANDSCAPING_LEVEL_LAND_TOOLTIP                              :{BLACK}Ratakan permukaan setinggi ujung kotak terpilih. Ctrl untuk memilih area secara diagonal. Shift untuk menampilkan perkiraan biaya
 STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Beli tanah untuk digunakan pada masa depan
 
 # Object construction window

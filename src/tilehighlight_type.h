@@ -27,10 +27,11 @@ enum HighLightStyle {
 	HT_LINE      = 0x008, ///< used for autorail highlighting (longer streches), lower bits: direction
 	HT_RAIL      = 0x080, ///< autorail (one piece), lower bits: direction
 	HT_VEHICLE   = 0x100, ///< vehicle is accepted as target as well (bitmask)
-	HT_DRAG_MASK = 0x0F8, ///< masks the drag-type
+	HT_DIAGONAL  = 0x200, ///< Also allow 'diagonal rectangles'. Only usable in combination with #HT_RECT or #HT_POINT.
+	HT_DRAG_MASK = 0x0F8, ///< Mask for the tile drag-type modes.
 
 	/* lower bits (used with HT_LINE and HT_RAIL):
-	 * (see ASCII art in autorail.h for a visual interpretation) */
+	 * (see ASCII art in table/autorail.h for a visual interpretation) */
 	HT_DIR_X  = 0,    ///< X direction
 	HT_DIR_Y  = 1,    ///< Y direction
 	HT_DIR_HU = 2,    ///< horizontal upper
@@ -54,7 +55,6 @@ struct TileHighlightData {
 	Point new_pos;       ///< New value for \a pos; used to determine whether to redraw the selection.
 	Point new_size;      ///< New value for \a size; used to determine whether to redraw the selection.
 	Point new_outersize; ///< New value for \a outersize; used to determine whether to redraw the selection.
-	bool new_diagonal;   ///< New value for \a diagonal; used to determine whether to redraw the selection.
 	byte dirty;          ///< Whether the build station window needs to redraw due to the changed selection.
 
 	Point selstart;      ///< The location where the dragging started.
@@ -62,7 +62,6 @@ struct TileHighlightData {
 	byte sizelimit;      ///< Whether the selection is limited in length, and what the maximum length is.
 
 	HighLightStyle drawstyle;      ///< Lower bits 0-3 are reserved for detailed highlight information.
-	HighLightStyle new_drawstyle;  ///< New value for \a drawstyle; used to determine whether to redraw the selection.
 	HighLightStyle next_drawstyle; ///< Queued, but not yet drawn style.
 
 	HighLightStyle place_mode;     ///< Method which is used to place the selection.
@@ -74,6 +73,8 @@ struct TileHighlightData {
 
 	ViewportPlaceMethod select_method;            ///< The method which governs how tiles are selected.
 	ViewportDragDropSelectionProcess select_proc; ///< The procedure that has to be called when the selection is done.
+
+	bool IsDraggingDiagonal();
 };
 
 #endif /* TILEHIGHLIGHT_TYPE_H */

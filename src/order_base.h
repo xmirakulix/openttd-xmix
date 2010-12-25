@@ -254,6 +254,9 @@ public:
 	void ConvertFromOldSavegame();
 };
 
+void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord);
+void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord);
+
 /**
  * Shared order list linking together the linked list of orders and the list
  *  of vehicles sharing this order list.
@@ -431,4 +434,4 @@ public:
 #define FOR_ALL_ORDER_LISTS_FROM(var, start) FOR_ALL_ITEMS_FROM(OrderList, orderlist_index, var, start)
 #define FOR_ALL_ORDER_LISTS(var) FOR_ALL_ORDER_LISTS_FROM(var, 0)
 
-#endif /* ORDER_H */
+#endif /* ORDER_BASE_H */
