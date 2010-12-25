@@ -353,16 +353,21 @@ static void ShipArrivesAt(const Vehicle *v, Station *st)
  * reverse. The tile given is the tile we are about to enter, enterdir is the
  * direction in which we are entering the tile
  */
-static Track ChooseShipTrack(const Ship *v, TileIndex tile, DiagDirection enterdir, TrackBits tracks)
+static Track ChooseShipTrack(Ship *v, TileIndex tile, DiagDirection enterdir, TrackBits tracks)
 {
 	assert(IsValidDiagDirection(enterdir));
 
+	bool path_found = true;
+	Track track;
 	switch (_settings_game.pf.pathfinder_for_ships) {
-		case VPF_OPF: return OPFShipChooseTrack(v, tile, enterdir, tracks);
-		case VPF_NPF: return NPFShipChooseTrack(v, tile, enterdir, tracks);
-		case VPF_YAPF: return YapfShipChooseTrack(v, tile, enterdir, tracks);
+		case VPF_OPF: track = OPFShipChooseTrack(v, tile, enterdir, tracks, path_found); break;
+		case VPF_NPF: track = NPFShipChooseTrack(v, tile, enterdir, tracks, path_found); break;
+		case VPF_YAPF: track = YapfShipChooseTrack(v, tile, enterdir, tracks, path_found); break;
 		default: NOT_REACHED();
 	}
+
+	v->HandlePathfindingResult(path_found);
+	return track;
 }
 
 static const Direction _new_vehicle_direction_table[] = {
@@ -488,14 +493,14 @@ static void ShipController(Ship *v)
 									return;
 								}
 							} else if (v->current_order.IsType(OT_GOTO_STATION)) {
+								v->last_station_visited = v->current_order.GetDestination();
 
 								/* Process station in the orderlist. */
 								Station *st = Station::Get(v->current_order.GetDestination());
 								if (st->facilities & FACIL_DOCK) { // ugly, ugly workaround for problem with ships able to drop off cargo at wrong stations
 									ShipArrivesAt(v, st);
-									v->BeginLoading(v->current_order.GetDestination());
+									v->BeginLoading();
 								} else { // leave stations without docks right aways
-									v->last_station_visited = v->current_order.GetDestination();
 									v->current_order.MakeLeaveStation();
 									v->IncrementOrderIndex();
 								}

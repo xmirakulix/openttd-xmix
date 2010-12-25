@@ -803,7 +803,7 @@ STR_NEWS_ROAD_VEHICLE_IS_WAITING                                :{WHITE}{VEHICLE
 STR_NEWS_SHIP_IS_WAITING                                        :{WHITE}{VEHICLE} está a aguardar no depósito
 STR_NEWS_AIRCRAFT_IS_WAITING                                    :{WHITE}{VEHICLE} está a aguardar no hangar
 
-# Start of order review system.
+# Start of order review system
 # DON'T ADD OR REMOVE LINES HERE
 STR_NEWS_VEHICLE_HAS_TOO_FEW_ORDERS                             :{WHITE}{VEHICLE} tem poucas ordens no horário
 STR_NEWS_VEHICLE_HAS_VOID_ORDER                                 :{WHITE}{VEHICLE} tem uma ordem nula
@@ -815,7 +815,7 @@ STR_NEWS_VEHICLE_IS_GETTING_OLD                                 :{WHITE}{VEHICLE
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD                            :{WHITE}{VEHICLE} está a ficar muito velho
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD_AND                        :{WHITE}{VEHICLE} está a ficar muito velho e urgentemente necessita de substituição
 STR_NEWS_TRAIN_IS_STUCK                                         :{WHITE}{VEHICLE} não consegue encontrar um caminho para continuar
-STR_NEWS_TRAIN_IS_LOST                                          :{WHITE}{VEHICLE} está perdido
+STR_NEWS_VEHICLE_IS_LOST                                        :{WHITE}{VEHICLE} está perdido
 STR_NEWS_VEHICLE_IS_UNPROFITABLE                                :{WHITE}{VEHICLE} teve um lucro de {CURRENCY} no ano passado
 
 STR_NEWS_ORDER_REFIT_FAILED                                     :{WHITE}{VEHICLE} parou porque a ordem de adaptação falhou
@@ -1146,7 +1146,6 @@ STR_CONFIG_SETTING_DYNAMIC_ENGINES_EXISTING_VEHICLES            :{WHITE}Não é 
 
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :{LTBLUE}Aeroportos nunca expiram: {ORANGE}{STRING}
 
-STR_CONFIG_SETTING_WARN_LOST_TRAIN                              :{LTBLUE}Alertar em caso de perda do comboio: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ORDER_REVIEW                                 :{LTBLUE}Analisar ordens dos veículos: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ORDER_REVIEW_OFF                             :Não
 STR_CONFIG_SETTING_ORDER_REVIEW_EXDEPOT                         :Sim, mas excluir veículos parados
@@ -2503,7 +2502,7 @@ STR_NEWGRF_BUGGY                                                :{WHITE}NewGRF '
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}A informação de carga/adaptação do modelo de veículo '{1:ENGINE}' difere da que consta na lista de veículos depois de adquirido. Isto poderá causar problemas ao adaptar quando automaticamente renovado/substituído.
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' causou um loop infinito no callback de produção.
 
-# 'User removed essential NewGRFs'-placeholders for stuff without specs.
+# 'User removed essential NewGRFs'-placeholders for stuff without specs
 STR_NEWGRF_INVALID_CARGO                                        :<mercadoria inválida>
 STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
 STR_NEWGRF_INVALID_CARGO_QUANTITY                               :{COMMA} de <mercadoria inválida>

@@ -44,6 +44,7 @@ enum VehicleFlags {
 	VF_AUTOFILL_TIMETABLE,      ///< Whether the vehicle should fill in the timetable automatically.
 	VF_AUTOFILL_PRES_WAIT_TIME, ///< Whether non-destructive auto-fill should preserve waiting times
 	VF_STOP_LOADING,            ///< Don't load anymore during the next load cycle.
+	VF_PATHFINDER_LOST,         ///< Vehicle's pathfinder is lost.
 };
 
 /** Bit numbers used to indicate which of the #NewGRFCache values are valid. */
@@ -97,6 +98,7 @@ extern VehiclePool _vehicle_pool;
 
 /* Some declarations of functions, so we can make them friendly */
 struct SaveLoad;
+struct GroundVehicleCache;
 extern const SaveLoad *GetVehicleDescription(VehicleType vt);
 struct LoadgameState;
 extern bool LoadOldVehicle(LoadgameState *ls, int num);
@@ -238,9 +240,12 @@ public:
 	/** We want to 'destruct' the right class. */
 	virtual ~Vehicle();
 
-	void BeginLoading(StationID curr_station_id);
+	void BeginLoading();
 	void CancelReservation(StationID next, Station *st);
 	void LeaveStation();
+
+	GroundVehicleCache *GetGroundVehicleCache();
+	const GroundVehicleCache *GetGroundVehicleCache() const;
 
 	/**
 	 * Handle the loading of the vehicle; when not it skips through dummy
@@ -360,6 +365,15 @@ public:
 		for (Vehicle *u = this; u != NULL; u = u->Next()) {
 			u->InvalidateNewGRFCache();
 		}
+	}
+
+	/**
+	 * Check if the vehicle is a ground vehicle.
+	 * @return True iff the vehicle is a train or a road vehicle.
+	 */
+	FORCEINLINE bool IsGroundVehicle() const
+	{
+		return this->type == VEH_TRAIN || this->type == VEH_ROAD;
 	}
 
 	/**
@@ -652,6 +666,8 @@ public:
 		return (this->orders.list == NULL) ? NULL : this->orders.list->GetOrderAt(index);
 	}
 
+	Order *GetNextManualOrder(int index) const;
+
 	/**
 	 * Returns the last order of a vehicle, or NULL if it doesn't exists
 	 * @return last order of a vehicle, if available
@@ -662,6 +678,8 @@ public:
 	}
 
 	bool IsEngineCountable() const;
+	bool HasDepotOrder() const;
+	void HandlePathfindingResult(bool path_found);
 };
 
 #define FOR_ALL_VEHICLES_FROM(var, start) FOR_ALL_ITEMS_FROM(Vehicle, vehicle_index, var, start)

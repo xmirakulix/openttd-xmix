@@ -87,6 +87,15 @@ struct Engine : EnginePool::PoolItem<&_engine_pool> {
 	uint GetDisplayWeight() const;
 	uint GetDisplayMaxTractiveEffort() const;
 	Date GetLifeLengthInDays() const;
+
+	/**
+	 * Check if the engine is a ground vehicle.
+	 * @return True iff the engine is a train or a road vehicle.
+	 */
+	FORCEINLINE bool IsGroundVehicle() const
+	{
+		return this->type == VEH_TRAIN || this->type == VEH_ROAD;
+	}
 };
 
 struct EngineIDMapping {
@@ -139,4 +148,4 @@ static inline const AircraftVehicleInfo *AircraftVehInfo(EngineID e)
 	return &Engine::Get(e)->u.air;
 }
 
-#endif /* ENGINE_TYPE_H */
+#endif /* ENGINE_BASE_H */

@@ -297,13 +297,13 @@ STR_PRESIDENT_NAME_MANAGER                                      :{BLACK}{PRESIDE
 
 
 
-# Start of order review system.
+# Start of order review system
 # DON'T ADD OR REMOVE LINES HERE
 # end of order system
 
 STR_NEWS_VEHICLE_IS_GETTING_OLD                                 :{WHITE}{VEHICLE} जुनी होत आहे
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD                            :{WHITE}{VEHICLE} खूप जुनी होत आहे
-STR_NEWS_TRAIN_IS_LOST                                          :{WHITE}{VEHICLE} हरवली आहे
+STR_NEWS_VEHICLE_IS_LOST                                        :{WHITE}{VEHICLE} हरवली आहे
 
 
 STR_NEWS_NEW_VEHICLE_TYPE                                       :{BIGFONT}{BLACK}{ENGINE}
@@ -736,7 +736,7 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 # NewGRF 'it's broken' warnings
 
 
-# 'User removed essential NewGRFs'-placeholders for stuff without specs.
+# 'User removed essential NewGRFs'-placeholders for stuff without specs
 STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
 
 # Sign list window

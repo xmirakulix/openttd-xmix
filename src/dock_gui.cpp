@@ -28,6 +28,7 @@
 #include "company_base.h"
 #include "station_type.h"
 #include "hotkeys.h"
+#include "bridge.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -51,50 +52,42 @@ void CcBuildCanal(const CommandCost &result, TileIndex tile, uint32 p1, uint32 p
 }
 
 
-static void PlaceDocks_Dock(TileIndex tile)
+/**
+ * Gets the other end of the aqueduct, if possible.
+ * @param tile_from     The begin tile for the aqueduct.
+ * @param [out] tile_to The tile till where to show a selection for the aqueduct.
+ * @return The other end of the aqueduct, or otherwise a tile in line with the aqueduct to cause the right error message.
+ */
+static TileIndex GetOtherAqueductEnd(TileIndex tile_from, TileIndex *tile_to = NULL)
 {
-	uint32 p2 = (uint32)INVALID_STATION << 16; // no station to join
+	uint z;
+	DiagDirection dir = GetInclinedSlopeDirection(GetTileSlope(tile_from, &z));
 
-	/* tile is always the land tile, so need to evaluate _thd.pos */
-	CommandContainer cmdcont = { tile, _ctrl_pressed, p2, CMD_BUILD_DOCK | CMD_MSG(STR_ERROR_CAN_T_BUILD_DOCK_HERE), CcBuildDocks, "" };
+	/* If the direction isn't right, just return the next tile so the command
+	 * complains about the wrong slope instead of the ends not matching up.
+	 * Make sure the coordinate is always a valid tile within the map, so we
+	 * don't go "off" the map. That would cause the wrong error message. */
+	if (!IsValidDiagDirection(dir)) return TILE_ADDXY(tile_from, TileX(tile_from) > 2 ? -1 : 1, 0);
 
-	/* Determine the watery part of the dock. */
-	DiagDirection dir = GetInclinedSlopeDirection(GetTileSlope(tile, NULL));
-	TileIndex tile_to = (dir != INVALID_DIAGDIR ? TileAddByDiagDir(tile, ReverseDiagDir(dir)) : tile);
+	/* Direction the aqueduct is built to. */
+	TileIndexDiff offset = TileOffsByDiagDir(ReverseDiagDir(dir));
+	/* The maximum length of the aqueduct. */
+	int max_length = min(_settings_game.construction.longbridges ? MAX_BRIDGE_LENGTH_LONGBRIDGES : MAX_BRIDGE_LENGTH, DistanceFromEdgeDir(tile_from, ReverseDiagDir(dir)) - 1);
 
-	ShowSelectStationIfNeeded(cmdcont, TileArea(tile, tile_to));
+	TileIndex endtile = tile_from;
+	for (int length = 0; IsValidTile(endtile) && TileX(endtile) != 0 && TileY(endtile) != 0; length++) {
+		endtile = TILE_ADD(endtile, offset);
+
+		if (length > max_length) break;
+
+		if (GetTileMaxZ(endtile) > z) {
+			if (tile_to != NULL) *tile_to = endtile;
+			break;
+		}
+	}
+
+	return endtile;
 }
-
-static void PlaceDocks_Depot(TileIndex tile)
-{
-	DoCommandP(tile, _ship_depot_direction, 0, CMD_BUILD_SHIP_DEPOT | CMD_MSG(STR_ERROR_CAN_T_BUILD_SHIP_DEPOT), CcBuildDocks);
-}
-
-static void PlaceDocks_Buoy(TileIndex tile)
-{
-	DoCommandP(tile, 0, 0, CMD_BUILD_BUOY | CMD_MSG(STR_ERROR_CAN_T_POSITION_BUOY_HERE), CcBuildDocks);
-}
-
-static void PlaceDocks_BuildCanal(TileIndex tile)
-{
-	VpStartPlaceSizing(tile, (_game_mode == GM_EDITOR) ? VPM_X_AND_Y : VPM_X_OR_Y, DDSP_CREATE_WATER);
-}
-
-static void PlaceDocks_BuildLock(TileIndex tile)
-{
-	DoCommandP(tile, 0, 0, CMD_BUILD_LOCK | CMD_MSG(STR_ERROR_CAN_T_BUILD_LOCKS), CcBuildDocks);
-}
-
-static void PlaceDocks_BuildRiver(TileIndex tile)
-{
-	VpStartPlaceSizing(tile, VPM_X_AND_Y, DDSP_CREATE_RIVER);
-}
-
-static void PlaceDocks_Aqueduct(TileIndex tile)
-{
-	VpStartPlaceSizing(tile, VPM_X_OR_Y, DDSP_BUILD_BRIDGE);
-}
-
 
 /** Enum referring to the widgets of the build dock toolbar */
 enum DockToolbarWidgets {
@@ -110,96 +103,7 @@ enum DockToolbarWidgets {
 	DTW_END,                       ///< End of toolbar widgets
 };
 
-
-/**
-  * Handle a click in the build canal widget.
-  * @param w #Window in which the widget was clicked.
-  */
-static void BuildDocksClick_Canal(Window *w)
-{
-	HandlePlacePushButton(w, DTW_CANAL, SPR_CURSOR_CANAL, HT_RECT, PlaceDocks_BuildCanal);
-}
-
-/**
-  * Handle a click in the build lock widget.
-  * @param w #Window in which the widget was clicked.
-  */
-static void BuildDocksClick_Lock(Window *w)
-{
-	HandlePlacePushButton(w, DTW_LOCK, SPR_CURSOR_LOCK, HT_SPECIAL, PlaceDocks_BuildLock);
-}
-
-/**
-  * Handle a click in the demolish widget.
-  * @param w #Window in which the widget was clicked.
-  */
-static void BuildDocksClick_Demolish(Window *w)
-{
-	HandlePlacePushButton(w, DTW_DEMOLISH, ANIMCURSOR_DEMOLISH, HT_RECT, PlaceProc_DemolishArea);
-}
-
-/**
-  * Handle a click in the build ship depot widget.
-  * @param w #Window in which the widget was clicked.
-  */
-static void BuildDocksClick_Depot(Window *w)
-{
-	if (!CanBuildVehicleInfrastructure(VEH_SHIP)) return;
-	if (HandlePlacePushButton(w, DTW_DEPOT, SPR_CURSOR_SHIP_DEPOT, HT_RECT, PlaceDocks_Depot)) ShowBuildDocksDepotPicker(w);
-}
-
-/**
-  * Handle a click in the build dock widget.
-  * @param w #Window in which the widget was clicked.
-  */
-static void BuildDocksClick_Dock(Window *w)
-{
-	if (!CanBuildVehicleInfrastructure(VEH_SHIP)) return;
-	if (HandlePlacePushButton(w, DTW_STATION, SPR_CURSOR_DOCK, HT_SPECIAL, PlaceDocks_Dock)) ShowBuildDockStationPicker(w);
-}
-
-/**
-  * Handle a click in the build buoy widget.
-  * @param w #Window in which the widget was clicked.
-  */
-static void BuildDocksClick_Buoy(Window *w)
-{
-	if (!CanBuildVehicleInfrastructure(VEH_SHIP)) return;
-	HandlePlacePushButton(w, DTW_BUOY, SPR_CURSOR_BOUY, HT_RECT, PlaceDocks_Buoy);
-}
-
-/**
-  * Handle a click in the create river widget.
-  * @param w #Window in which the widget was clicked.
-  */
-static void BuildDocksClick_River(Window *w)
-{
-	if (_game_mode != GM_EDITOR) return;
-	HandlePlacePushButton(w, DTW_RIVER, SPR_CURSOR_RIVER, HT_RECT, PlaceDocks_BuildRiver);
-}
-
-/**
-  * Handle a click in the build aqueduct widget.
-  * @param w #Window in which the widget was clicked.
-  */
-static void BuildDocksClick_Aqueduct(Window *w)
-{
-	HandlePlacePushButton(w, DTW_BUILD_AQUEDUCT, SPR_CURSOR_AQUEDUCT, HT_RECT, PlaceDocks_Aqueduct);
-}
-
-
-typedef void OnButtonClick(Window *w);
-static OnButtonClick * const _build_docks_button_proc[] = {
-	BuildDocksClick_Canal,
-	BuildDocksClick_Lock,
-	BuildDocksClick_Demolish,
-	BuildDocksClick_Depot,
-	BuildDocksClick_Dock,
-	BuildDocksClick_Buoy,
-	BuildDocksClick_River,
-	BuildDocksClick_Aqueduct
-};
-
+/** Toolbar window for constructing water infra structure. */
 struct BuildDocksToolbarWindow : Window {
 	DockToolbarWidgets last_clicked_widget; ///< Contains the last widget that has been clicked on this toolbar.
 
@@ -228,7 +132,45 @@ struct BuildDocksToolbarWindow : Window {
 	virtual void OnClick(Point pt, int widget, int click_count)
 	{
 		this->last_clicked_widget = (DockToolbarWidgets)widget;
-		if (widget >= DTW_BUTTONS_BEGIN) _build_docks_button_proc[widget - DTW_BUTTONS_BEGIN](this);
+		switch (widget) {
+			case DTW_CANAL: // Build canal button
+				HandlePlacePushButton(this, DTW_CANAL, SPR_CURSOR_CANAL, HT_RECT);
+				break;
+
+			case DTW_LOCK: // Build lock button
+				HandlePlacePushButton(this, DTW_LOCK, SPR_CURSOR_LOCK, HT_SPECIAL);
+				break;
+
+			case DTW_DEMOLISH: // Demolish aka dynamite button
+				HandlePlacePushButton(this, DTW_DEMOLISH, ANIMCURSOR_DEMOLISH, HT_RECT | HT_DIAGONAL);
+				break;
+
+			case DTW_DEPOT: // Build depot button
+				if (!CanBuildVehicleInfrastructure(VEH_SHIP)) return;
+				if (HandlePlacePushButton(this, DTW_DEPOT, SPR_CURSOR_SHIP_DEPOT, HT_RECT)) ShowBuildDocksDepotPicker(this);
+				break;
+
+			case DTW_STATION: // Build station button
+				if (!CanBuildVehicleInfrastructure(VEH_SHIP)) return;
+				if (HandlePlacePushButton(this, DTW_STATION, SPR_CURSOR_DOCK, HT_SPECIAL)) ShowBuildDockStationPicker(this);
+				break;
+
+			case DTW_BUOY: // Build buoy button
+				if (!CanBuildVehicleInfrastructure(VEH_SHIP)) return;
+				HandlePlacePushButton(this, DTW_BUOY, SPR_CURSOR_BOUY, HT_RECT);
+				break;
+
+			case DTW_RIVER: // Build river button (in scenario editor)
+				if (_game_mode != GM_EDITOR) return;
+				HandlePlacePushButton(this, DTW_RIVER, SPR_CURSOR_RIVER, HT_RECT);
+				break;
+
+			case DTW_BUILD_AQUEDUCT: // Build aqueduct button
+				HandlePlacePushButton(this, DTW_BUILD_AQUEDUCT, SPR_CURSOR_AQUEDUCT, HT_SPECIAL);
+				break;
+
+			default: break;
+		}
 	}
 
 	virtual EventState OnKeyPress(uint16 key, uint16 keycode)
@@ -241,7 +183,51 @@ struct BuildDocksToolbarWindow : Window {
 
 	virtual void OnPlaceObject(Point pt, TileIndex tile)
 	{
-		_place_proc(tile);
+		switch (this->last_clicked_widget) {
+			case DTW_CANAL: // Build canal button
+				VpStartPlaceSizing(tile, (_game_mode == GM_EDITOR) ? VPM_X_AND_Y : VPM_X_OR_Y, DDSP_CREATE_WATER);
+				break;
+
+			case DTW_LOCK: // Build lock button
+				DoCommandP(tile, 0, 0, CMD_BUILD_LOCK | CMD_MSG(STR_ERROR_CAN_T_BUILD_LOCKS), CcBuildDocks);
+				break;
+
+			case DTW_DEMOLISH: // Demolish aka dynamite button
+				PlaceProc_DemolishArea(tile);
+				break;
+
+			case DTW_DEPOT: // Build depot button
+				DoCommandP(tile, _ship_depot_direction, 0, CMD_BUILD_SHIP_DEPOT | CMD_MSG(STR_ERROR_CAN_T_BUILD_SHIP_DEPOT), CcBuildDocks);
+				break;
+
+			case DTW_STATION: { // Build station button
+				uint32 p2 = (uint32)INVALID_STATION << 16; // no station to join
+
+				/* tile is always the land tile, so need to evaluate _thd.pos */
+				CommandContainer cmdcont = { tile, _ctrl_pressed, p2, CMD_BUILD_DOCK | CMD_MSG(STR_ERROR_CAN_T_BUILD_DOCK_HERE), CcBuildDocks, "" };
+
+				/* Determine the watery part of the dock. */
+				DiagDirection dir = GetInclinedSlopeDirection(GetTileSlope(tile, NULL));
+				TileIndex tile_to = (dir != INVALID_DIAGDIR ? TileAddByDiagDir(tile, ReverseDiagDir(dir)) : tile);
+
+				ShowSelectStationIfNeeded(cmdcont, TileArea(tile, tile_to));
+				break;
+			}
+
+			case DTW_BUOY: // Build buoy button
+				DoCommandP(tile, 0, 0, CMD_BUILD_BUOY | CMD_MSG(STR_ERROR_CAN_T_POSITION_BUOY_HERE), CcBuildDocks);
+				break;
+
+			case DTW_RIVER: // Build river button (in scenario editor)
+				VpStartPlaceSizing(tile, VPM_X_AND_Y, DDSP_CREATE_RIVER);
+				break;
+
+			case DTW_BUILD_AQUEDUCT: // Build aqueduct button
+				DoCommandP(tile, GetOtherAqueductEnd(tile), TRANSPORT_WATER << 15, CMD_BUILD_BRIDGE | CMD_MSG(STR_ERROR_CAN_T_BUILD_AQUEDUCT_HERE), CcBuildBridge);
+				break;
+
+			default: NOT_REACHED();
+		}
 	}
 
 	virtual void OnPlaceDrag(ViewportPlaceMethod select_method, ViewportDragDropSelectionProcess select_proc, Point pt)
@@ -253,10 +239,6 @@ struct BuildDocksToolbarWindow : Window {
 	{
 		if (pt.x != -1) {
 			switch (select_proc) {
-				case DDSP_BUILD_BRIDGE:
-					if (!_settings_client.gui.persistent_buildingtools) ResetObjectToPlace();
-					DoCommandP(end_tile, start_tile, TRANSPORT_WATER << 15, CMD_BUILD_BRIDGE | CMD_MSG(STR_ERROR_CAN_T_BUILD_AQUEDUCT_HERE), CcBuildBridge);
-
 				case DDSP_DEMOLISH_AREA:
 					GUIPlaceProcDragXY(select_proc, start_tile, end_tile);
 					break;
@@ -284,9 +266,19 @@ struct BuildDocksToolbarWindow : Window {
 
 	virtual void OnPlacePresize(Point pt, TileIndex tile_from)
 	{
-		DiagDirection dir = GetInclinedSlopeDirection(GetTileSlope(tile_from, NULL));
-		TileIndex tile_to = (dir != INVALID_DIAGDIR ? TileAddByDiagDir(tile_from, ReverseDiagDir(dir)) : tile_from);
-		tile_from = this->last_clicked_widget == DTW_LOCK && dir != INVALID_DIAGDIR ? TileAddByDiagDir(tile_from, dir) : tile_from;
+		TileIndex tile_to = tile_from;
+
+		if (this->last_clicked_widget == DTW_BUILD_AQUEDUCT) {
+			GetOtherAqueductEnd(tile_from, &tile_to);
+		} else {
+			DiagDirection dir = GetInclinedSlopeDirection(GetTileSlope(tile_from, NULL));
+			if (IsValidDiagDirection(dir)) {
+				/* Locks and docks always select the tile "down" the slope. */
+				tile_to = TileAddByDiagDir(tile_from, ReverseDiagDir(dir));
+				/* Locks also select the tile "up" the slope. */
+				if (this->last_clicked_widget == DTW_LOCK) tile_from = TileAddByDiagDir(tile_from, dir);
+			}
+		}
 
 		VpSetPresizeRange(tile_from, tile_to);
 	}

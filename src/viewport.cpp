@@ -45,10 +45,10 @@
 #include "window_func.h"
 #include "tilehighlight_func.h"
 #include "window_gui.h"
+#include "terraform_gui.h"
 
 #include "table/strings.h"
 
-PlaceProc *_place_proc;
 Point _tile_fract_coords;
 
 struct StringSpriteToDraw {
@@ -754,6 +754,38 @@ void EndSpriteCombine()
 }
 
 /**
+ * Check if the parameter "check" is inside the interval between
+ * begin and end, including both begin and end.
+ * @note Whether \c begin or \c end is the biggest does not matter.
+ *       This method will account for that.
+ * @param begin The begin of the interval.
+ * @param end   The end of the interval.
+ * @param check The value to check.
+ */
+static bool IsInRangeInclusive(int begin, int end, int check)
+{
+	if (begin > end) Swap(begin, end);
+	return begin <= check && check <= end;
+}
+
+/**
+ * Checks whether a point is inside the selected a diagonal rectangle given by _thd.size and _thd.pos
+ * @param x The x coordinate of the point to be checked.
+ * @param y The y coordinate of the point to be checked.
+ * @return True if the point is inside the rectangle, else false.
+ */
+bool IsInsideRotatedRectangle(int x, int y)
+{
+	int dist_a = (_thd.size.x + _thd.size.y);      // Rotated coordinate system for selected rectangle.
+	int dist_b = (_thd.size.x - _thd.size.y);      // We don't have to divide by 2. It's all relative!
+	int a = ((x - _thd.pos.x) + (y - _thd.pos.y)); // Rotated coordinate system for the point under scrutiny.
+	int b = ((x - _thd.pos.x) - (y - _thd.pos.y));
+
+	/* Check if a and b are between 0 and dist_a or dist_b respectively. */
+	return IsInRangeInclusive(dist_a, 0, a) && IsInRangeInclusive(dist_b, 0, b);
+}
+
+/**
  * Add a child sprite to a parent sprite.
  *
  * @param image the image to draw.
@@ -865,7 +897,7 @@ static bool IsPartOfAutoLine(int px, int py)
 	px -= _thd.selstart.x;
 	py -= _thd.selstart.y;
 
-	if ((_thd.drawstyle & ~HT_DIR_MASK) != HT_LINE) return false;
+	if ((_thd.drawstyle & HT_DRAG_MASK) != HT_LINE) return false;
 
 	switch (_thd.drawstyle & HT_DIR_MASK) {
 		case HT_DIR_X:  return py == 0; // x direction
@@ -937,8 +969,31 @@ static void DrawTileSelection(const TileInfo *ti)
 	bool is_redsq = _thd.redsq == ti->tile;
 	if (is_redsq) DrawTileSelectionRect(ti, PALETTE_TILE_RED_PULSATING);
 
-	/* no selection active? */
-	if (_thd.drawstyle == 0) return;
+	/* No tile selection active? */
+	if ((_thd.drawstyle & HT_DRAG_MASK) == HT_NONE) return;
+
+	if (_thd.diagonal) { // We're drawing a 45 degrees rotated (diagonal) rectangle
+		if (IsInsideRotatedRectangle((int)ti->x, (int)ti->y)) {
+			if (_thd.drawstyle & HT_RECT) { // Highlighting a square (clear land)
+				/* Don't mark tiles outside the map. */
+				if (!IsValidTile(ti->tile)) return;
+
+				SpriteID image = SPR_SELECT_TILE + SlopeToSpriteOffset(ti->tileh);
+				DrawSelectionSprite(image, _thd.make_square_red ? PALETTE_SEL_TILE_RED : PAL_NONE, ti, 7, FOUNDATION_PART_NORMAL);
+			} else { // Highlighting a dot (level land)
+				/* Figure out the Z coordinate for the single dot. */
+				byte z = ti->z;
+				if (ti->tileh & SLOPE_N) {
+					z += TILE_HEIGHT;
+					if (!(ti->tileh & SLOPE_S) && (ti->tileh & SLOPE_STEEP)) {
+						z += TILE_HEIGHT;
+					}
+				}
+				AddTileSpriteToDraw(_cur_dpi->zoom != 2 ? SPR_DOT : SPR_DOT_SMALL, PAL_NONE, ti->x, ti->y, z);
+			}
+		}
+		return;
+	}
 
 	/* Inside the inner area? */
 	if (IsInsideBS(ti->x, _thd.pos.x, _thd.size.x) &&
@@ -1621,88 +1676,107 @@ void MarkTileDirtyByTile(TileIndex tile)
  */
 static void SetSelectionTilesDirty()
 {
-	int x_start = _thd.pos.x;
-	int y_start = _thd.pos.y;
-
 	int x_size = _thd.size.x;
 	int y_size = _thd.size.y;
 
-	if (_thd.outersize.x != 0) {
-		x_size  += _thd.outersize.x;
-		x_start += _thd.offs.x;
-		y_size  += _thd.outersize.y;
-		y_start += _thd.offs.y;
+	if (!_thd.diagonal) { // Selecting in a straigth rectangle (or a single square)
+		int x_start = _thd.pos.x;
+		int y_start = _thd.pos.y;
+
+		if (_thd.outersize.x != 0) {
+			x_size  += _thd.outersize.x;
+			x_start += _thd.offs.x;
+			y_size  += _thd.outersize.y;
+			y_start += _thd.offs.y;
+		}
+
+		x_size -= TILE_SIZE;
+		y_size -= TILE_SIZE;
+
+		assert(x_size >= 0);
+		assert(y_size >= 0);
+
+		int x_end = Clamp(x_start + x_size, 0, MapSizeX() * TILE_SIZE - TILE_SIZE);
+		int y_end = Clamp(y_start + y_size, 0, MapSizeY() * TILE_SIZE - TILE_SIZE);
+
+		x_start = Clamp(x_start, 0, MapSizeX() * TILE_SIZE - TILE_SIZE);
+		y_start = Clamp(y_start, 0, MapSizeY() * TILE_SIZE - TILE_SIZE);
+
+		/* make sure everything is multiple of TILE_SIZE */
+		assert((x_end | y_end | x_start | y_start) % TILE_SIZE == 0);
+
+		/* How it works:
+		 * Suppose we have to mark dirty rectangle of 3x4 tiles:
+		 *   x
+		 *  xxx
+		 * xxxxx
+		 *  xxxxx
+		 *   xxx
+		 *    x
+		 * This algorithm marks dirty columns of tiles, so it is done in 3+4-1 steps:
+		 * 1)  x     2)  x
+		 *    xxx       Oxx
+		 *   Oxxxx     xOxxx
+		 *    xxxxx     Oxxxx
+		 *     xxx       xxx
+		 *      x         x
+		 * And so forth...
+		 */
+
+		int top_x = x_end; // coordinates of top dirty tile
+		int top_y = y_start;
+		int bot_x = top_x; // coordinates of bottom dirty tile
+		int bot_y = top_y;
+
+		do {
+			Point top = RemapCoords2(top_x, top_y); // topmost dirty point
+			Point bot = RemapCoords2(bot_x + TILE_SIZE - 1, bot_y + TILE_SIZE - 1); // bottommost point
+
+			/* the 'x' coordinate of 'top' and 'bot' is the same (and always in the same distance from tile middle),
+			 * tile height/slope affects only the 'y' on-screen coordinate! */
+
+			int l = top.x - (TILE_PIXELS - 2); // 'x' coordinate of left side of dirty rectangle
+			int t = top.y;                     // 'y' coordinate of top side -//-
+			int r = top.x + (TILE_PIXELS - 2); // right side of dirty rectangle
+			int b = bot.y;                     // bottom -//-
+
+			static const int OVERLAY_WIDTH = 4; // part of selection sprites is drawn outside the selected area
+
+			/* For halftile foundations on SLOPE_STEEP_S the sprite extents some more towards the top */
+			MarkAllViewportsDirty(l - OVERLAY_WIDTH, t - OVERLAY_WIDTH - TILE_HEIGHT, r + OVERLAY_WIDTH, b + OVERLAY_WIDTH);
+
+			/* haven't we reached the topmost tile yet? */
+			if (top_x != x_start) {
+				top_x -= TILE_SIZE;
+			} else {
+				top_y += TILE_SIZE;
+			}
+
+			/* the way the bottom tile changes is different when we reach the bottommost tile */
+			if (bot_y != y_end) {
+				bot_y += TILE_SIZE;
+			} else {
+				bot_x -= TILE_SIZE;
+			}
+		} while (bot_x >= top_x);
+	} else { // Selecting in a 45 degrees rotated (diagonal) rectangle.
+		/* a_size, b_size describe a rectangle with rotated coordinates */
+		int a_size = x_size + y_size, b_size = x_size - y_size;
+
+		int interval_a = a_size < 0 ? -(int)TILE_SIZE : (int)TILE_SIZE;
+		int interval_b = b_size < 0 ? -(int)TILE_SIZE : (int)TILE_SIZE;
+
+		for (int a = -interval_a; a != a_size + interval_a; a += interval_a) {
+			for (int b = -interval_b; b != b_size + interval_b; b += interval_b) {
+				uint x = (_thd.pos.x + (a + b) / 2) / TILE_SIZE;
+				uint y = (_thd.pos.y + (a - b) / 2) / TILE_SIZE;
+
+				if (x < MapMaxX() && y < MapMaxY()) {
+					MarkTileDirtyByTile(TileXY(x, y));
+				}
+			}
+		}
 	}
-
-	x_size -= TILE_SIZE;
-	y_size -= TILE_SIZE;
-
-	assert(x_size >= 0);
-	assert(y_size >= 0);
-
-	int x_end = Clamp(x_start + x_size, 0, MapSizeX() * TILE_SIZE - TILE_SIZE);
-	int y_end = Clamp(y_start + y_size, 0, MapSizeY() * TILE_SIZE - TILE_SIZE);
-
-	x_start = Clamp(x_start, 0, MapSizeX() * TILE_SIZE - TILE_SIZE);
-	y_start = Clamp(y_start, 0, MapSizeY() * TILE_SIZE - TILE_SIZE);
-
-	/* make sure everything is multiple of TILE_SIZE */
-	assert((x_end | y_end | x_start | y_start) % TILE_SIZE == 0);
-
-	/* How it works:
-	 * Suppose we have to mark dirty rectangle of 3x4 tiles:
-	 *   x
-	 *  xxx
-	 * xxxxx
-	 *  xxxxx
-	 *   xxx
-	 *    x
-	 * This algorithm marks dirty columns of tiles, so it is done in 3+4-1 steps:
-	 * 1)  x     2)  x
-	 *    xxx       Oxx
-	 *   Oxxxx     xOxxx
-	 *    xxxxx     Oxxxx
-	 *     xxx       xxx
-	 *      x         x
-	 * And so forth...
-	 */
-
-	int top_x = x_end; // coordinates of top dirty tile
-	int top_y = y_start;
-	int bot_x = top_x; // coordinates of bottom dirty tile
-	int bot_y = top_y;
-
-	do {
-		Point top = RemapCoords2(top_x, top_y); // topmost dirty point
-		Point bot = RemapCoords2(bot_x + TILE_SIZE - 1, bot_y + TILE_SIZE - 1); // bottommost point
-
-		/* the 'x' coordinate of 'top' and 'bot' is the same (and always in the same distance from tile middle),
-		 * tile height/slope affects only the 'y' on-screen coordinate! */
-
-		int l = top.x - (TILE_PIXELS - 2); // 'x' coordinate of left side of dirty rectangle
-		int t = top.y;                     // 'y' coordinate of top side -//-
-		int r = top.x + (TILE_PIXELS - 2); // right side of dirty rectangle
-		int b = bot.y;                     // bottom -//-
-
-		static const int OVERLAY_WIDTH = 4; // part of selection sprites is drawn outside the selected area
-
-		/* For halftile foundations on SLOPE_STEEP_S the sprite extents some more towards the top */
-		MarkAllViewportsDirty(l - OVERLAY_WIDTH, t - OVERLAY_WIDTH - TILE_HEIGHT, r + OVERLAY_WIDTH, b + OVERLAY_WIDTH);
-
-		/* haven't we reached the topmost tile yet? */
-		if (top_x != x_start) {
-			top_x -= TILE_SIZE;
-		} else {
-			top_y += TILE_SIZE;
-		}
-
-		/* the way the bottom tile changes is different when we reach the bottommost tile */
-		if (bot_y != y_end) {
-			bot_y += TILE_SIZE;
-		} else {
-			bot_x -= TILE_SIZE;
-		}
-	} while (bot_x >= top_x);
 }
 
 
@@ -1807,7 +1881,7 @@ static void PlaceObject()
 	pt = GetTileBelowCursor();
 	if (pt.x == -1) return;
 
-	if (_thd.place_mode == HT_POINT) {
+	if ((_thd.place_mode & HT_DRAG_MASK) == HT_POINT) {
 		pt.x += 8;
 		pt.y += 8;
 	}
@@ -1828,7 +1902,8 @@ bool HandleViewportClicked(const ViewPort *vp, int x, int y)
 		if (v != NULL && VehicleClicked(v)) return true;
 	}
 
-	if (_thd.place_mode & HT_DRAG_MASK) {
+	/* Vehicle placement mode already handled above. */
+	if ((_thd.place_mode & HT_DRAG_MASK) != HT_NONE) {
 		PlaceObject();
 		return true;
 	}
@@ -1836,7 +1911,7 @@ bool HandleViewportClicked(const ViewPort *vp, int x, int y)
 	if (CheckClickOnTown(vp, x, y)) return true;
 	if (CheckClickOnStation(vp, x, y)) return true;
 	if (CheckClickOnSign(vp, x, y)) return true;
-	CheckClickOnLandscape(vp, x, y);
+	bool result = CheckClickOnLandscape(vp, x, y);
 
 	if (v != NULL) {
 		DEBUG(misc, 2, "Vehicle %d (index %d) at %p", v->unitnumber, v->index, v);
@@ -1850,7 +1925,7 @@ bool HandleViewportClicked(const ViewPort *vp, int x, int y)
 		}
 		return true;
 	}
-	return CheckClickOnLandscape(vp, x, y);
+	return result;
 }
 
 
@@ -1951,6 +2026,15 @@ static HighLightStyle GetAutorailHT(int x, int y)
 }
 
 /**
+ * Is the user dragging a 'diagonal rectangle'?
+ * @return User is dragging a rotated rectangle.
+ */
+bool TileHighlightData::IsDraggingDiagonal()
+{
+	return (this->place_mode & HT_DIAGONAL) != 0 && _ctrl_pressed && _left_button_down;
+}
+
+/**
  * Updates tile highlighting for all cases.
  * Uses _thd.selstart and _thd.selend and _thd.place_mode (set elsewhere) to determine _thd.pos and _thd.size
  * Also drawstyle is determined. Uses _thd.new.* as a buffer and calls SetSelectionTilesDirty() twice,
@@ -1962,9 +2046,10 @@ void UpdateTileSelection()
 	int x1;
 	int y1;
 
-	_thd.new_drawstyle = HT_NONE;
+	HighLightStyle new_drawstyle = HT_NONE;
+	bool new_diagonal = false;
 
-	if (_thd.place_mode == HT_SPECIAL) {
+	if ((_thd.place_mode & HT_DRAG_MASK) == HT_SPECIAL) {
 		x1 = _thd.selend.x;
 		y1 = _thd.selend.y;
 		if (x1 != -1) {
@@ -1973,13 +2058,21 @@ void UpdateTileSelection()
 			x1 &= ~TILE_UNIT_MASK;
 			y1 &= ~TILE_UNIT_MASK;
 
-			if (x1 >= x2) Swap(x1, x2);
-			if (y1 >= y2) Swap(y1, y2);
+			if (_thd.IsDraggingDiagonal()) {
+				new_diagonal = true;
+			} else {
+				if (x1 >= x2) Swap(x1, x2);
+				if (y1 >= y2) Swap(y1, y2);
+			}
 			_thd.new_pos.x = x1;
 			_thd.new_pos.y = y1;
-			_thd.new_size.x = x2 - x1 + TILE_SIZE;
-			_thd.new_size.y = y2 - y1 + TILE_SIZE;
-			_thd.new_drawstyle = _thd.next_drawstyle;
+			_thd.new_size.x = x2 - x1;
+			_thd.new_size.y = y2 - y1;
+			if (!new_diagonal) {
+				_thd.new_size.x += TILE_SIZE;
+				_thd.new_size.y += TILE_SIZE;
+			}
+			new_drawstyle = _thd.next_drawstyle;
 		}
 	} else if ((_thd.place_mode & HT_DRAG_MASK) != HT_NONE) {
 		Point pt = GetTileBelowCursor();
@@ -1988,30 +2081,30 @@ void UpdateTileSelection()
 		if (x1 != -1) {
 			switch (_thd.place_mode & HT_DRAG_MASK) {
 				case HT_RECT:
-					_thd.new_drawstyle = HT_RECT;
+					new_drawstyle = HT_RECT;
 					break;
 				case HT_POINT:
-					_thd.new_drawstyle = HT_POINT;
+					new_drawstyle = HT_POINT;
 					x1 += TILE_SIZE / 2;
 					y1 += TILE_SIZE / 2;
 					break;
 				case HT_RAIL:
 					/* Draw one highlighted tile in any direction */
-					_thd.new_drawstyle = GetAutorailHT(pt.x, pt.y);
+					new_drawstyle = GetAutorailHT(pt.x, pt.y);
 					break;
 				case HT_LINE:
 					switch (_thd.place_mode & HT_DIR_MASK) {
-						case HT_DIR_X: _thd.new_drawstyle = HT_LINE | HT_DIR_X; break;
-						case HT_DIR_Y: _thd.new_drawstyle = HT_LINE | HT_DIR_Y; break;
+						case HT_DIR_X: new_drawstyle = HT_LINE | HT_DIR_X; break;
+						case HT_DIR_Y: new_drawstyle = HT_LINE | HT_DIR_Y; break;
 
 						case HT_DIR_HU:
 						case HT_DIR_HL:
-							_thd.new_drawstyle = (pt.x & TILE_UNIT_MASK) + (pt.y & TILE_UNIT_MASK) <= TILE_SIZE ? HT_LINE | HT_DIR_HU : HT_LINE | HT_DIR_HL;
+							new_drawstyle = (pt.x & TILE_UNIT_MASK) + (pt.y & TILE_UNIT_MASK) <= TILE_SIZE ? HT_LINE | HT_DIR_HU : HT_LINE | HT_DIR_HL;
 							break;
 
 						case HT_DIR_VL:
 						case HT_DIR_VR:
-							_thd.new_drawstyle = (pt.x & TILE_UNIT_MASK) > (pt.y & TILE_UNIT_MASK) ? HT_LINE | HT_DIR_VL : HT_LINE | HT_DIR_VR;
+							new_drawstyle = (pt.x & TILE_UNIT_MASK) > (pt.y & TILE_UNIT_MASK) ? HT_LINE | HT_DIR_VL : HT_LINE | HT_DIR_VR;
 							break;
 
 						default: NOT_REACHED();
@@ -2029,22 +2122,24 @@ void UpdateTileSelection()
 	}
 
 	/* redraw selection */
-	if (_thd.drawstyle != _thd.new_drawstyle ||
+	if (_thd.drawstyle != new_drawstyle ||
 			_thd.pos.x != _thd.new_pos.x || _thd.pos.y != _thd.new_pos.y ||
 			_thd.size.x != _thd.new_size.x || _thd.size.y != _thd.new_size.y ||
 			_thd.outersize.x != _thd.new_outersize.x ||
-			_thd.outersize.y != _thd.new_outersize.y) {
-		/* clear the old selection? */
-		if (_thd.drawstyle) SetSelectionTilesDirty();
+			_thd.outersize.y != _thd.new_outersize.y ||
+			_thd.diagonal    != new_diagonal) {
+		/* Clear the old tile selection? */
+		if ((_thd.drawstyle & HT_DRAG_MASK) != HT_NONE) SetSelectionTilesDirty();
 
-		_thd.drawstyle = _thd.new_drawstyle;
+		_thd.drawstyle = new_drawstyle;
 		_thd.pos = _thd.new_pos;
 		_thd.size = _thd.new_size;
 		_thd.outersize = _thd.new_outersize;
+		_thd.diagonal = new_diagonal;
 		_thd.dirty = 0xff;
 
-		/* draw the new selection? */
-		if (_thd.new_drawstyle) SetSelectionTilesDirty();
+		/* Draw the new tile selection? */
+		if ((new_drawstyle & HT_DRAG_MASK) != HT_NONE) SetSelectionTilesDirty();
 	}
 }
 
@@ -2058,7 +2153,7 @@ void UpdateTileSelection()
 static inline void ShowMeasurementTooltips(StringID str, uint paramcount, const uint64 params[], TooltipCloseCondition close_cond = TCC_LEFT_CLICK)
 {
 	if (!_settings_client.gui.measure_tooltip) return;
-	GuiShowTooltips(str, paramcount, params, close_cond);
+	GuiShowTooltips(FindWindowById(_thd.window_class, _thd.window_number), str, paramcount, params, close_cond);
 }
 
 /** highlighting tiles while only going over them with the mouse */
@@ -2081,15 +2176,16 @@ void VpStartPlaceSizing(TileIndex tile, ViewportPlaceMethod method, ViewportDrag
 		_thd.selstart.y += TILE_SIZE / 2;
 	}
 
-	if (_thd.place_mode == HT_RECT) {
-		_thd.place_mode = HT_SPECIAL;
-		_thd.next_drawstyle = HT_RECT;
+	HighLightStyle others = _thd.place_mode & ~(HT_DRAG_MASK | HT_DIR_MASK);
+	if ((_thd.place_mode & HT_DRAG_MASK) == HT_RECT) {
+		_thd.place_mode = HT_SPECIAL | others;
+		_thd.next_drawstyle = HT_RECT | others;
 	} else if (_thd.place_mode & (HT_RAIL | HT_LINE)) {
-		_thd.place_mode = HT_SPECIAL;
-		_thd.next_drawstyle = _thd.drawstyle;
+		_thd.place_mode = HT_SPECIAL | others;
+		_thd.next_drawstyle = _thd.drawstyle | others;
 	} else {
-		_thd.place_mode = HT_SPECIAL;
-		_thd.next_drawstyle = HT_POINT;
+		_thd.place_mode = HT_SPECIAL | others;
+		_thd.next_drawstyle = HT_POINT | others;
 	}
 	_special_mouse_mode = WSM_SIZING;
 }
@@ -2549,7 +2645,7 @@ void VpSelectTilesWithMethod(int x, int y, ViewportPlaceMethod method)
 	}
 
 	/* Needed so level-land is placed correctly */
-	if (_thd.next_drawstyle == HT_POINT) {
+	if ((_thd.next_drawstyle & HT_DRAG_MASK) == HT_POINT) {
 		x += TILE_SIZE / 2;
 		y += TILE_SIZE / 2;
 	}
@@ -2637,7 +2733,36 @@ calc_heightdiff_single_direction:;
 				/* If dragging an area (eg dynamite tool) and it is actually a single
 				 * row/column, change the type to 'line' to get proper calculation for height */
 				style = (HighLightStyle)_thd.next_drawstyle;
-				if (style & HT_RECT) {
+				if (_thd.IsDraggingDiagonal()) {
+					/* Determine the "area" of the diagonal dragged selection.
+					 * We assume the area is the number of tiles along the X
+					 * edge and the number of tiles along the Y edge. However,
+					 * multiplying these two numbers does not give the exact
+					 * number of tiles; basically we are counting the black
+					 * squares on a chess board and ignore the white ones to
+					 * make the tile counts at the edges match up. There is no
+					 * other way to make a proper count though.
+					 *
+					 * First convert to the rotated coordinate system. */
+					int dist_x = TileX(t0) - TileX(t1);
+					int dist_y = TileY(t0) - TileY(t1);
+					int a_max = dist_x + dist_y;
+					int b_max = dist_y - dist_x;
+
+					/* Now determine the size along the edge, but due to the
+					 * chess board principle this counts double. */
+					a_max = abs(a_max + (a_max > 0 ? 2 : -2)) / 2;
+					b_max = abs(b_max + (b_max > 0 ? 2 : -2)) / 2;
+
+					/* We get a 1x1 on normal 2x1 rectangles, due to it being
+					 * a seen as two sides. As the result for actual building
+					 * will be the same as non-diagonal dragging revert to that
+					 * behaviour to give it a more normally looking size. */
+					if (a_max != 1 || b_max != 1) {
+						dx = a_max;
+						dy = b_max;
+					}
+				} else if (style & HT_RECT) {
 					if (dx == 1) {
 						style = HT_LINE | HT_DIR_Y;
 					} else if (dy == 1) {
@@ -2645,7 +2770,7 @@ calc_heightdiff_single_direction:;
 					}
 				}
 
-				if (dx != 1 || dy != 1) {
+				if (t0 != 1 || t1 != 1) {
 					int heightdiff = CalcHeightdiff(style, 0, t0, t1);
 
 					params[index++] = dx;
@@ -2688,14 +2813,15 @@ EventState VpHandlePlaceSizingDrag()
 	/* mouse button released..
 	 * keep the selected tool, but reset it to the original mode. */
 	_special_mouse_mode = WSM_NONE;
-	if (_thd.next_drawstyle == HT_RECT) {
-		_thd.place_mode = HT_RECT;
+	HighLightStyle others = _thd.place_mode & ~(HT_DRAG_MASK | HT_DIR_MASK);
+	if ((_thd.next_drawstyle & HT_DRAG_MASK) == HT_RECT) {
+		_thd.place_mode = HT_RECT | others;
 	} else if (_thd.select_method & VPM_SIGNALDIRS) {
-		_thd.place_mode = HT_RECT;
+		_thd.place_mode = HT_RECT | others;
 	} else if (_thd.select_method & VPM_RAILDIRS) {
-		_thd.place_mode = (_thd.select_method & ~VPM_RAILDIRS) ? _thd.next_drawstyle : HT_RAIL;
+		_thd.place_mode = (_thd.select_method & ~VPM_RAILDIRS) ? _thd.next_drawstyle : (HT_RAIL | others);
 	} else {
-		_thd.place_mode = HT_POINT;
+		_thd.place_mode = HT_POINT | others;
 	}
 	SetTileSelectSize(1, 1);
 
@@ -2714,7 +2840,7 @@ void SetObjectToPlaceWnd(CursorID icon, PaletteID pal, HighLightStyle mode, Wind
 void SetObjectToPlace(CursorID icon, PaletteID pal, HighLightStyle mode, WindowClass window_class, WindowNumber window_num)
 {
 	/* undo clicking on button and drag & drop */
-	if (_thd.place_mode != HT_NONE || _special_mouse_mode == WSM_DRAGDROP) {
+	if ((_thd.place_mode & ~HT_DIR_MASK) != HT_NONE || _special_mouse_mode == WSM_DRAGDROP) {
 		Window *w = FindWindowById(_thd.window_class, _thd.window_number);
 		if (w != NULL) {
 			/* Call the abort function, but set the window class to something

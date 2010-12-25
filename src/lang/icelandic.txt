@@ -802,7 +802,7 @@ STR_NEWS_ROAD_VEHICLE_IS_WAITING                                :{WHITE}{VEHICLE
 STR_NEWS_SHIP_IS_WAITING                                        :{WHITE}{VEHICLE} bíður í þjónustumiðstöð
 STR_NEWS_AIRCRAFT_IS_WAITING                                    :{WHITE}{VEHICLE} bíður í flugskýlinu
 
-# Start of order review system.
+# Start of order review system
 # DON'T ADD OR REMOVE LINES HERE
 STR_NEWS_VEHICLE_HAS_TOO_FEW_ORDERS                             :{WHITE}{VEHICLE} hefur of fáar stöðvar á áætlun
 STR_NEWS_VEHICLE_HAS_VOID_ORDER                                 :{WHITE}{VEHICLE} hefur ógilda færslu á áætlun
@@ -814,7 +814,7 @@ STR_NEWS_VEHICLE_IS_GETTING_OLD                                 :{WHITE}{VEHICLE
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD                            :{WHITE}{VEHICLE} er tekinn að eldast mikið
 STR_NEWS_VEHICLE_IS_GETTING_VERY_OLD_AND                        :{WHITE}{VEHICLE} er tekinn að eldast mikið og nauðsynlegt er að skipta honum út
 STR_NEWS_TRAIN_IS_STUCK                                         :{WHITE}{VEHICLE} ratar ekki á áfangastað
-STR_NEWS_TRAIN_IS_LOST                                          :{WHITE}{VEHICLE} er týnd.
+STR_NEWS_VEHICLE_IS_LOST                                        :{WHITE}{VEHICLE} er týnd.
 STR_NEWS_VEHICLE_IS_UNPROFITABLE                                :{WHITE}Hagnaður síðasta árs af {VEHICLE} nam {CURRENCY}
 
 STR_NEWS_ORDER_REFIT_FAILED                                     :{WHITE}{VEHICLE} stöðvaði vegna þess að umbeðin endursetning klikkaði
@@ -1142,7 +1142,6 @@ STR_CONFIG_SETTING_DYNAMIC_ENGINES_EXISTING_VEHICLES            :{WHITE}Ekki er 
 
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :{LTBLUE}Alltaf hægt að byggja allar gerðir flugvalla: {ORANGE}{STRING}
 
-STR_CONFIG_SETTING_WARN_LOST_TRAIN                              :{LTBLUE}Gera viðvart ef lest týnist: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ORDER_REVIEW                                 :{LTBLUE}Fara yfir áætlanir farartækja: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ORDER_REVIEW_OFF                             :nei
 STR_CONFIG_SETTING_ORDER_REVIEW_EXDEPOT                         :allra nema kyrrstæðra farartækja
@@ -2491,7 +2490,7 @@ STR_NEWGRF_BUGGY                                                :{WHITE}Rangar u
 STR_NEWGRF_BUGGY_ARTICULATED_CARGO                              :{WHITE}Farm/breytingaupplýsingar fyrir '{1:ENGINE}' stangast á við innkaupalista eftir kaup. Þetta kann að valda því að sjálfvirk uppfærsla/útskipting mistakist.
 STR_NEWGRF_BUGGY_ENDLESS_PRODUCTION_CALLBACK                    :{WHITE}'{1:STRING}' olli endalausri lykkju í framleiðsluferlinu.
 
-# 'User removed essential NewGRFs'-placeholders for stuff without specs.
+# 'User removed essential NewGRFs'-placeholders for stuff without specs
 STR_NEWGRF_INVALID_CARGO                                        :<invalid cargo>
 STR_NEWGRF_INVALID_CARGO_ABBREV                                 :??
 STR_NEWGRF_INVALID_CARGO_QUANTITY                               :{COMMA} af <invalid cargo>

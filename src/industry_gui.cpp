@@ -517,7 +517,7 @@ public:
 					DoCommandP(0, this->selected_type, InteractiveRandom(), CMD_BUILD_INDUSTRY | CMD_MSG(STR_ERROR_CAN_T_CONSTRUCT_THIS_INDUSTRY));
 					this->HandleButtonClick(DPIW_FUND_WIDGET);
 				} else {
-					HandlePlacePushButton(this, DPIW_FUND_WIDGET, SPR_CURSOR_INDUSTRY, HT_RECT, NULL);
+					HandlePlacePushButton(this, DPIW_FUND_WIDGET, SPR_CURSOR_INDUSTRY, HT_RECT);
 				}
 				break;
 			}
@@ -2564,7 +2564,7 @@ struct IndustryCargoesWindow : public Window {
 
 			case CFT_INDUSTRY:
 				if (fld->u.industry.ind_type < NUM_INDUSTRYTYPES && (this->ind_cargo >= NUM_INDUSTRYTYPES || fieldxy.x != 2)) {
-					GuiShowTooltips(STR_INDUSTRY_CARGOES_INDUSTRY_TOOLTIP, 0, NULL, TCC_HOVER);
+					GuiShowTooltips(this, STR_INDUSTRY_CARGOES_INDUSTRY_TOOLTIP, 0, NULL, TCC_HOVER);
 				}
 				return;
 
@@ -2575,7 +2575,7 @@ struct IndustryCargoesWindow : public Window {
 			const CargoSpec *csp = CargoSpec::Get(cid);
 			uint64 params[5];
 			params[0] = csp->name;
-			GuiShowTooltips(STR_INDUSTRY_CARGOES_CARGO_TOOLTIP, 1, params, TCC_HOVER);
+			GuiShowTooltips(this, STR_INDUSTRY_CARGOES_CARGO_TOOLTIP, 1, params, TCC_HOVER);
 		}
 	}
 

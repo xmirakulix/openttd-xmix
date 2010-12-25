@@ -60,6 +60,12 @@ static const StringID _autosave_dropdown[] = {
 	INVALID_STRING_ID,
 };
 
+/**
+ * Fill a static array with consecutive stringIDs for use with a drop down.
+ * @param base First stringID.
+ * @param num  Number of stringIDs (must be at most 32).
+ * *return Pointer to the static buffer with stringIDs.
+ */
 static StringID *BuildDynamicDropdown(StringID base, int num)
 {
 	static StringID buf[32 + 1];
@@ -69,10 +75,11 @@ static StringID *BuildDynamicDropdown(StringID base, int num)
 	return buf;
 }
 
-int _nb_orig_names = SPECSTR_TOWNNAME_LAST - SPECSTR_TOWNNAME_START + 1;
-static StringID *_grf_names = NULL;
-static int _nb_grf_names = 0;
+int _nb_orig_names = SPECSTR_TOWNNAME_LAST - SPECSTR_TOWNNAME_START + 1; ///< Number of original town names.
+static StringID *_grf_names = NULL; ///< Pointer to town names defined by NewGRFs.
+static int _nb_grf_names = 0;       ///< Number of town names defined by NewGRFs.
 
+/** Allocate memory for the NewGRF town names. */
 void InitGRFTownGeneratorNames()
 {
 	free(_grf_names);
@@ -81,6 +88,11 @@ void InitGRFTownGeneratorNames()
 	for (StringID *s = _grf_names; *s != INVALID_STRING_ID; s++) _nb_grf_names++;
 }
 
+/**
+ * Get a town name.
+ * @param town_name Number of the wanted town name.
+ * @return Name of the town as string ID.
+ */
 static inline StringID TownName(int town_name)
 {
 	if (town_name < _nb_orig_names) return STR_GAME_OPTIONS_TOWN_NAME_ORIGINAL_ENGLISH + town_name;
@@ -89,6 +101,10 @@ static inline StringID TownName(int town_name)
 	return STR_UNDEFINED;
 }
 
+/**
+ * Get index of the current screen resolution.
+ * @return Index of the current screen resolution if it is a known resolution, #_num_resolutions otherwise.
+ */
 static int GetCurRes()
 {
 	int i;
@@ -414,6 +430,7 @@ struct GameOptionsWindow : Window {
 
 			case GOW_LANG_DROPDOWN: // Change interface language
 				ReadLanguagePack(&_languages[index]);
+				DeleteWindowByClass(WC_QUERY_STRING);
 				CheckForMissingGlyphsInLoadedLanguagePack();
 				UpdateAllVirtCoords();
 				ReInitAllWindows();
@@ -532,7 +549,7 @@ static const WindowDesc _game_options_desc(
 	_nested_game_options_widgets, lengthof(_nested_game_options_widgets)
 );
 
-
+/** Open the game options window. */
 void ShowGameOptions()
 {
 	DeleteWindowById(WC_GAME_OPTIONS, 0);
@@ -809,6 +826,7 @@ static const WindowDesc _game_difficulty_desc(
 	_nested_game_difficulty_widgets, lengthof(_nested_game_difficulty_widgets)
 );
 
+/** Open the game-difficulty window. */
 void ShowGameDifficulty()
 {
 	DeleteWindowById(WC_GAME_OPTIONS, 0);
@@ -1454,7 +1472,6 @@ static SettingEntry _settings_vehicles_trains[] = {
 	SettingEntry("vehicle.train_acceleration_model"),
 	SettingEntry("vehicle.train_slope_steepness"),
 	SettingEntry("vehicle.mammoth_trains"),
-	SettingEntry("gui.lost_train_warn"),
 	SettingEntry("vehicle.wagon_speed_limits"),
 	SettingEntry("vehicle.disable_elrails"),
 	SettingEntry("vehicle.freight_trains"),
@@ -1472,6 +1489,7 @@ static SettingEntry _settings_vehicles[] = {
 	SettingEntry("gui.new_nonstop"),
 	SettingEntry("gui.order_review_system"),
 	SettingEntry("gui.vehicle_income_warn"),
+	SettingEntry("gui.lost_vehicle_warn"),
 	SettingEntry("vehicle.never_expire_vehicles"),
 	SettingEntry("vehicle.max_trains"),
 	SettingEntry("vehicle.max_roadveh"),
@@ -1735,6 +1753,7 @@ static const WindowDesc _settings_selection_desc(
 	_nested_settings_selection_widgets, lengthof(_nested_settings_selection_widgets)
 );
 
+/** Open advanced settings window. */
 void ShowGameSettings()
 {
 	DeleteWindowById(WC_GAME_OPTIONS, 0);
@@ -2009,6 +2028,7 @@ static const WindowDesc _cust_currency_desc(
 	_nested_cust_currency_widgets, lengthof(_nested_cust_currency_widgets)
 );
 
+/** Open custom currency window. */
 static void ShowCustCurrency()
 {
 	DeleteWindowById(WC_CUSTOM_CURRENCY, 0);
