@@ -1046,8 +1046,7 @@ static void DrawTileSelection(const TileInfo *ti)
 	}
 
 	/* Check if it's inside the outer area? */
-	if (!is_redsq && _thd.outersize.x &&
-			_thd.size.x < _thd.size.x + _thd.outersize.x &&
+	if (!is_redsq && _thd.outersize.x > 0 &&
 			IsInsideBS(ti->x, _thd.pos.x + _thd.offs.x, _thd.size.x + _thd.outersize.x) &&
 			IsInsideBS(ti->y, _thd.pos.y + _thd.offs.y, _thd.size.y + _thd.outersize.y)) {
 		/* Draw a blue rect. */
@@ -1439,9 +1438,9 @@ static void ViewportDrawStrings(DrawPixelInfo *dpi, const StringSpriteToDrawVect
 			/* if we didn't draw a rectangle, or if transparant building is on,
 			 * draw the text in the colour the rectangle would have */
 			if (IsTransparencySet(TO_SIGNS) && ss->string != STR_WHITE_SIGN) {
-				/* Real colours need the IS_PALETTE_COLOUR flag
+				/* Real colours need the TC_IS_PALETTE_COLOUR flag
 				 * otherwise colours from _string_colourmap are assumed. */
-				colour = (TextColour)_colour_gradient[ss->colour][6] | IS_PALETTE_COLOUR;
+				colour = (TextColour)_colour_gradient[ss->colour][6] | TC_IS_PALETTE_COLOUR;
 			}
 
 			/* Draw the rectangle if 'tranparent station signs' is off,
@@ -2883,18 +2882,16 @@ void SetObjectToPlaceWnd(CursorID icon, PaletteID pal, HighLightStyle mode, Wind
 
 void SetObjectToPlace(CursorID icon, PaletteID pal, HighLightStyle mode, WindowClass window_class, WindowNumber window_num)
 {
-	/* undo clicking on button and drag & drop */
-	if ((_thd.place_mode & ~HT_DIR_MASK) != HT_NONE || _special_mouse_mode == WSM_DRAGDROP) {
+	if (_thd.window_class != WC_INVALID) {
+		/* Undo clicking on button and drag & drop */
 		Window *w = FindWindowById(_thd.window_class, _thd.window_number);
-		if (w != NULL) {
-			/* Call the abort function, but set the window class to something
-			 * that will never be used to avoid infinite loops. Setting it to
-			 * the 'next' window class must not be done because recursion into
-			 * this function might in some cases reset the newly set object to
-			 * place or not properly reset the original selection. */
-			_thd.window_class = WC_INVALID;
-			w->OnPlaceObjectAbort();
-		}
+		/* Call the abort function, but set the window class to something
+		 * that will never be used to avoid infinite loops. Setting it to
+		 * the 'next' window class must not be done because recursion into
+		 * this function might in some cases reset the newly set object to
+		 * place or not properly reset the original selection. */
+		_thd.window_class = WC_INVALID;
+		if (w != NULL) w->OnPlaceObjectAbort();
 	}
 
 	SetTileSelectSize(1, 1);
