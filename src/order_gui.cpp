@@ -202,7 +202,7 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 
 	TextColour colour = TC_BLACK;
 	if (order->IsType(OT_AUTOMATIC)) {
-		colour =  selected ? TC_SILVER : TC_GREY;
+		colour = (selected ? TC_SILVER : TC_GREY) | TC_NO_SHADE;
 	} else if (selected) {
 		colour = TC_WHITE;
 	}
@@ -222,7 +222,7 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 			SetDParam(0, STR_ORDER_GO_TO_STATION);
 			SetDParam(1, STR_ORDER_GO_TO);
 			SetDParam(2, order->GetDestination());
-			SetDParam(3, STR_EMPTY);
+			SetDParam(3, timetable ? STR_EMPTY : STR_ORDER_AUTOMATIC);
 			break;
 
 		case OT_GOTO_STATION: {
@@ -1104,7 +1104,20 @@ public:
 	{
 		switch (widget) {
 			case ORDER_WIDGET_ORDER_LIST: {
-				ResetObjectToPlace();
+				if (this->goto_type == OPOS_CONDITIONAL) {
+					this->goto_type = OPOS_GOTO;
+					int order_id = this->GetOrderFromPt(_cursor.pos.y - this->top);
+					if (order_id != INVALID_ORDER) {
+						Order order;
+						order.next = NULL;
+						order.index = 0;
+						order.MakeConditional(order_id);
+
+						DoCommandP(this->vehicle->tile, this->vehicle->index + (this->OrderGetSel() << 20), order.Pack(), CMD_INSERT_ORDER | CMD_MSG(STR_ERROR_CAN_T_INSERT_NEW_ORDER));
+					}
+					ResetObjectToPlace();
+					break;
+				}
 
 				int sel = this->GetOrderFromPt(pt.y);
 
@@ -1362,21 +1375,6 @@ public:
 
 	virtual void OnPlaceObjectAbort()
 	{
-		if (this->goto_type == OPOS_CONDITIONAL) {
-			this->goto_type = OPOS_GOTO;
-			NWidgetBase *nwid = this->GetWidget<NWidgetBase>(ORDER_WIDGET_ORDER_LIST);
-			if (IsInsideBS(_cursor.pos.x, this->left + nwid->pos_x, nwid->current_x) && IsInsideBS(_cursor.pos.y, this->top + nwid->pos_y, nwid->current_y)) {
-				int order_id = this->GetOrderFromPt(_cursor.pos.y - this->top);
-				if (order_id != INVALID_ORDER) {
-					Order order;
-					order.next = NULL;
-					order.index = 0;
-					order.MakeConditional(order_id);
-
-					DoCommandP(this->vehicle->tile, this->vehicle->index + (this->OrderGetSel() << 20), order.Pack(), CMD_INSERT_ORDER | CMD_MSG(STR_ERROR_CAN_T_INSERT_NEW_ORDER));
-				}
-			}
-		}
 		this->RaiseWidget(ORDER_WIDGET_GOTO);
 		this->SetWidgetDirty(ORDER_WIDGET_GOTO);
 
