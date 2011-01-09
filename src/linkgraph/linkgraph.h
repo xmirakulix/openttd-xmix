@@ -38,12 +38,12 @@ typedef std::map<StationID, FlowViaMap> FlowMap;
  */
 class Node {
 public:
-	uint supply;             ///< supply at the station
-	uint undelivered_supply; ///< amount of supply that hasn't been distributed yet
-	uint demand;             ///< acceptance at the station
-	StationID station;       ///< the station's ID
-	PathSet paths;           ///< paths through this node
-	FlowMap flows;           ///< planned flows to other nodes
+	uint supply;             ///< Supply at the station.
+	uint undelivered_supply; ///< Amount of supply that hasn't been distributed yet.
+	uint demand;             ///< Acceptance at the station.
+	StationID station;       ///< Station ID.
+	PathSet paths;           ///< Paths through this node.
+	FlowMap flows;           ///< Planned flows to other nodes.
 
 	/**
 	 * Clear a node on destruction to delete paths that might remain.
@@ -65,12 +65,12 @@ private:
  */
 class Edge {
 public:
-	uint distance;           ///< length of the link
-	uint capacity;           ///< capacity of the link
-	uint demand;             ///< transport demand between the nodes
-	uint unsatisfied_demand; ///< demand over this edge that hasn't been satisfied yet
-	uint flow;               ///< planned flow over this edge
-	NodeID next_edge;        ///< destination of next valid edge starting at the same source node
+	uint distance;           ///< Length of the link.
+	uint capacity;           ///< Capacity of the link.
+	uint demand;             ///< Transport demand between the nodes.
+	uint unsatisfied_demand; ///< Demand over this edge that hasn't been satisfied yet.
+	uint flow;               ///< Planned flow over this edge.
+	NodeID next_edge;        ///< Destination of next valid edge starting at the same source node.
 
 	void Init(uint distance = 0, uint capacity = 0);
 };
@@ -93,9 +93,9 @@ public:
 
 	/**
 	 * Get a reference to an edge.
-	 * @param from the origin node
-	 * @param the destination node
-	 * @return the edge between from and to
+	 * @param from Origin node.
+	 * @param to Destination node.
+	 * @return Edge between from and to.
 	 */
 	FORCEINLINE Edge &GetEdge(NodeID from, NodeID to)
 	{
@@ -104,8 +104,8 @@ public:
 
 	/**
 	 * Get a reference to a node with the specified id.
-	 * @param num ID of the node
-	 * @return the requested node
+	 * @param num ID of the node.
+	 * @return the Requested node.
 	 */
 	FORCEINLINE Node &GetNode(NodeID num)
 	{
@@ -114,7 +114,7 @@ public:
 
 	/**
 	 * Get the current size of the component.
-	 * @return the size
+	 * @return Size.
 	 */
 	FORCEINLINE uint GetSize() const
 	{
@@ -129,7 +129,7 @@ public:
 
 	/**
 	 * Get the ID of this component.
-	 * @return the ID
+	 * @return ID.
 	 */
 	FORCEINLINE LinkGraphComponentID GetIndex() const
 	{
@@ -138,7 +138,7 @@ public:
 
 	/**
 	 * Get the cargo ID this component's link graph refers to.
-	 * @return the cargo ID
+	 * @return Cargo ID.
 	 */
 	FORCEINLINE CargoID GetCargo() const
 	{
@@ -147,7 +147,7 @@ public:
 
 	/**
 	 * Get the link graph settings for this component.
-	 * @return the settings
+	 * @return Settings.
 	 */
 	FORCEINLINE const LinkGraphSettings &GetSettings() const
 	{
@@ -170,12 +170,12 @@ public:
 	}
 
 protected:
-	LinkGraphSettings settings; ///< Copy of _settings_game.linkgraph at creation time
-	CargoID cargo;              ///< Cargo of this component's link graph
-	uint num_nodes;             ///< Number of nodes in the component
-	LinkGraphComponentID index; ///< ID of the component
-	NodeVector nodes;           ///< Nodes in the component
-	EdgeMatrix edges;           ///< Edges in the component
+	LinkGraphSettings settings; ///< Copy of _settings_game.linkgraph at creation time.
+	CargoID cargo;              ///< Cargo of this component's link graph.
+	uint num_nodes;             ///< Number of nodes in the component.
+	LinkGraphComponentID index; ///< ID of the component.
+	NodeVector nodes;           ///< Nodes in the component.
+	EdgeMatrix edges;           ///< Edges in the component.
 };
 
 /**
@@ -192,6 +192,7 @@ public:
 	/**
 	 * Run the handler. A link graph handler must not read or write any data
 	 * outside the given component as that would create a potential desync.
+	 * @param component Link graph component to run the handler on.
 	 */
 	virtual void Run(LinkGraphComponent *component) = 0;
 };
@@ -221,7 +222,7 @@ public:
 
 	/**
 	 * Add a handler to the end of the list.
-	 * @param handler the handler to be added
+	 * @param handler Handler to be added.
 	 */
 	static void AddHandler(ComponentHandler *handler)
 	{
@@ -235,13 +236,13 @@ public:
 	void Join();
 
 private:
-	static HandlerList _handlers;   ///< Handlers the job is executing
-	ThreadObject *thread;           ///< Thread the job is running in or NULL if it's running in the main thread
+	static HandlerList _handlers;   ///< Handlers the job is executing.
+	ThreadObject *thread;           ///< Thread the job is running in or NULL if it's running in the main thread.
 
 	/**
 	 * Private Copy-Constructor: there cannot be two identical LinkGraphJobs.
 	 * @param other hypothetical other job to be copied.
-	 * @note It's necessary to explicitly initialize the link graph component in order to silence some compile warnings
+	 * @note It's necessary to explicitly initialize the link graph component in order to silence some compile warnings.
 	 */
 	LinkGraphJob(const LinkGraphJob &other) : LinkGraphComponent(other) {NOT_REACHED();}
 };
@@ -251,8 +252,9 @@ private:
  */
 class LinkGraph : public LinkGraphJob {
 public:
-	static const uint COMPONENTS_JOIN_TICK  = 21; ///< tick when jobs are joined every day
-	static const uint COMPONENTS_SPAWN_TICK = 58; ///< tick when jobs are spawned every day
+	/* Those are ticks where not much else is happening, so a small lag might go unnoticed. */
+	static const uint COMPONENTS_JOIN_TICK  = 21; ///< Tick when jobs are joined every day.
+	static const uint COMPONENTS_SPAWN_TICK = 58; ///< Tick when jobs are spawned every day.
 
 	/**
 	 * Create a link graph.
@@ -266,7 +268,7 @@ public:
 	void Join();
 
 private:
-	StationID current_station_id; ///< ID of the last station examined while creating components
+	StationID current_station_id; ///< ID of the last station examined while creating components.
 
 	friend const SaveLoad *GetLinkGraphDesc();
 
@@ -280,64 +282,65 @@ class Path {
 public:
 	Path(NodeID n, bool source = false);
 
-	/** get the node this leg passes. */
+	/** Get the node this leg passes. */
 	FORCEINLINE NodeID GetNode() const {return this->node;}
 
-	/** get the overall origin of the path. */
+	/** Get the overall origin of the path. */
 	FORCEINLINE NodeID GetOrigin() const {return this->origin;}
 
-	/** get the parent leg of this one. */
+	/** Get the parent leg of this one. */
 	FORCEINLINE Path *GetParent() {return this->parent;}
 
-	/** get the overall capacity of the path. */
+	/** Get the overall capacity of the path. */
 	FORCEINLINE uint GetCapacity() const {return this->capacity;}
 
-	/** get the free capacity of the path. */
+	/** Get the free capacity of the path. */
 	FORCEINLINE int GetFreeCapacity() const {return this->free_capacity;}
 
-	/** get ratio of free * 16 (so that we get fewer 0) /
-	 * overall capacity + 1 (so that we don't divide by 0)
+	/**
+	 * Get ratio of free * 16 (so that we get fewer 0) /
+	 * overall capacity + 1 (so that we don't divide by 0).
 	 */
 	FORCEINLINE int GetCapacityRatio() const {return (this->free_capacity << 4) / (this->capacity + 1);}
 
-	/** get the overall distance of the path. */
+	/** Get the overall distance of the path. */
 	FORCEINLINE uint GetDistance() const {return this->distance;}
 
-	/** reduce the flow on this leg only by the specified amount. */
+	/** Reduce the flow on this leg only by the specified amount. */
 	FORCEINLINE void ReduceFlow(uint f) {this->flow -= f;}
 
-	/** increase the flow on this leg only by the specified amount. */
+	/** Increase the flow on this leg only by the specified amount. */
 	FORCEINLINE void AddFlow(uint f) {this->flow += f;}
 
-	/** get the flow on this leg. */
+	/** Get the flow on this leg. */
 	FORCEINLINE uint GetFlow() const {return this->flow;}
 
-	/** get the number of "forked off" child legs of this one */
+	/** Get the number of "forked off" child legs of this one. */
 	FORCEINLINE uint GetNumChildren() const {return this->num_children;}
 
 	/**
-	 * detach this path from its parent.
+	 * Detach this path from its parent.
 	 */
-	FORCEINLINE void UnFork()
+	FORCEINLINE void Detach()
 	{
 		if (this->parent != NULL) {
 			this->parent->num_children--;
 			this->parent = NULL;
 		}
 	}
-	
+
 	uint AddFlow(uint f, LinkGraphComponent *graph, bool only_positive);
 	void Fork(Path *base, uint cap, int free_cap, uint dist);
 
 protected:
-	uint distance;     ///< sum(distance of all legs up to this one)
-	uint capacity;     ///< this capacity is min(capacity) fom all edges
-	int free_capacity; ///< this capacity is min(edge.capacity - edge.flow) for the current run of dijkstra
-	uint flow;         ///< this is the flow the current run of the mcf solver assigns
-	NodeID node;       ///< the link graph node this leg passes
-	NodeID origin;     ///< the link graph node this path originates from
-	uint num_children; ///< the number of child legs that have been forked from this path
-	Path *parent;      ///< the parent leg of this one
+	uint distance;     ///< Sum(distance of all legs up to this one).
+	uint capacity;     ///< This capacity is min(capacity) fom all edges.
+	int free_capacity; ///< This capacity is min(edge.capacity - edge.flow) for the current run of dijkstra.
+	uint flow;         ///< Flow the current run of the mcf solver assigns.
+	NodeID node;       ///< Link graph node this leg passes.
+	NodeID origin;     ///< Link graph node this path originates from.
+	uint num_children; ///< Number of child legs that have been forked from this path.
+	Path *parent;      ///< Parent leg of this one.
 };
 
 void InitializeLinkGraphs();

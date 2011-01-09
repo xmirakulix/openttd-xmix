@@ -544,11 +544,11 @@ extern char _savegame_format[8];
 extern bool _do_autosave;
 
 /**
- * save/load versions used for the various branches
+ * Save/load versions used for the various branches.
  * SL_TRUNK is always the current trunk version.
  */
 enum SaveLoadVersions {
-	SL_TRUNK = 155,
+	SL_TRUNK = 156,
 	SL_RESERVATION = SL_TRUNK + 10,
 	SL_CAPACITIES = SL_TRUNK + 20,
 	SL_COMPONENTS,

@@ -38,25 +38,25 @@ static const byte INITIAL_STATION_RATING = 175;
 class LinkStat : private MovingAverage<uint> {
 private:
 	/**
-	 * capacity of the link.
-	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value
+	 * Capacity of the link.
+	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value.
 	 */
 	uint capacity;
-	
+
 	/**
-	 * capacity of currently loading vehicles
+	 * Capacity of currently loading vehicles.
 	 */
 	uint frozen;
-	
+
 	/**
-	 * usage of the link.
-	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value
+	 * Usage of the link.
+	 * This is a moving average. Use MovingAverage::Monthly() to get a meaningful value.
 	 */
 	uint usage;
 
 public:
 	/**
-	 * minimum length of moving averages for capacity and usage
+	 * Minimum length of moving averages for capacity and usage.
 	 */
 	static const uint MIN_AVERAGE_LENGTH = 96;
 
@@ -66,7 +66,7 @@ public:
 		MovingAverage<uint>(distance), capacity(capacity), frozen(frozen), usage(usage) {}
 
 	/**
-	 * reset everything to 0
+	 * Reset everything to 0.
 	 */
 	FORCEINLINE void Clear()
 	{
@@ -76,7 +76,7 @@ public:
 	}
 
 	/**
-	 * apply the moving averages to usage and capacity
+	 * Apply the moving averages to usage and capacity.
 	 */
 	FORCEINLINE void Decrease()
 	{
@@ -85,8 +85,8 @@ public:
 	}
 
 	/**
-	 * get an estimate of the current the capacity
-	 * @return the capacity
+	 * Get an estimate of the current the capacity by calculating the moving average.
+	 * @return Capacity.
 	 */
 	FORCEINLINE uint Capacity() const
 	{
@@ -94,8 +94,8 @@ public:
 	}
 
 	/**
-	 * get an estimage of the current usage
-	 * @return the usage
+	 * Get an estimage of the current usage by calculating the moving average.
+	 * @return Usage.
 	 */
 	FORCEINLINE uint Usage() const
 	{
@@ -103,7 +103,8 @@ public:
 	}
 
 	/**
-	 * get the amount of frozen capacity
+	 * Get the amount of frozen capacity.
+	 * @return Frozen capacity.
 	 */
 	FORCEINLINE uint Frozen() const
 	{
@@ -111,9 +112,9 @@ public:
 	}
 
 	/**
-	 * add some capacity and usage
-	 * @param capacity the additional capacity
-	 * @param usage the additional usage
+	 * Add some capacity and usage.
+	 * @param capacity Additional capacity.
+	 * @param usage Additional usage.
 	 */
 	FORCEINLINE void Increase(uint capacity, uint usage)
 	{
@@ -122,9 +123,9 @@ public:
 	}
 
 	/**
-	 * freeze some of the capacity and prevent it from being decreased by the
-	 * moving average
-	 * @param capacity the amount of capacity to be frozen
+	 * Freeze some of the capacity and prevent it from being decreased by the
+	 * moving average.
+	 * @param capacity Amount of capacity to be frozen.
 	 */
 	FORCEINLINE void Freeze(uint capacity)
 	{
@@ -133,8 +134,8 @@ public:
 	}
 
 	/**
-	 * thaw some of the frozen capacity and make it available for Decrease()
-	 * @oaram capacity the capacity to be thawed
+	 * Thaw some of the frozen capacity and make it available for Decrease().
+	 * @oaram capacity Capacity to be thawed.
 	 */
 	FORCEINLINE void Unfreeze(uint capacity)
 	{
@@ -142,7 +143,7 @@ public:
 	}
 
 	/**
-	 * thaw all frozen capacity
+	 * Thaw all frozen capacity.
 	 */
 	FORCEINLINE void Unfreeze()
 	{
@@ -150,33 +151,48 @@ public:
 	}
 
 	/**
-	 * check if the capacity is 0. This is necessary as Capacity() might return
-	 * 0 even if there is a miniscule amount of capacity left
-	 * @return if capacity is 0
+	 * Check if the capacity is 0. This is necessary as Capacity() might return
+	 * 0 even if there is a miniscule amount of capacity left.
+	 * @return If capacity is 0.
 	 */
-	FORCEINLINE bool IsNull() const
+	FORCEINLINE bool HasCapacity() const
 	{
 		return this->capacity == 0;
 	}
 };
 
+/**
+ * Flow statistics telling how much flow should be and was sent along a link.
+ */
 class FlowStat : private MovingAverage<uint> {
 private:
-	uint planned;
-	uint sent;
-	StationID via;
+	uint planned;  ///< Cargo planned to be sent along a link each "month" (30 units of time, determined by moving average).
+	uint sent;     ///< Moving average of cargo being sent.
+	StationID via; ///< Other end of the link. Can be this station, then it means "deliver here".
 
 public:
 	friend const SaveLoad *GetFlowStatDesc();
 
-	FORCEINLINE FlowStat(uint distance = 1, StationID st = INVALID_STATION, uint p = 0, uint s = 0) :
-		MovingAverage<uint>(distance), planned(p), sent(s), via(st) {}
+	/**
+	 * Create a flow stat.
+	 * @param distance Distance to be used as length of moving average.
+	 * @param st Remote station.
+	 * @param planned Cargo planned to be sent along this link.
+	 * @param sent Cargo already sent along this link.
+	 */
+	FORCEINLINE FlowStat(uint distance = 1, StationID st = INVALID_STATION, uint planned = 0, uint sent = 0) :
+		MovingAverage<uint>(distance), planned(planned), sent(sent), via(st) {}
 
+	/**
+	 * Clone an existing flow stat, changing the plan.
+	 * @param prev Flow stat to be cloned.
+	 * @param new_plan New value for planned.
+	 */
 	FORCEINLINE FlowStat(const FlowStat &prev, uint new_plan) :
 		MovingAverage<uint>(prev.length), planned(new_plan), sent(prev.sent), via(prev.via) {}
 
 	/**
-	 * prevents one copy operation when moving a flowstat from one set to another and decreasing it at the same time
+	 * Prevents one copy operation when moving a flowstat from one set to another and decreasing it at the same time.
 	 */
 	FORCEINLINE FlowStat GetDecreasedCopy() const
 	{
@@ -185,28 +201,56 @@ public:
 		return ret;
 	}
 
-	FORCEINLINE void Increase(int sent)
+	/**
+	 * Increase the sent value.
+	 * @param sent Amount to be added to sent.
+	 */
+	FORCEINLINE void Increase(uint sent)
 	{
 		this->sent += sent;
 	}
 
+	/**
+	 * Get an estimate of cargo sent along this link during the last 30 time units.
+	 * @return Cargo sent along this link.
+	 */
 	FORCEINLINE uint Sent() const
 	{
 		return this->MovingAverage<uint>::Monthly(sent);
 	}
 
+	/**
+	 * Get the amount of cargo planned to be sent along this link in 30 time units.
+	 * @return Cargo planned to be sent.
+	 */
 	FORCEINLINE uint Planned() const
 	{
 		return this->planned;
 	}
 
+	/**
+	 * Get the station this link is connected to.
+	 * @return Remote station.
+	 */
 	FORCEINLINE StationID Via() const
 	{
 		return this->via;
 	}
 
+	/**
+	 * Comparator for two flow stats for ordering them in a way that makes
+	 * the next flow stat to sent cargo for show up as first element.
+	 */
 	struct comp {
-		bool operator()(const FlowStat & x, const FlowStat & y) const {
+		/**
+		 * Comparator function. Decides by planned - sent or via, if those
+		 * are equal.
+		 * @param x First flow stat.
+		 * @param y Second flow stat.
+		 * @return True if x.planned - x.sent is greater than y.planned - y.sent.
+		 */
+		bool operator()(const FlowStat &x, const FlowStat &y) const
+		{
 			int diff_x = (int)x.Planned() - (int)x.Sent();
 			int diff_y = (int)y.Planned() - (int)y.Sent();
 			if (diff_x != diff_y) {
@@ -217,6 +261,11 @@ public:
 		}
 	};
 
+	/**
+	 * Add up two flow stats' planned and sent figures and assign via from the other one to this one.
+	 * @param other Flow stat to add to this one.
+	 * @return This flow stat.
+	 */
 	FORCEINLINE FlowStat &operator+=(const FlowStat &other)
 	{
 		assert(this->via == INVALID_STATION || other.via == INVALID_STATION || this->via == other.via);
@@ -231,6 +280,9 @@ public:
 		return *this;
 	}
 
+	/**
+	 * Clear this flow stat.
+	 */
 	FORCEINLINE void Clear()
 	{
 		this->planned = 0;
@@ -239,10 +291,10 @@ public:
 	}
 };
 
-typedef std::set<FlowStat, FlowStat::comp> FlowStatSet; ///< percentage of flow to be sent via specified station (or consumed locally)
+typedef std::set<FlowStat, FlowStat::comp> FlowStatSet; ///< Percentage of flow to be sent via specified station (or consumed locally).
 
 typedef std::map<StationID, LinkStat> LinkStatMap;
-typedef std::map<StationID, FlowStatSet> FlowStatMap; ///< flow descriptions by origin stations
+typedef std::map<StationID, FlowStatSet> FlowStatMap; ///< Flow descriptions by origin stations.
 
 uint GetMovingAverageLength(const Station *from, const Station *to);
 
@@ -269,15 +321,14 @@ struct GoodsEntry {
 	byte rating;
 	byte last_speed;
 	byte last_age;
-	byte amount_fract;                   ///< Fractional part of the amount in the cargo list
-	StationCargoList cargo;              ///< The cargo packets of cargo waiting in this station
-	uint supply;                         ///< Cargo supplied last month
-	uint supply_new;                     ///< Cargo supplied so far this month
-	FlowStatMap flows;                   ///< The planned flows through this station
-	LinkStatMap link_stats;              ///< capacities and usage statistics for outgoing links
-	LinkGraphComponentID last_component; ///< the component this station was last part of in this cargo's link graph
-	uint max_waiting_cargo;              ///< max cargo from this station waiting at any station
-	
+	byte amount_fract;                   ///< Fractional part of the amount in the cargo list.
+	StationCargoList cargo;              ///< The cargo packets of cargo waiting in this station.
+	uint supply;                         ///< Cargo supplied last month.
+	uint supply_new;                     ///< Cargo supplied so far this month.
+	FlowStatMap flows;                   ///< Planned flows through this station.
+	LinkStatMap link_stats;              ///< Capacities and usage statistics for outgoing links.
+	LinkGraphComponentID last_component; ///< Component this station was last part of in this cargo's link graph.
+	uint max_waiting_cargo;              ///< Max cargo from this station waiting at any station.
 	FlowStat GetSumFlowVia(StationID via) const;
 
 	void UpdateFlowStats(StationID source, uint count, StationID next);

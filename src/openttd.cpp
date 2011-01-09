@@ -706,7 +706,7 @@ int ttd_main(int argc, char *argv[])
 	_screen.zoom = ZOOM_LVL_NORMAL;
 
 	/* restore saved music volume */
-	_music_driver->SetVolume(msf.music_vol);
+	_music_driver->SetVolume(_msf.music_vol);
 
 	NetworkStartUp(); // initialize network-core
 
@@ -1261,6 +1261,7 @@ void StateGameLoop()
 {
 	/* dont execute the state loop during pause */
 	if (_pause_mode != PM_UNPAUSED) {
+		UpdateLandscapingLimits();
 		CallWindowTickEvent();
 		return;
 	}
@@ -1273,6 +1274,7 @@ void StateGameLoop()
 		CallVehicleTicks();
 		CallLandscapeTick();
 		ClearStorageChanges(true);
+		UpdateLandscapingLimits();
 
 		CallWindowTickEvent();
 		NewsLoop();
@@ -1298,6 +1300,7 @@ void StateGameLoop()
 		ClearStorageChanges(true);
 
 		AI::GameLoop();
+		UpdateLandscapingLimits();
 
 		CallWindowTickEvent();
 		NewsLoop();

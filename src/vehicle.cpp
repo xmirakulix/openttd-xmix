@@ -1744,14 +1744,17 @@ void Vehicle::BeginLoading()
 
 	if (this->current_order.IsType(OT_GOTO_STATION) &&
 			this->current_order.GetDestination() == this->last_station_visited) {
-		current_order.MakeLoading(true);
-		UpdateVehicleTimetable(this, true);
-
-		for (Order *order = this->GetOrder(this->cur_order_index);
-				order != NULL && order->IsType(OT_AUTOMATIC);
-				order = order->next) {
+		/* Delete all automatic orders which were not reached */
+		const Order *order = this->GetOrder(this->cur_order_index);
+		while (order != NULL && order->IsType(OT_AUTOMATIC)) {
+			/* Delete order effectively deletes order, so get the next before deleting it. */
+			order = order->next;
 			DeleteOrder(this, this->cur_order_index);
 		}
+
+		/* Now cur_order_index points to the destination station, and we can start loading */
+		this->current_order.MakeLoading(true);
+		UpdateVehicleTimetable(this, true);
 
 		/* Furthermore add the Non Stop flag to mark that this station
 		 * is the actual destination of the vehicle, which is (for example)
@@ -1764,7 +1767,7 @@ void Vehicle::BeginLoading()
 		/* We weren't scheduled to stop here. Insert an automatic order
 		 * to show that we are stopping here. */
 		Order *in_list = this->GetOrder(this->cur_order_index);
-		if (this->orders.list->GetNumOrders() < MAX_VEH_ORDER_ID &&
+		if ((this->orders.list == NULL || this->orders.list->GetNumOrders() < MAX_VEH_ORDER_ID) &&
 				((in_list == NULL && this->cur_order_index == 0) ||
 				(in_list != NULL && (!in_list->IsType(OT_AUTOMATIC) ||
 				in_list->GetDestination() != this->last_station_visited)))) {
@@ -1773,7 +1776,7 @@ void Vehicle::BeginLoading()
 			InsertOrder(this, auto_order, this->cur_order_index);
 			if (this->cur_order_index > 0) --this->cur_order_index;
 		}
-		current_order.MakeLoading(false);
+		this->current_order.MakeLoading(false);
 	}
 
 	Station *curr_station = Station::Get(this->last_station_visited);
@@ -1826,15 +1829,15 @@ void Vehicle::CancelReservation(StationID next, Station *st)
 
 /**
  * A vehicle can leave the current station with cargo if:
- * - it can load cargo here OR (
- * - it could leave the last station with cargo AND
- * - it doesn't have to unload all cargo here)
+ * 1. it can load cargo here OR
+ * 2a. it could leave the last station with cargo AND
+ * 2b. it doesn't have to unload all cargo here.
  */
 bool Vehicle::CanLeaveWithCargo()
 {
-	return ((this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
+	return (this->current_order.GetLoadType() & OLFB_NO_LOAD) == 0 ||
 			((this->current_order.GetUnloadType() & (OUFB_UNLOAD | OUFB_TRANSFER)) == 0 &&
-			this->last_loading_station != INVALID_STATION));
+			this->last_loading_station != INVALID_STATION);
 }
 
 void Vehicle::LeaveStation()

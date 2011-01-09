@@ -271,6 +271,8 @@ enum Commands {
 	CMD_SET_TIMETABLE_START,          ///< set the date that a timetable should start
 
 	CMD_OPEN_CLOSE_AIRPORT,           ///< open/close an airport
+
+	CMD_END                           ///< Must ALWAYS be on the end of this list!! (period)
 };
 
 /**

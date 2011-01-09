@@ -34,6 +34,7 @@
 #include "vehicle_base.h"
 #include "vehicle_func.h"
 #include "sprite.h"
+#include "smallmap_gui.h"
 
 #include "table/strings.h"
 
@@ -57,6 +58,9 @@ Company::Company(uint16 name_1, bool is_ai)
 	this->name_1 = name_1;
 	this->location_of_HQ = INVALID_TILE;
 	this->is_ai = is_ai;
+	this->terraform_limit = _settings_game.construction.terraform_frame_burst << 16;
+	this->clear_limit     = _settings_game.construction.clear_frame_burst << 16;
+
 	for (uint j = 0; j < 4; j++) this->share_owners[j] = COMPANY_SPECTATOR;
 	InvalidateWindowData(WC_PERFORMANCE_DETAIL, 0, INVALID_COMPANY);
 }
@@ -116,10 +120,10 @@ void SetLocalCompany(CompanyID new_company)
  * @param company Company to get the colour of.
  * @return Colour of \a company.
  */
-uint16 GetDrawStringCompanyColour(CompanyID company)
+TextColour GetDrawStringCompanyColour(CompanyID company)
 {
-	if (!Company::IsValidID(company)) return _colour_gradient[COLOUR_WHITE][4] | TC_IS_PALETTE_COLOUR;
-	return (_colour_gradient[_company_colours[company]][4]) | TC_IS_PALETTE_COLOUR;
+	if (!Company::IsValidID(company)) return (TextColour)_colour_gradient[COLOUR_WHITE][4] | TC_IS_PALETTE_COLOUR;
+	return (TextColour)_colour_gradient[_company_colours[company]][4] | TC_IS_PALETTE_COLOUR;
 }
 
 /**
@@ -249,6 +253,16 @@ void SubtractMoneyFromCompanyFract(CompanyID company, CommandCost cst)
 	cost >>= 8;
 	if (c->money_fraction > m) cost++;
 	if (cost != 0) SubtractMoneyFromAnyCompany(c, CommandCost(cst.GetExpensesType(), cost));
+}
+
+/** Update the landscaping limits per company. */
+void UpdateLandscapingLimits()
+{
+	Company *c;
+	FOR_ALL_COMPANIES(c) {
+		c->terraform_limit = min(c->terraform_limit + _settings_game.construction.terraform_per_64k_frames, (uint32)_settings_game.construction.terraform_frame_burst << 16);
+		c->clear_limit     = min(c->clear_limit     + _settings_game.construction.clear_per_64k_frames,     (uint32)_settings_game.construction.clear_frame_burst << 16);
+	}
 }
 
 /**
@@ -539,6 +553,8 @@ Company *DoStartupNewCompany(bool is_ai, CompanyID company = INVALID_COMPANY)
 	SetWindowDirty(WC_GRAPH_LEGEND, 0);
 	SetWindowDirty(WC_TOOLBAR_MENU, 0);
 	SetWindowDirty(WC_CLIENT_LIST, 0);
+	BuildOwnerLegend();
+	InvalidateWindowData(WC_SMALLMAP, 0, 1);
 
 	if (is_ai && (!_networking || _network_server)) AI::StartNew(c->index);
 
@@ -897,6 +913,10 @@ CommandCost CmdCompanyCtrl(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 		default: return CMD_ERROR;
 	}
+
+	InvalidateWindowClassesData(WC_GAME_OPTIONS);
+	InvalidateWindowClassesData(WC_AI_SETTINGS);
+	InvalidateWindowClassesData(WC_AI_LIST);
 
 	return CommandCost();
 }

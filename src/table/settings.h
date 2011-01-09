@@ -362,7 +362,7 @@ const SettingDesc _settings[] = {
 	 SDT_CONDVAR(GameSettings, difficulty.line_reverse_mode,         SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     0,     0,      1,  1, STR_REVERSE_AT_END_OF_LINE_AND_AT_STATIONS,DifficultyChange),
 	 SDT_CONDVAR(GameSettings, difficulty.disasters,                 SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     0,     0,      1,  1, STR_DISASTERS_OFF,                         DifficultyChange),
 	 SDT_CONDVAR(GameSettings, difficulty.town_council_tolerance,    SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     0,     0,      2,  1, STR_CITY_APPROVAL_PERMISSIVE,                            DifficultyNoiseChange),
-	 SDT_CONDVAR(GameSettings, difficulty.diff_level,                SLE_UINT8, 97, SL_MAX_VERSION, 0,NG,     3,     0,      3,  0, STR_NULL,                                  DifficultyReset),
+	 SDT_CONDVAR(GameSettings, difficulty.diff_level,                SLE_UINT8, 97, SL_MAX_VERSION, 0, 0,     3,     0,      3,  0, STR_NULL,                                  DifficultyReset),
 
 	/* There are only 21 predefined town_name values (0-20), but you can have more with newgrf action F so allow these bigger values (21-255). Invalid values will fallback to english on use and (undefined string) in GUI. */
  SDT_CONDOMANY(GameSettings, game_creation.town_name,              SLE_UINT8, 97, SL_MAX_VERSION, 0,NN, 0, 255, _town_names,      STR_NULL,                                  NULL, NULL),
@@ -371,7 +371,11 @@ const SettingDesc _settings[] = {
  SDT_CONDOMANY(GameSettings, vehicle.road_side,                    SLE_UINT8, 97, SL_MAX_VERSION, 0,NN, 1,   1, _roadsides,       STR_NULL,                                  CheckRoadSide, NULL),
 
 	    SDT_BOOL(GameSettings, construction.build_on_slopes,                                        0,NN,  true,                    STR_CONFIG_SETTING_BUILDONSLOPES,          NULL),
-	 SDT_CONDVAR(GameSettings, construction.command_pause_level,     SLE_UINT8,154, SL_MAX_VERSION, 0,MS|NN,  1,     0,       3, 1, STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL, NULL),
+	 SDT_CONDVAR(GameSettings, construction.command_pause_level,     SLE_UINT8,154, SL_MAX_VERSION, 0,MS|NN,  1,    0,        3, 1, STR_CONFIG_SETTING_COMMAND_PAUSE_LEVEL,    NULL),
+	 SDT_CONDVAR(GameSettings, construction.terraform_per_64k_frames,SLE_UINT32,156,SL_MAX_VERSION, 0, 0, 64 << 16, 0,  1 << 30, 1, STR_NULL, NULL),
+	 SDT_CONDVAR(GameSettings, construction.terraform_frame_burst,  SLE_UINT16,156, SL_MAX_VERSION, 0, 0, 4096,     0,  1 << 30, 1, STR_NULL, NULL),
+	 SDT_CONDVAR(GameSettings, construction.clear_per_64k_frames,   SLE_UINT32,156, SL_MAX_VERSION, 0, 0, 64 << 16, 0,  1 << 30, 1, STR_NULL, NULL),
+	 SDT_CONDVAR(GameSettings, construction.clear_frame_burst,      SLE_UINT16,156, SL_MAX_VERSION, 0, 0, 4096,     0,  1 << 30, 1, STR_NULL, NULL),
 	SDT_CONDBOOL(GameSettings, construction.autoslope,                          75, SL_MAX_VERSION, 0, 0,  true,                    STR_CONFIG_SETTING_AUTOSLOPE,              NULL),
 	    SDT_BOOL(GameSettings, construction.extra_dynamite,                                         0, 0,  true,                    STR_CONFIG_SETTING_EXTRADYNAMITE,          NULL),
 	    SDT_BOOL(GameSettings, construction.longbridges,                                            0,NN,  true,                    STR_CONFIG_SETTING_LONGBRIDGES,            NULL),

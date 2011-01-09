@@ -33,9 +33,9 @@ LinkGraphJob::HandlerList LinkGraphJob::_handlers;
 
 /**
  * Create a node or clear it.
- * @param st ID of the associated station
- * @param sup supply of cargo at the station last month
- * @param dem acceptance for cargo at the station
+ * @param st ID of the associated station.
+ * @param sup Supply of cargo at the station last month.
+ * @param dem Acceptance for cargo at the station.
  */
 void Node::Init(StationID st, uint sup, uint dem)
 {
@@ -53,8 +53,8 @@ void Node::Init(StationID st, uint sup, uint dem)
 
 /**
  * Create an edge.
- * @param distance length of the link as manhattan distance
- * @param capacity capacity of the link
+ * @param distance Length of the link as manhattan distance.
+ * @param capacity Capacity of the link.
  */
 FORCEINLINE void Edge::Init(uint distance, uint capacity)
 {
@@ -71,7 +71,7 @@ FORCEINLINE void Edge::Init(uint distance, uint capacity)
  * 1. Build the link graph component containing the given station by using BFS on the link stats.
  * 2. Set every included station's last_component to the new component's ID (this->current_component_id).
  * 3. Start a link graph job with the new component.
- * @param first Station to start the search at
+ * @param first Station to start the search at.
  */
 void LinkGraph::CreateComponent(Station *first)
 {
@@ -87,7 +87,7 @@ void LinkGraph::CreateComponent(Station *first)
 		search_queue.pop();
 
 		const LinkStatMap &links = source->goods[this->cargo].link_stats;
-		for(LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
+		for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
 			Station *target = Station::GetIfValid(i->first);
 			if (target == NULL) continue;
 
@@ -97,9 +97,9 @@ void LinkGraph::CreateComponent(Station *first)
 				NodeID node = this->AddNode(target);
 				index[target] = node;
 
-				this->AddEdge(index[source], node,	i->second.Capacity());
+				this->AddEdge(index[source], node, i->second.Capacity());
 			} else {
-				this->AddEdge(index[source], index_it->second,	i->second.Capacity());
+				this->AddEdge(index[source], index_it->second, i->second.Capacity());
 			}
 		}
 	}
@@ -195,8 +195,8 @@ void OnTick_LinkGraph()
  * the station's last_component to this component. Calculate the distances to all
  * other nodes. The distances to _all_ nodes are important as the demand
  * calculator relies on their availability.
- * @param st the new node's station
- * @return the new node's ID
+ * @param st New node's station.
+ * @return New node's ID.
  */
 NodeID LinkGraphComponent::AddNode(Station *st)
 {
@@ -218,7 +218,7 @@ NodeID LinkGraphComponent::AddNode(Station *st)
 	/* reset the first edge starting at the new node */
 	new_edges[this->num_nodes].next_edge = INVALID_NODE;
 
-	for(NodeID i = 0; i < this->num_nodes; ++i) {
+	for (NodeID i = 0; i < this->num_nodes; ++i) {
 		uint distance = DistanceManhattan(st->xy, Station::Get(this->nodes[i].station)->xy);
 		if (do_resize) this->edges[i].push_back(Edge());
 		new_edges[i].Init(distance);
@@ -229,9 +229,9 @@ NodeID LinkGraphComponent::AddNode(Station *st)
 
 /**
  * Fill an edge with values from a link.
- * @param from source node of the link
- * @param to destination node of the link
- * @param capacity capacity of the link
+ * @param from Source node of the link.
+ * @param to Destination node of the link.
+ * @param capacity Capacity of the link.
  */
 FORCEINLINE void LinkGraphComponent::AddEdge(NodeID from, NodeID to, uint capacity)
 {
@@ -262,7 +262,7 @@ void LinkGraphComponent::SetSize()
 		this->edges.resize(this->num_nodes, std::vector<Edge>(this->num_nodes));
 	}
 
-	for(uint i = 0; i < this->num_nodes; ++i) {
+	for (uint i = 0; i < this->num_nodes; ++i) {
 		this->nodes[i].Init();
 		for (uint j = 0; j < this->num_nodes; ++j) {
 			this->edges[i][j].Init();
@@ -281,7 +281,7 @@ LinkGraphComponent::LinkGraphComponent() :
 {}
 
 /**
- * (re-)initialize this component with a new ID and a new copy of the settings.
+ * (Re-)initialize this component with a new ID and a new copy of the settings.
  */
 void LinkGraphComponent::Init(LinkGraphComponentID id)
 {
@@ -294,10 +294,10 @@ void LinkGraphComponent::Init(LinkGraphComponentID id)
 /**
  * Exports all entries in the FlowViaMap pointed to by "source_flows_it", erases the source
  * flows and increments the iterator afterwards.
- * @param it iterator pointing to the flows to be exported into the main game state
- * @param dest the flow stats to which the flows shall be exported
- * @param cargo the cargo we're exporting flows for (used to check if the link stats for the new
- *        flows still exist)
+ * @param it Iterator pointing to the flows to be exported into the main game state.
+ * @param dest Flow stats to which the flows shall be exported.
+ * @param cargo Cargo we're exporting flows for (used to check if the link stats for the new
+ *        flows still exist).
  */
 void Node::ExportNewFlows(FlowMap::iterator &it, FlowStatSet &dest, CargoID cargo)
 {
@@ -336,7 +336,8 @@ void Node::ExportNewFlows(FlowMap::iterator &it, FlowStatSet &dest, CargoID carg
  * Export all flows of this node to the main game state.
  * @param cargo the cargo we're exporting flows for.
  */
-void Node::ExportFlows(CargoID cargo) {
+void Node::ExportFlows(CargoID cargo)
+{
 	FlowStatMap &station_flows = Station::Get(this->station)->goods[cargo].flows;
 	FlowStatSet new_flows;
 	/* loop over all existing flows in the station and update them */
@@ -399,7 +400,7 @@ void LinkGraph::Join()
 
 /**
  * Run all handlers for the given Job.
- * @param j a pointer to a link graph job
+ * @param j Pointer to a link graph job.
  */
 /* static */ void LinkGraphJob::RunLinkGraphJob(void *j)
 {
@@ -414,8 +415,8 @@ void LinkGraph::Join()
  */
 /* static */ void LinkGraphJob::ClearHandlers()
 {
-	for(HandlerList::iterator i = _handlers.begin(); i != _handlers.end(); ++i) {
-		delete (*i);
+	for (HandlerList::iterator i = _handlers.begin(); i != _handlers.end(); ++i) {
+		delete *i;
 	}
 	_handlers.clear();
 }
@@ -434,7 +435,7 @@ void Path::Fork(Path *base, uint cap, int free_cap, uint dist)
 	this->distance = base->distance + dist;
 	assert(this->distance > 0);
 	if (this->parent != base) {
-		this->UnFork();
+		this->Detach();
 		this->parent = base;
 		this->parent->num_children++;
 	}
@@ -489,11 +490,10 @@ Path::Path(NodeID n, bool source)  :
  */
 FORCEINLINE void LinkGraphJob::Join()
 {
-	if (this->thread != NULL) {
-		this->thread->Join();
-		delete this->thread;
-		this->thread = NULL;
-	}
+	if (this->thread == NULL) return;
+	this->thread->Join();
+	delete this->thread;
+	this->thread = NULL;
 }
 
 /**
@@ -520,7 +520,7 @@ void LinkGraphJob::SpawnThread()
 /**
  * (Re-)Initialize the link graph: join all jobs and set current_station_id and
  * cargo to their start values.
- * @param cargo the new cargo ID for the link graph
+ * @param cargo New cargo ID for the link graph.
  */
 void LinkGraph::Init(CargoID cargo)
 {
