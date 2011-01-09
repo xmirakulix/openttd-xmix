@@ -176,7 +176,7 @@ public:
 	byte spritenum;                     ///< currently displayed sprite index
 	                                    ///< 0xfd == custom sprite, 0xfe == custom second head sprite
 	                                    ///< 0xff == reserved for another custom sprite
-	uint16 cur_image;                   ///< sprite number for this vehicle
+	SpriteID cur_image;                 ///< sprite number for this vehicle
 	byte x_extent;                      ///< x-extent of vehicle bounding box
 	byte y_extent;                      ///< y-extent of vehicle bounding box
 	byte z_extent;                      ///< z-extent of vehicle bounding box
@@ -551,6 +551,12 @@ public:
 	 * @return the number of orders this vehicle has.
 	 */
 	inline VehicleOrderID GetNumOrders() const { return (this->orders.list == NULL) ? 0 : this->orders.list->GetNumOrders(); }
+
+	/**
+	 * Get the number of manually added orders this vehicle has.
+	 * @return the number of manually added orders this vehicle has.
+	 */
+	inline VehicleOrderID GetNumManualOrders() const { return (this->orders.list == NULL) ? 0 : this->orders.list->GetNumManualOrders(); }
 
 	/**
 	 * Copy certain configurations and statistics of a vehicle after successful autoreplace/renew

@@ -3176,13 +3176,21 @@ static void UpdateStationRating(Station *st)
 	}
 }
 
-void DeleteStaleFlows(StationID at, CargoID c_id, StationID to) {
+/**
+ * Delete all flows at a station for specific cargo and destination.
+ * @param at Station to delete flows from.
+ * @param c_id Cargo for which flows shall be deleted.
+ * @param to Remote station of flows to be deleted.
+ */
+void DeleteStaleFlows(StationID at, CargoID c_id, StationID to)
+{
 	FlowStatMap &flows = Station::Get(at)->goods[c_id].flows;
 	for (FlowStatMap::iterator f_it = flows.begin(); f_it != flows.end();) {
 		FlowStatSet &s_flows = f_it->second;
 		for (FlowStatSet::iterator s_it = s_flows.begin(); s_it != s_flows.end();) {
 			if (s_it->Via() == to) {
 				s_flows.erase(s_it++);
+				break; // There can only be one flow stat for this remote station in each set.
 			} else {
 				++s_it;
 			}
@@ -3196,10 +3204,10 @@ void DeleteStaleFlows(StationID at, CargoID c_id, StationID to) {
 }
 
 /**
- * get the length of a moving average for a link between two stations
- * @param from the source station
- * @param to the destination station
- * @return the moving average length
+ * Get the length of a moving average for a link between two stations.
+ * @param from Source station.
+ * @param to Destination station.
+ * @return Moving average length.
  */
 uint GetMovingAverageLength(const Station *from, const Station *to)
 {
@@ -3209,9 +3217,10 @@ uint GetMovingAverageLength(const Station *from, const Station *to)
 /**
  * Run the moving average decrease function for all link stats.
  */
-void Station::RunAverages() {
+void Station::RunAverages()
+{
 	FlowStatSet new_flows;
-	for(int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
+	for (int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
 		LinkStatMap &links = this->goods[goods_index].link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end();) {
 			StationID id = i->first;
@@ -3222,7 +3231,7 @@ void Station::RunAverages() {
 			} else {
 				LinkStat &ls = i->second;
 				ls.Decrease();
-				if (ls.IsNull()) {
+				if (ls.HasCapacity()) {
 					DeleteStaleFlows(this->index, goods_index, id);
 					this->goods[goods_index].cargo.RerouteStalePackets(id);
 					links.erase(i++);
@@ -3259,9 +3268,10 @@ void Station::RunAverages() {
 /**
  * Recalculate the frozen value of the station the given vehicle is loading at
  * if the vehicle is loading.
- * @param v the vehicle to be examined
+ * @param v Vehicle to be examined.
  */
-void RecalcFrozenIfLoading(const Vehicle *v) {
+void RecalcFrozenIfLoading(const Vehicle *v)
+{
 	if (v->current_order.IsType(OT_LOADING)) {
 		RecalcFrozen(Station::Get(v->last_station_visited));
 	}
@@ -3270,10 +3280,11 @@ void RecalcFrozenIfLoading(const Vehicle *v) {
 /**
  * Recalculate all frozen values for all link stats of a station. This is done
  * by adding up the capacities of all loading vehicles.
- * @param st the station
+ * @param st Station.
  */
-void RecalcFrozen(Station *st) {
-	for(int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
+void RecalcFrozen(Station *st)
+{
+	for (int goods_index = 0; goods_index < NUM_CARGO; ++goods_index) {
 		GoodsEntry &good = st->goods[goods_index];
 		LinkStatMap &links = good.link_stats;
 		for (LinkStatMap::iterator i = links.begin(); i != links.end(); ++i) {
@@ -3298,44 +3309,46 @@ void RecalcFrozen(Station *st) {
 /**
  * Decrease the frozen values of all link stats associated with vehicles in the
  * given consist (ie the consist is leaving the station).
- * @param st the station to decrease the frozen values on
- * @param front the first vehicle in the consist
- * @param next_station_id the station the vehicle is leaving for
+ * @param st Station to decrease the frozen values on.
+ * @param front First vehicle in the consist.
+ * @param next_station_id Station the vehicle is leaving for.
  */
-void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id) {
-	assert(st->index != next_station_id && next_station_id != INVALID_STATION);
+void DecreaseFrozen(Station *st, const Vehicle *front, StationID next_station_id)
+{
+	assert(st->index != next_station_id);
+       	assert(next_station_id != INVALID_STATION);
 	for (const Vehicle *v = front; v != NULL; v = v->Next()) {
-		if (v->cargo_cap > 0) {
-			LinkStatMap &link_stats = st->goods[v->cargo_type].link_stats;
-			LinkStatMap::iterator lstat_it = link_stats.find(next_station_id);
-			if (lstat_it == link_stats.end()) {
-				DEBUG(misc, 1, "frozen not in linkstat list.");
-				RecalcFrozen(st);
-				return;
-			} else {
-				LinkStat &link_stat = lstat_it->second;
-				if (link_stat.Frozen() < v->cargo_cap) {
-					DEBUG(misc, 1, "frozen is smaller than cargo cap.");
-					RecalcFrozen(st);
-					return;
-				} else {
-					link_stat.Unfreeze(v->cargo_cap);
-				}
-				assert(!link_stat.IsNull());
-			}
+		if (v->cargo_cap <= 0) continue;
+
+		LinkStatMap &link_stats = st->goods[v->cargo_type].link_stats;
+		LinkStatMap::iterator lstat_it = link_stats.find(next_station_id);
+		if (lstat_it == link_stats.end()) {
+			DEBUG(misc, 1, "frozen not in linkstat list.");
+			RecalcFrozen(st);
+			return;
 		}
+
+		LinkStat &link_stat = lstat_it->second;
+		if (link_stat.Frozen() < v->cargo_cap) {
+			DEBUG(misc, 1, "frozen is smaller than cargo cap.");
+			RecalcFrozen(st);
+			return;
+		}
+		link_stat.Unfreeze(v->cargo_cap);
+		assert(!link_stat.HasCapacity());
 	}
 }
 
 /**
  * Either freeze or increase capacity for all link stats associated with vehicles
  * in the given consist.
- * @param st the station to get the link stats from
- * @param front the first vehicle in the consist
- * @param next_station_id the station the consist will be travelling to next
- * @param freeze if true, freeze capacity, otherwise increase capacity
+ * @param st Station to get the link stats from.
+ * @param front First vehicle in the consist.
+ * @param next_station_id Station the consist will be travelling to next.
+ * @param freeze If true, freeze capacity, otherwise increase capacity.
  */
-void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id, bool freeze) {
+void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id, bool freeze)
+{
 	Station *next = Station::GetIfValid(next_station_id);
 	assert(st->index != next_station_id && next != NULL);
 	uint average_length = GetMovingAverageLength(st, next);
@@ -3354,7 +3367,7 @@ void IncreaseStats(Station *st, const Vehicle *front, StationID next_station_id,
 				} else {
 					link_stat.Increase(v->cargo_cap, v->cargo.Count());
 				}
-				assert(!link_stat.IsNull());
+				assert(!link_stat.HasCapacity());
 			}
 		}
 	}
@@ -3808,10 +3821,10 @@ static CommandCost TerraformTile_Station(TileIndex tile, DoCommandFlag flags, ui
 }
 
 /**
- * update the flow stats for a specific entry.
- * @param flow_stats the flow stats to update
- * @param flow_it an iterator pointing to an entry in flow_stats
- * @param count the amount by which the flow should be increased
+ * Update the flow stats for a specific entry.
+ * @param flow_stats Flow stats to update.
+ * @param flow_it Iterator pointing to an entry in flow_stats.
+ * @param count Amount by which the flow should be increased.
  */
 void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator flow_it, uint count)
 {
@@ -3822,10 +3835,10 @@ void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, FlowStatSet::iterator 
 }
 
 /**
- * update the flow stats for a specific next station
- * @param flow_stats the flow stats to update
- * @param count the amount by which the flow should be increased
- * @param next the next hop for which the flow stats should be updated
+ * Update the flow stats for a specific next station.
+ * @param flow_stats Flow stats to update.
+ * @param count Amount by which the flow should be increased.
+ * @param next Next hop for which the flow stats should be updated.
  */
 void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID next)
 {
@@ -3842,10 +3855,10 @@ void GoodsEntry::UpdateFlowStats(FlowStatSet &flow_stats, uint count, StationID 
 }
 
 /**
- * update the flow stats for "count" cargo from "source" sent to "next"
- * @param source the ID of station the cargo is from
- * @param count the amount of cargo
- * @param next ID of the station the cargo is travelling to
+ * Update the flow stats for "count" cargo from "source" sent to "next".
+ * @param source ID of station the cargo is from.
+ * @param count Amount of cargo.
+ * @param next ID of the station the cargo is travelling to.
  */
 void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next)
 {
@@ -3855,13 +3868,14 @@ void GoodsEntry::UpdateFlowStats(StationID source, uint count, StationID next)
 }
 
 /**
- * update the flow stats for "count" cargo that cannot be delivered here.
- * @param source the ID of station where the cargo is from
- * @param count the amount of cargo
- * @param curr the ID of station where it is stored for now
- * @return the ID of the station where the cargo is sent next
+ * Update the flow stats for "count" cargo that cannot be delivered here.
+ * @param source ID of station where the cargo is from.
+ * @param count Amount of cargo.
+ * @param curr ID of station where it is stored for now.
+ * @return ID of the station where the cargo is sent next.
  */
-StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, StationID curr) {
+StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, StationID curr)
+{
 	if (source == INVALID_STATION || this->flows.empty()) return INVALID_STATION;
 	FlowStatSet &flow_stats = this->flows[source];
 	FlowStatSet::iterator flow_it = flow_stats.begin();
@@ -3878,7 +3892,13 @@ StationID GoodsEntry::UpdateFlowStatsTransfer(StationID source, uint count, Stat
 	return INVALID_STATION;
 }
 
-FlowStat GoodsEntry::GetSumFlowVia(StationID via) const {
+/**
+ * Get the sum of flows via a specific station from this GoodsEntry.
+ * @param via Remote station to look for.
+ * @return a FlowStat with all flows for 'via' added up.
+ */
+FlowStat GoodsEntry::GetSumFlowVia(StationID via) const
+{
 	FlowStat ret(1, via);
 	for(FlowStatMap::const_iterator i = this->flows.begin(); i != this->flows.end(); ++i) {
 		const FlowStatSet &flow_set = i->second;

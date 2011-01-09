@@ -5,10 +5,13 @@ VPATH=.:./.git/refs/heads/
 gitmake-all: cd
 	touch gitmake-all
 	git checkout patches
-	mv patches/current/* current/
+	mv patches/current/*.diff current/
+	mv patches/current/incremental/* current/incremental
+	mv patches/incremental/* incremental/
 	mv patches/*.diff .
 	git add *.diff
-	git add current/*
+	git add current
+	git add incremental
 	git commit --allow-empty -m "patches for version `cat current/TRUNK_VERSION.txt`"
 	git checkout gitmake
 
@@ -18,7 +21,8 @@ check: clean gitmake-origin
 clean:
 	rm -f gitmake-origin
 	rm -rf patches
-	mkdir -p patches/current
+	mkdir -p patches/current/incremental
+	mkdir -p patches/incremental
 
 %:
 	git checkout ${@}-tmp
@@ -32,7 +36,7 @@ gitmake-origin:
 	git fetch git://git.openttd.org/openttd/trunk.git master:master
 	git log master | grep -m 1 '(svn r[0-9]*)' | awk '{print $$2}' | sed -e 's/)//' > gitmake-origin
 	cp gitmake-origin patches/current/TRUNK_VERSION.txt
-	git diff --numstat master gitmake | grep -v .gitignore | grep -v gitmake | grep -v make_diffs && touch gitmake-origin || touch -t 197001010100 gitmake-origin
+	git diff --numstat master gitmake | grep -v .gitignore | grep -v gitmake | grep -v make_diffs | grep -v whitespace && touch gitmake-origin || touch -t 197001010100 gitmake-origin
 
 gitmake: gitmake-origin
 	git checkout $@
@@ -65,12 +69,14 @@ selfaware-stationcargo: gitmake
 
 cargomap: flowmapping-core texteff multimap reservation selfaware-stationcargo
 
-reservation: gitmake 
+cargo-split-merge: gitmake
+
+reservation: cargo-split-merge
 
 multimap: gitmake 
 
 moving-average: gitmake 
 
-push: master gitmake patches cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in texteff cargomap multimap reservation moving-average selfaware-stationcargo
+push: master gitmake patches cd ext-rating station-gui smallmap-stats flowmapping-core mcf demands components capacities smallmap-zoom-in texteff cargomap multimap reservation moving-average selfaware-stationcargo cargo-split-merge
 	git push github $(^F)
 

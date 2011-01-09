@@ -212,11 +212,13 @@ void OrderList::Initialize(Order *chain, Vehicle *v)
 	this->first_shared = v;
 
 	this->num_orders = 0;
+	this->num_manual_orders = 0;
 	this->num_vehicles = 1;
 	this->timetable_duration = 0;
 
 	for (Order *o = this->first; o != NULL; o = o->next) {
 		++this->num_orders;
+		if (!o->IsType(OT_AUTOMATIC)) ++this->num_manual_orders;
 		this->timetable_duration += o->wait_time + o->travel_time;
 	}
 
@@ -239,6 +241,7 @@ void OrderList::FreeChain(bool keep_orderlist)
 	if (keep_orderlist) {
 		this->first = NULL;
 		this->num_orders = 0;
+		this->num_manual_orders = 0;
 		this->timetable_duration = 0;
 	} else {
 		delete this;
@@ -259,10 +262,10 @@ Order *OrderList::GetOrderAt(int index) const
 
 /**
  * Recursively determine the next deterministic station to stop at.
- * @param next the first order to check
- * @param curr_station the station the vehicle is just visiting or INVALID_STATION
- * @param hops the number of orders we have already checked.
- * @return the next stoppping station or INVALID_STATION
+ * @param next First order to check.
+ * @param curr_station Station the vehicle is just visiting or INVALID_STATION.
+ * @param hops Number of orders we have already checked.
+ * @return Next stoppping station or INVALID_STATION.
  */
 StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_station, uint hops) const
 {
@@ -287,9 +290,9 @@ StationID OrderList::GetNextStoppingStation(const Order *next, StationID curr_st
 
 /**
  * Get the next station the vehicle will stop at, if that is deterministic.
- * @param curr_order the ID of the current order
- * @param curr_station the station the vehicle is just visiting or INVALID_STATION
- * @return The ID of the next station the vehicle will stop at or INVALID_STATION
+ * @param curr_order ID of the current order.
+ * @param curr_station Station the vehicle is just visiting or INVALID_STATION.
+ * @return ID of the next station the vehicle will stop at or INVALID_STATION.
  */
 StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID curr_station) const
 {
@@ -303,7 +306,7 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID
 	 * we're at, we have to check the current order; otherwise we have to check
 	 * the next one.
 	 */
-	if (curr_station == INVALID_STATION || 
+	if (curr_station == INVALID_STATION ||
 			!(curr->IsType(OT_GOTO_STATION) || curr->IsType(OT_AUTOMATIC)) ||
 			curr_station != curr->GetDestination()) {
 		return this->GetNextStoppingStation(curr, curr_station, 0);
@@ -332,6 +335,7 @@ void OrderList::InsertOrderAt(Order *new_order, int index)
 		}
 	}
 	++this->num_orders;
+	if (!new_order->IsType(OT_AUTOMATIC)) ++this->num_manual_orders;
 	this->timetable_duration += new_order->wait_time + new_order->travel_time;
 }
 
@@ -351,6 +355,7 @@ void OrderList::DeleteOrderAt(int index)
 		prev->next = to_remove->next;
 	}
 	--this->num_orders;
+	if (!to_remove->IsType(OT_AUTOMATIC)) --this->num_manual_orders;
 	this->timetable_duration -= (to_remove->wait_time + to_remove->travel_time);
 	delete to_remove;
 }
@@ -417,6 +422,7 @@ bool OrderList::IsCompleteTimetable() const
 void OrderList::DebugCheckSanity() const
 {
 	VehicleOrderID check_num_orders = 0;
+	VehicleOrderID check_num_manual_orders = 0;
 	uint check_num_vehicles = 0;
 	Ticks check_timetable_duration = 0;
 
@@ -424,9 +430,11 @@ void OrderList::DebugCheckSanity() const
 
 	for (const Order *o = this->first; o != NULL; o = o->next) {
 		++check_num_orders;
+		if (!o->IsType(OT_AUTOMATIC)) ++check_num_manual_orders;
 		check_timetable_duration += o->wait_time + o->travel_time;
 	}
 	assert(this->num_orders == check_num_orders);
+	assert(this->num_manual_orders == check_num_manual_orders);
 	assert(this->timetable_duration == check_timetable_duration);
 
 	for (const Vehicle *v = this->first_shared; v != NULL; v = v->NextShared()) {
@@ -434,8 +442,9 @@ void OrderList::DebugCheckSanity() const
 		assert(v->orders.list == this);
 	}
 	assert(this->num_vehicles == check_num_vehicles);
-	DEBUG(misc, 6, "... detected %u orders, %u vehicles, %i ticks", (uint)this->num_orders,
-	      this->num_vehicles, this->timetable_duration);
+	DEBUG(misc, 6, "... detected %u orders (%u manual), %u vehicles, %i ticks",
+			(uint)this->num_orders, (uint)this->num_manual_orders,
+			this->num_vehicles, this->timetable_duration);
 }
 
 /**
@@ -763,7 +772,7 @@ void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord)
 		}
 		/* Update any possible open window of the vehicle */
 		InvalidateVehicleOrder(u, INVALID_VEH_ORDER_ID | (sel_ord << 8));
-		
+
 		RecalcFrozenIfLoading(u);
 	}
 
@@ -847,8 +856,6 @@ void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord)
 	Vehicle *u = v->FirstShared();
 	DeleteOrderWarnings(u);
 	for (; u != NULL; u = u->NextShared()) {
-		if (sel_ord < u->cur_order_index) u->cur_order_index--;
-
 		assert(v->orders.list == u->orders.list);
 
 		/* NON-stop flag is misused to see if a train is in a station that is
@@ -859,6 +866,8 @@ void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord)
 			 * stay indefinitely at this station anymore. */
 			if (u->current_order.GetLoadType() & OLFB_FULL_LOAD) u->current_order.SetLoadType(OLF_LOAD_IF_POSSIBLE);
 		}
+
+		if (sel_ord < u->cur_order_index) u->cur_order_index--;
 
 		/* Update any possible open window of the vehicle */
 		InvalidateVehicleOrder(u, sel_ord | (INVALID_VEH_ORDER_ID << 8));
@@ -1391,7 +1400,7 @@ CommandCost CmdOrderRefit(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 	CargoID cargo = GB(p2, 0, 8);
 	byte subtype  = GB(p2, 8, 8);
 
-	if (cargo >= NUM_CARGO) return CMD_ERROR;
+	if (cargo >= NUM_CARGO && cargo != CT_NO_REFIT) return CMD_ERROR;
 
 	const Vehicle *v = Vehicle::GetIfValid(veh);
 	if (v == NULL || !v->IsPrimaryVehicle()) return CMD_ERROR;
