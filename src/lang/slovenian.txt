@@ -742,8 +742,8 @@ STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHIT
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Onemogoči vse
 STR_SMALLMAP_ENABLE_ALL                                         :{BLACK}Omogoči vse
 STR_SMALLMAP_SHOW_HEIGHT                                        :{BLACK}Prikaži višino
-STR_SMALLMAP_TOOLTIP_DISABLE_ALL                                :{BLACK}Na zemljevidu ne prikaži nobene industrije
-STR_SMALLMAP_TOOLTIP_ENABLE_ALL                                 :{BLACK}Na zemljevidu prikaži vse industrije
+STR_SMALLMAP_TOOLTIP_DISABLE_ALL_INDUSTRIES                     :{BLACK}Na zemljevidu ne prikaži nobene industrije
+STR_SMALLMAP_TOOLTIP_ENABLE_ALL_INDUSTRIES                      :{BLACK}Na zemljevidu prikaži vse industrije
 STR_SMALLMAP_TOOLTIP_SHOW_HEIGHT                                :{BLACK}Preklopi vidljivost višinske karte
 
 # Status bar messages
@@ -2322,7 +2322,7 @@ STR_LAI_OBJECT_DESCRIPTION_COMPANY_OWNED_LAND                   :Ozemlje v lasti
 STR_ABOUT_OPENTTD                                               :{WHITE}O OpenTTD
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Prvotne avtorske pravice {COPYRIGHT} 1995 Chris Sawyer, vse pravice pridržane
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD različica {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2010 ekipa OpenTTD
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT}2002-2011 ekipa OpenTTD
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Shrani igro
@@ -3294,6 +3294,8 @@ STR_ORDER_STOP_ORDER                                            :(Stop)
 
 STR_ORDER_GO_TO_STATION                                         :{STRING} {STATION} {STRING}
 
+STR_ORDER_AUTOMATIC                                             :(Avtomatično)
+
 STR_ORDER_FULL_LOAD                                             :(Napolni)
 STR_ORDER_FULL_LOAD_ANY                                         :(Napolni kakršenkoli tovor)
 STR_ORDER_NO_LOAD                                               :(Brez polnjenja)
@@ -3327,6 +3329,7 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Preklop 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Urnik - klikni na ukaz, da ga označiš
 
 STR_TIMETABLE_NO_TRAVEL                                         :Brez potovanja
+STR_TIMETABLE_NOT_TIMETABLEABLE                                 :Potovanje (avtomatično; urnik z naslednjim ukazom)
 STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Potovanje (brez urnika)
 STR_TIMETABLE_TRAVEL_FOR                                        :Potuj za {STRING}
 STR_TIMETABLE_STAY_FOR                                          :in ostani za {STRING}

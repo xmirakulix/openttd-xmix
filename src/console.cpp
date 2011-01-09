@@ -20,13 +20,8 @@
 
 #include <stdarg.h>
 
-#define ICON_BUFFER 79
-#define ICON_HISTORY_SIZE 20
-#define ICON_LINE_HEIGHT 12
-#define ICON_RIGHT_BORDERWIDTH 10
-#define ICON_BOTTOM_BORDERWIDTH 12
-#define ICON_MAX_ALIAS_LINES 40
-#define ICON_TOKEN_COUNT 20
+static const uint ICON_TOKEN_COUNT = 20;     ///< Maximum number of tokens in one command
+static const uint ICON_MAX_ALIAS_LINES = 40; ///< Maximum number of commands executed by one alias
 
 /* console parser */
 IConsoleCmd   *_iconsole_cmds;    ///< list of registered commands
@@ -89,8 +84,10 @@ void IConsoleFree()
  * @param colour_code the colour of the command. Red in case of errors, etc.
  * @param string the message entered or output on the console (notice, error, etc.)
  */
-void IConsolePrint(ConsoleColour colour_code, const char *string)
+void IConsolePrint(TextColour colour_code, const char *string)
 {
+	assert(IsValidConsoleColour(colour_code));
+
 	char *str;
 #ifdef ENABLE_NETWORK
 	if (_redirect_console_to_client != INVALID_CLIENT_ID) {
@@ -131,8 +128,10 @@ void IConsolePrint(ConsoleColour colour_code, const char *string)
  * by any other means. Uses printf() style format, for more information look
  * at IConsolePrint()
  */
-void CDECL IConsolePrintF(ConsoleColour colour_code, const char *format, ...)
+void CDECL IConsolePrintF(TextColour colour_code, const char *format, ...)
 {
+	assert(IsValidConsoleColour(colour_code));
+
 	va_list va;
 	char buf[ICON_MAX_STREAMSIZE];
 

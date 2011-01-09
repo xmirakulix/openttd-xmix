@@ -1231,7 +1231,7 @@ void VehicleEnterDepot(Vehicle *v)
 	if (v->current_order.IsType(OT_GOTO_DEPOT)) {
 		SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 
-		const Order *real_order = v->GetOrder(v->cur_order_index);
+		const Order *real_order = v->GetNextManualOrder(v->cur_order_index);
 		Order t = v->current_order;
 		v->current_order.MakeDummy();
 
@@ -1744,7 +1744,16 @@ void Vehicle::BeginLoading()
 
 	if (this->current_order.IsType(OT_GOTO_STATION) &&
 			this->current_order.GetDestination() == this->last_station_visited) {
-		current_order.MakeLoading(true);
+		/* Delete all automatic orders which were not reached */
+		const Order *order = this->GetOrder(this->cur_order_index);
+		while (order != NULL && order->IsType(OT_AUTOMATIC)) {
+			/* Delete order effectively deletes order, so get the next before deleting it. */
+			order = order->next;
+			DeleteOrder(this, this->cur_order_index);
+		}
+
+		/* Now cur_order_index points to the destination station, and we can start loading */
+		this->current_order.MakeLoading(true);
 		UpdateVehicleTimetable(this, true);
 
 		/* Furthermore add the Non Stop flag to mark that this station
@@ -1755,7 +1764,19 @@ void Vehicle::BeginLoading()
 		this->current_order.SetNonStopType(ONSF_NO_STOP_AT_ANY_STATION);
 
 	} else {
-		current_order.MakeLoading(false);
+		/* We weren't scheduled to stop here. Insert an automatic order
+		 * to show that we are stopping here. */
+		Order *in_list = this->GetOrder(this->cur_order_index);
+		if ((this->orders.list == NULL || this->orders.list->GetNumOrders() < MAX_VEH_ORDER_ID) &&
+				((in_list == NULL && this->cur_order_index == 0) ||
+				(in_list != NULL && (!in_list->IsType(OT_AUTOMATIC) ||
+				in_list->GetDestination() != this->last_station_visited)))) {
+			Order *auto_order = new Order();
+			auto_order->MakeAutomatic(this->last_station_visited);
+			InsertOrder(this, auto_order, this->cur_order_index);
+			if (this->cur_order_index > 0) --this->cur_order_index;
+		}
+		this->current_order.MakeLoading(false);
 	}
 
 	Station::Get(this->last_station_visited)->loading_vehicles.push_back(this);
@@ -1808,11 +1829,8 @@ void Vehicle::HandleLoading(bool mode)
 
 			this->PlayLeaveStationSound();
 
-			bool at_destination_station = this->current_order.GetNonStopType() != ONSF_STOP_EVERYWHERE;
 			this->LeaveStation();
 
-			/* If this was not the final order, don't remove it from the list. */
-			if (!at_destination_station) return;
 			break;
 		}
 
@@ -2141,6 +2159,20 @@ void Vehicle::RemoveFromShared()
 
 	this->next_shared     = NULL;
 	this->previous_shared = NULL;
+}
+
+/**
+ * Get the next manual (not OT_AUTOMATIC) order after the one at the given index.
+ * @param index The index to start searching at.
+ * @return The next manual order at or after index or NULL if there is none.
+ */
+Order *Vehicle::GetNextManualOrder(int index) const
+{
+	Order *order = this->GetOrder(index);
+	while(order != NULL && order->IsType(OT_AUTOMATIC)) {
+		order = order->next;
+	}
+	return order;
 }
 
 void StopAllVehicles()

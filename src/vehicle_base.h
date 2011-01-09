@@ -174,7 +174,7 @@ public:
 	byte spritenum;                     ///< currently displayed sprite index
 	                                    ///< 0xfd == custom sprite, 0xfe == custom second head sprite
 	                                    ///< 0xff == reserved for another custom sprite
-	uint16 cur_image;                   ///< sprite number for this vehicle
+	SpriteID cur_image;                 ///< sprite number for this vehicle
 	byte x_extent;                      ///< x-extent of vehicle bounding box
 	byte y_extent;                      ///< y-extent of vehicle bounding box
 	byte z_extent;                      ///< z-extent of vehicle bounding box
@@ -549,6 +549,12 @@ public:
 	inline VehicleOrderID GetNumOrders() const { return (this->orders.list == NULL) ? 0 : this->orders.list->GetNumOrders(); }
 
 	/**
+	 * Get the number of manually added orders this vehicle has.
+	 * @return the number of manually added orders this vehicle has.
+	 */
+	inline VehicleOrderID GetNumManualOrders() const { return (this->orders.list == NULL) ? 0 : this->orders.list->GetNumManualOrders(); }
+
+	/**
 	 * Copy certain configurations and statistics of a vehicle after successful autoreplace/renew
 	 * The function shall copy everything that cannot be copied by a command (like orders / group etc),
 	 * and that shall not be resetted for the new vehicle.
@@ -661,6 +667,8 @@ public:
 	{
 		return (this->orders.list == NULL) ? NULL : this->orders.list->GetOrderAt(index);
 	}
+
+	Order *GetNextManualOrder(int index) const;
 
 	/**
 	 * Returns the last order of a vehicle, or NULL if it doesn't exists

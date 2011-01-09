@@ -17,6 +17,7 @@
 #include "transport_type.h"
 #include "network/core/config.h"
 #include "company_type.h"
+#include "openttd.h"
 
 /** Settings related to the difficulty of the game */
 struct DifficultySettings {
@@ -99,7 +100,7 @@ struct GUISettings {
 	bool   station_dragdrop;                 ///< whether drag and drop is enabled for stations
 	bool   station_show_coverage;            ///< whether to highlight coverage area
 	bool   persistent_buildingtools;         ///< keep the building tools active after usage
-	uint8  expenses_layout;                  ///< layout of expenses window
+	bool   expenses_layout;                  ///< layout of expenses window
 
 	uint16 console_backlog_timeout;          ///< the minimum amount of time items should be in the console backlog before they will be removed in ~3 seconds granularity.
 	uint16 console_backlog_length;           ///< the minimum amount of items in the console backlog before items will be removed.
@@ -213,6 +214,11 @@ struct ConstructionSettings {
 	bool   freeform_edges;                   ///< allow terraforming the tiles at the map edges
 	uint8  extra_tree_placement;             ///< (dis)allow building extra trees in-game
 	uint8  command_pause_level;              ///< level/amount of commands that can't be executed while paused
+
+	uint32 terraform_per_64k_frames;         ///< how many tile heights may, over a long period, be terraformed per 65536 frames?
+	uint16 terraform_frame_burst;            ///< how many tile heights may, over a short period, be terraformed?
+	uint32 clear_per_64k_frames;             ///< how many tiles may, over a long period, be cleared per 65536 frames?
+	uint16 clear_frame_burst;                ///< how many tiles may, over a short period, be cleared?
 };
 
 /** Settings related to the AI. */
@@ -437,5 +443,14 @@ extern GameSettings _settings_game;
 
 /** The settings values that are used for new games and/or modified in config file. */
 extern GameSettings _settings_newgame;
+
+/**
+ * Get the settings-object applicable for the current situation: the newgame settings
+ * when we're in the main menu and otherwise the settings of the current game.
+ */
+static inline GameSettings &GetGameSettings()
+{
+	return (_game_mode == GM_MENU) ? _settings_newgame : _settings_game;
+}
 
 #endif /* SETTINGS_TYPE_H */

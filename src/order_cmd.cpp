@@ -99,6 +99,12 @@ void Order::MakeConditional(VehicleOrderID order)
 	this->dest = 0;
 }
 
+void Order::MakeAutomatic(StationID destination)
+{
+	this->type = OT_AUTOMATIC;
+	this->dest = destination;
+}
+
 void Order::SetRefit(CargoID cargo, byte subtype)
 {
 	this->refit_cargo = cargo;
@@ -206,11 +212,13 @@ void OrderList::Initialize(Order *chain, Vehicle *v)
 	this->first_shared = v;
 
 	this->num_orders = 0;
+	this->num_manual_orders = 0;
 	this->num_vehicles = 1;
 	this->timetable_duration = 0;
 
 	for (Order *o = this->first; o != NULL; o = o->next) {
 		++this->num_orders;
+		if (!o->IsType(OT_AUTOMATIC)) ++this->num_manual_orders;
 		this->timetable_duration += o->wait_time + o->travel_time;
 	}
 
@@ -233,6 +241,7 @@ void OrderList::FreeChain(bool keep_orderlist)
 	if (keep_orderlist) {
 		this->first = NULL;
 		this->num_orders = 0;
+		this->num_manual_orders = 0;
 		this->timetable_duration = 0;
 	} else {
 		delete this;
@@ -271,6 +280,7 @@ void OrderList::InsertOrderAt(Order *new_order, int index)
 		}
 	}
 	++this->num_orders;
+	if (!new_order->IsType(OT_AUTOMATIC)) ++this->num_manual_orders;
 	this->timetable_duration += new_order->wait_time + new_order->travel_time;
 }
 
@@ -290,6 +300,7 @@ void OrderList::DeleteOrderAt(int index)
 		prev->next = to_remove->next;
 	}
 	--this->num_orders;
+	if (!to_remove->IsType(OT_AUTOMATIC)) --this->num_manual_orders;
 	this->timetable_duration -= (to_remove->wait_time + to_remove->travel_time);
 	delete to_remove;
 }
@@ -346,6 +357,8 @@ int OrderList::GetPositionInSharedOrderList(const Vehicle *v) const
 bool OrderList::IsCompleteTimetable() const
 {
 	for (Order *o = this->first; o != NULL; o = o->next) {
+		/* Automatic orders are, by definition, not timetabled. */
+		if (o->IsType(OT_AUTOMATIC)) continue;
 		if (!o->IsCompletelyTimetabled()) return false;
 	}
 	return true;
@@ -354,6 +367,7 @@ bool OrderList::IsCompleteTimetable() const
 void OrderList::DebugCheckSanity() const
 {
 	VehicleOrderID check_num_orders = 0;
+	VehicleOrderID check_num_manual_orders = 0;
 	uint check_num_vehicles = 0;
 	Ticks check_timetable_duration = 0;
 
@@ -361,9 +375,11 @@ void OrderList::DebugCheckSanity() const
 
 	for (const Order *o = this->first; o != NULL; o = o->next) {
 		++check_num_orders;
+		if (!o->IsType(OT_AUTOMATIC)) ++check_num_manual_orders;
 		check_timetable_duration += o->wait_time + o->travel_time;
 	}
 	assert(this->num_orders == check_num_orders);
+	assert(this->num_manual_orders == check_num_manual_orders);
 	assert(this->timetable_duration == check_timetable_duration);
 
 	for (const Vehicle *v = this->first_shared; v != NULL; v = v->NextShared()) {
@@ -371,8 +387,9 @@ void OrderList::DebugCheckSanity() const
 		assert(v->orders.list == this);
 	}
 	assert(this->num_vehicles == check_num_vehicles);
-	DEBUG(misc, 6, "... detected %u orders, %u vehicles, %i ticks", (uint)this->num_orders,
-	      this->num_vehicles, this->timetable_duration);
+	DEBUG(misc, 6, "... detected %u orders (%u manual), %u vehicles, %i ticks",
+			(uint)this->num_orders, (uint)this->num_manual_orders,
+			this->num_vehicles, this->timetable_duration);
 }
 
 /**
@@ -779,8 +796,6 @@ void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord)
 	Vehicle *u = v->FirstShared();
 	DeleteOrderWarnings(u);
 	for (; u != NULL; u = u->NextShared()) {
-		if (sel_ord < u->cur_order_index) u->cur_order_index--;
-
 		assert(v->orders.list == u->orders.list);
 
 		/* NON-stop flag is misused to see if a train is in a station that is
@@ -791,6 +806,8 @@ void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord)
 			 * stay indefinitely at this station anymore. */
 			if (u->current_order.GetLoadType() & OLFB_FULL_LOAD) u->current_order.SetLoadType(OLF_LOAD_IF_POSSIBLE);
 		}
+
+		if (sel_ord < u->cur_order_index) u->cur_order_index--;
 
 		/* Update any possible open window of the vehicle */
 		InvalidateVehicleOrder(u, sel_ord | (INVALID_VEH_ORDER_ID << 8));
@@ -1315,7 +1332,7 @@ CommandCost CmdOrderRefit(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 	CargoID cargo = GB(p2, 0, 8);
 	byte subtype  = GB(p2, 8, 8);
 
-	if (cargo >= NUM_CARGO) return CMD_ERROR;
+	if (cargo >= NUM_CARGO && cargo != CT_NO_REFIT) return CMD_ERROR;
 
 	const Vehicle *v = Vehicle::GetIfValid(veh);
 	if (v == NULL || !v->IsPrimaryVehicle()) return CMD_ERROR;
@@ -1446,9 +1463,20 @@ void RemoveOrderFromAllVehicles(OrderType type, DestinationID destination)
 		int id = -1;
 		FOR_VEHICLE_ORDERS(v, order) {
 			id++;
-			if (order->IsType(OT_GOTO_DEPOT) && (order->GetDepotActionType() & ODATFB_NEAREST_DEPOT) != 0) continue;
-			if ((v->type == VEH_AIRCRAFT && order->IsType(OT_GOTO_DEPOT) ? OT_GOTO_STATION : order->GetType()) == type &&
-					order->GetDestination() == destination) {
+
+			OrderType ot = order->GetType();
+			if (ot == OT_GOTO_DEPOT && (order->GetDepotActionType() & ODATFB_NEAREST_DEPOT) != 0) continue;
+			if (ot == OT_AUTOMATIC || (v->type == VEH_AIRCRAFT && ot == OT_GOTO_DEPOT)) ot = OT_GOTO_STATION;
+			if (ot == type && order->GetDestination() == destination) {
+				/* We want to clear automatic orders, but we don't want to make them
+				 * dummy orders. They should just vanish. Also check the actual order
+				 * type as ot is currently OT_GOTO_STATION. */
+				if (order->IsType(OT_AUTOMATIC)) {
+					DeleteOrder(v, id);
+					id--;
+					continue;
+				}
+
 				order->MakeDummy();
 				for (const Vehicle *w = v->FirstShared(); w != NULL; w = w->NextShared()) {
 					/* In GUI, simulate by removing the order and adding it back */
@@ -1653,7 +1681,15 @@ bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth)
 	assert(v->cur_order_index < v->GetNumOrders());
 
 	/* Get the current order */
-	order = v->GetOrder(v->cur_order_index);
+	order = v->GetNextManualOrder(v->cur_order_index);
+	if (order == NULL) {
+		order = v->GetNextManualOrder(0);
+		if (order == NULL) {
+			v->current_order.Free();
+			v->dest_tile = 0;
+			return false;
+		}
+	}
 	v->current_order = *order;
 	return UpdateOrderDest(v, order, conditional_depth + 1);
 }
@@ -1708,7 +1744,7 @@ bool ProcessOrders(Vehicle *v)
 	/* Get the current order */
 	if (v->cur_order_index >= v->GetNumOrders()) v->cur_order_index = 0;
 
-	const Order *order = v->GetOrder(v->cur_order_index);
+	const Order *order = v->GetNextManualOrder(v->cur_order_index);
 
 	/* If no order, do nothing. */
 	if (order == NULL || (v->type == VEH_AIRCRAFT && !CheckForValidOrders(v))) {

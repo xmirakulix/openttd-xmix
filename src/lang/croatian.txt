@@ -444,6 +444,7 @@ STR_SCENEDIT_FILE_MENU_QUIT                                     :Završi
 STR_SETTINGS_MENU_GAME_OPTIONS                                  :Postavke igre
 STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Postavke težine
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Napredne postavke
+STR_SETTINGS_MENU_AI_SETTINGS                                   :UI postavke
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Postavke za NewGRF
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Postavke prozirnosti
 STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Prikaži imena gradova
@@ -759,6 +760,8 @@ STR_SMALLMAP_TOOLTIP_SHOW_INDUSTRIES_ON_MAP                     :{BLACK}Pokaži 
 STR_SMALLMAP_TOOLTIP_SHOW_TRANSPORT_ROUTES_ON                   :{BLACK}Pokaži prijevozne trase na karti
 STR_SMALLMAP_TOOLTIP_SHOW_VEGETATION_ON_MAP                     :{BLACK}Pokaži vegetaciju na karti
 STR_SMALLMAP_TOOLTIP_SHOW_LAND_OWNERS_ON_MAP                    :{BLACK}Pokaži vlasnike zemlje na karti
+STR_SMALLMAP_TOOLTIP_INDUSTRY_SELECTION                         :{BLACK}Klikni na tip industrije za njen prikaz. Ctrl+Klik isključuje sve tipove industrije osim odabrane. Ponovni Ctrl+Klik uključuje sve tipove industrije.
+STR_SMALLMAP_TOOLTIP_COMPANY_SELECTION                          :{BLACK}Klikni na kompaniju za prikaz njenog vlasništva. Ctrl+Klik isključuje sve kompanije osim odabrane. Ponovni Ctrl+Klik uključuje sve kompanije.
 
 STR_SMALLMAP_LEGENDA_ROADS                                      :{TINYFONT}{BLACK}Ceste
 STR_SMALLMAP_LEGENDA_RAILROADS                                  :{TINYFONT}{BLACK}Željeznice
@@ -792,13 +795,16 @@ STR_SMALLMAP_LEGENDA_SNOW                                       :{TINYFONT}{BLAC
 STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF                   :{BLACK}Prikaži/sakrij imena gradova na karti
 STR_SMALLMAP_CENTER                                             :{BLACK}Centriraj malu kartu na trenutni položaj
 STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRING} ({NUM})
+STR_SMALLMAP_COMPANY                                            :{TINYFONT}{COMPANY}
 STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Onemogući sve
 STR_SMALLMAP_ENABLE_ALL                                         :{BLACK}Omogući sve
 STR_SMALLMAP_SHOW_HEIGHT                                        :{BLACK}Pokaži visinu
-STR_SMALLMAP_TOOLTIP_DISABLE_ALL                                :{BLACK}Ne prikazuj industrije na karti
-STR_SMALLMAP_TOOLTIP_ENABLE_ALL                                 :{BLACK}Prikaži sve industrije na karti
+STR_SMALLMAP_TOOLTIP_DISABLE_ALL_INDUSTRIES                     :{BLACK}Ne prikazuj industrije na karti
+STR_SMALLMAP_TOOLTIP_ENABLE_ALL_INDUSTRIES                      :{BLACK}Prikaži sve industrije na karti
 STR_SMALLMAP_TOOLTIP_SHOW_HEIGHT                                :{BLACK}Aktiviraj prikaz visinske karte
+STR_SMALLMAP_TOOLTIP_DISABLE_ALL_COMPANIES                      :{BLACK}Prikaži sve što nije vlasništvo kompanije na mapi
+STR_SMALLMAP_TOOLTIP_ENABLE_ALL_COMPANIES                       :{BLACK}Prikaži sve vlasništvo kompanije na mapi
 
 # Status bar messages
 STR_STATUSBAR_TOOLTIP_SHOW_LAST_NEWS                            :{BLACK}Pokaži zadnju poruku ili vijest
@@ -1274,7 +1280,7 @@ STR_CONFIG_SETTING_HEIGHTMAP_ROTATION                           :{LTBLUE}Rotacij
 STR_CONFIG_SETTING_HEIGHTMAP_ROTATION_COUNTER_CLOCKWISE         :Obrnuto od smjera kazaljke na satu
 STR_CONFIG_SETTING_HEIGHTMAP_ROTATION_CLOCKWISE                 :U smjeru kazaljke na satu
 STR_CONFIG_SETTING_SE_FLAT_WORLD_HEIGHT                         :{LTBLUE}Visinski nivo koji ravna mapa u scenariju dobiva: {ORANGE}{STRING}
-STR_CONFIG_SETTING_ENABLE_FREEFORM_EDGES                        :{LTBLUE}Omogući teraformiranje pločica na rubu karte: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ENABLE_FREEFORM_EDGES                        :{LTBLUE}Omogući teraformiranje polja na rubovima karte: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EDGES_NOT_EMPTY                              :{WHITE}Jedna ili više pločica na sjevernom rubu nisu prazne
 STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Jedna ili više pločica na jednom od rubova nije voda
 
@@ -2070,6 +2076,7 @@ STR_SELECT_RAIL_BRIDGE_CAPTION                                  :{WHITE}Odaberi 
 STR_SELECT_ROAD_BRIDGE_CAPTION                                  :{WHITE}Odaberi cestovni most
 STR_SELECT_BRIDGE_SELECTION_TOOLTIP                             :{BLACK}Izbor mosta - klikni na most koji želiš izgraditi
 STR_SELECT_BRIDGE_INFO                                          :{GOLD}{STRING},{} {VELOCITY} {WHITE}{CURRENCY}
+STR_SELECT_BRIDGE_SCENEDIT_INFO                                 :{GOLD}{STRING},{} {VELOCITY}
 STR_BRIDGE_NAME_SUSPENSION_STEEL                                :Viseći, čelični
 STR_BRIDGE_NAME_GIRDER_STEEL                                    :Noseći, čelični
 STR_BRIDGE_NAME_CANTILEVER_STEEL                                :Konzolni, čelični
@@ -2376,7 +2383,7 @@ STR_LAI_OBJECT_DESCRIPTION_COMPANY_OWNED_LAND                   :Zemlja u posjed
 STR_ABOUT_OPENTTD                                               :{WHITE}O OpenTTD-u
 STR_ABOUT_ORIGINAL_COPYRIGHT                                    :{BLACK}Izvorno autorsko pravo {COPYRIGHT} 1995 Chris Sawyer, sva prava pridržana
 STR_ABOUT_VERSION                                               :{BLACK}OpenTTD verzija {REV}
-STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT} 2002-2010 OpenTTD tim
+STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT} 2002-2011 OpenTTD tim
 
 # Save/load game/scenario
 STR_SAVELOAD_SAVE_CAPTION                                       :{WHITE}Spremi igru
@@ -3348,6 +3355,8 @@ STR_ORDER_STOP_ORDER                                            :(Stani)
 
 STR_ORDER_GO_TO_STATION                                         :{STRING} {STATION} {STRING}
 
+STR_ORDER_AUTOMATIC                                             :(Automatsko)
+
 STR_ORDER_FULL_LOAD                                             :(Puni ukrcaj)
 STR_ORDER_FULL_LOAD_ANY                                         :(Puni ukrcaj bilo kojeg tereta)
 STR_ORDER_NO_LOAD                                               :(Nema ukrcaja)
@@ -3381,6 +3390,7 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Promijen
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Vozni red - klikni na naredbu kako bi ju označio.
 
 STR_TIMETABLE_NO_TRAVEL                                         :Nema putovanja
+STR_TIMETABLE_NOT_TIMETABLEABLE                                 :Putovanje (automatsko; prema rasporedu sljedeće ručno određene naredbe)
 STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Putovanje (izvan voznog reda)
 STR_TIMETABLE_TRAVEL_FOR                                        :Putovanje za {STRING}
 STR_TIMETABLE_STAY_FOR                                          :i boravak za {STRING}
@@ -3562,6 +3572,8 @@ STR_ERROR_SITE_UNSUITABLE                                       :{WHITE}... nepr
 STR_ERROR_ALREADY_BUILT                                         :{WHITE}... već izgrađeno
 STR_ERROR_OWNED_BY                                              :{WHITE}... u vlasništvu {STRING}
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}... područje je u vlasništvu druge tvrtke
+STR_ERROR_TERRAFORM_LIMIT_REACHED                               :{WHITE}... dosegnut limit preobrazbe terena
+STR_ERROR_CLEARING_LIMIT_REACHED                                :{WHITE}... dosegnut limit čišćenja polja
 STR_ERROR_NAME_MUST_BE_UNIQUE                                   :{WHITE}Ime mora biti jedinstveno
 STR_ERROR_GENERIC_OBJECT_IN_THE_WAY                             :{WHITE}{1:STRING} na putu
 STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}Nije dozvoljeno za vrijeme pauze
