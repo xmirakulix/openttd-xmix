@@ -1258,8 +1258,8 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Automat
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Automatski obnovi vozilo {ORANGE}{STRING}{LTBLUE} mjeseci prije/poslije maksimalne starosti
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Minimum novca potrebnih za automatsko obnavljanje: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Trajanje poruke s greškom: {ORANGE}{STRING} sekundi
-STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Odgoda lebdjećih događaja: {ORANGE}{STRING} sekundi
-STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Odgoda lebdjećih dođađaja: {ORANGE}isključen
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Prikaz savjeta za alate: {ORANGE}Prikaži na {STRING} sekundi
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Prikaži savjete za alate: {ORANGE}Desni klik
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Pokaži broj stanovnika u oznaci imena grada: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Generator zemlje: {ORANGE}{STRING}
@@ -2180,7 +2180,7 @@ STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Kupi zem
 # Object construction window
 STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Odabir objekta
 STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Odaberi objekt za izgradnju. Shift mijenja prikaz građenje/procjena troškova.
-STR_OBJECT_BUILD_CLASS_LABEL                                    :{BLACK}Klasa objekta
+STR_OBJECT_BUILD_CLASS_TOOLTIP                                  :{BLACK}Odaberi vrstu objekta za izgradnju
 STR_OBJECT_BUILD_PREVIEW_TOOLTIP                                :{BLACK}Pregled objekta
 STR_OBJECT_BUILD_SIZE                                           :{BLACK}Veličina: {GOLD}{NUM} x {NUM} polja
 
@@ -4403,6 +4403,7 @@ STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLAC
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_ORANGE_STRING                                               :{ORANGE}{STRING}
 STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_HEIGHT                                           :{TINYFONT}{BLACK}{HEIGHT}

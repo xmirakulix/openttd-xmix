@@ -528,7 +528,7 @@ STR_GRAPH_COMPANY_VALUES_CAPTION                                :{WHITE}Valores 
 
 STR_GRAPH_CARGO_PAYMENT_RATES_CAPTION                           :{WHITE}Tasas de pago por carga
 STR_GRAPH_CARGO_PAYMENT_RATES_X_LABEL                           :{TINYFONT}{BLACK}Días en tránsito
-STR_GRAPH_CARGO_PAYMENT_RATES_TITLE                             :{TINYFONT}{BLACK}Pago por entregar 10 unidades (o 1,000 litros) de mercancía a una distancia de 20 cuadros
+STR_GRAPH_CARGO_PAYMENT_RATES_TITLE                             :{TINYFONT}{BLACK}Pago por entregar 10 unidades (o 1,000 litros) de mercancía a una distancia de 20 casillas
 STR_GRAPH_CARGO_ENABLE_ALL                                      :{TINYFONT}{BLACK}Activar todos
 STR_GRAPH_CARGO_DISABLE_ALL                                     :{TINYFONT}{BLACK}Desactivar todos
 STR_GRAPH_CARGO_TOOLTIP_ENABLE_ALL                              :{BLACK}Mostrar todos los tipos de carga en el gráfico de tarifas de pagos por carga
@@ -1163,8 +1163,8 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Renovac
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Renovar automáticamente vehículos que estén a {ORANGE}{STRING}{LTBLUE} mes{P 0:1 "" es} antes/después de su edad máxima
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Mínimo de dinero requerido para renovación automática: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Duración de mensajes de error: {ORANGE}{STRING} segundo{P 0:1 "" s}
-STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Retraso requerido al mantener ratón: {ORANGE}{STRING} segundo{P 0:1 "" s}
-STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Retraso requerido al mantener ratón: {ORANGE}desactivado
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Mostrar mensajes de ayuda: {ORANGE}Mantener ratón durante {STRING} segundo{P 0:1 "" s}
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Mostrar mensajes de ayuda: {ORANGE}Click derecho
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Muestra la población de un pueblo en su etiqueta: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Generador terreno: {ORANGE}{STRING}
@@ -1186,8 +1186,8 @@ STR_CONFIG_SETTING_HEIGHTMAP_ROTATION_COUNTER_CLOCKWISE         :A la izquierda
 STR_CONFIG_SETTING_HEIGHTMAP_ROTATION_CLOCKWISE                 :Sentido horario
 STR_CONFIG_SETTING_SE_FLAT_WORLD_HEIGHT                         :{LTBLUE}El nivel de la altura del mapa plano tiene: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ENABLE_FREEFORM_EDGES                        :{LTBLUE}Habilitar la modificación del terreno en los bordes del mapa: {ORANGE}{STRING}
-STR_CONFIG_SETTING_EDGES_NOT_EMPTY                              :{WHITE}Uno o más cuadrados del borde más al norte no están vacios
-STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Uno o más cuadrados en uno de los bordes no son agua
+STR_CONFIG_SETTING_EDGES_NOT_EMPTY                              :{WHITE}Una o más casillas del borde norte no están vacías
+STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Una o más casillas en uno de los bordes no son agua
 
 STR_CONFIG_SETTING_STATION_SPREAD                               :{LTBLUE}Expansión máxima de estaciones: {ORANGE}{STRING} casilla{P 0:1 "" s}{RED}Advertencia: Valores altos ralentizan
 STR_CONFIG_SETTING_SERVICEATHELIPAD                             :{LTBLUE}Mantener los helicópteros en helipuertos automáticamente: {ORANGE}{STRING}
@@ -2085,7 +2085,7 @@ STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Comprar 
 # Object construction window
 STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Selección de Objeto
 STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Seleccionar objeto a construir. Shift permite mostrar una estimación del precio
-STR_OBJECT_BUILD_CLASS_LABEL                                    :{BLACK}Clase de objeto
+STR_OBJECT_BUILD_CLASS_TOOLTIP                                  :{BLACK}Seleccione el tipo de objeto a construir
 STR_OBJECT_BUILD_PREVIEW_TOOLTIP                                :{BLACK}Vista previa del objeto
 STR_OBJECT_BUILD_SIZE                                           :{BLACK}Tamaño: {GOLD}{NUM} x {NUM} casillas
 
@@ -2134,7 +2134,7 @@ STR_FOUND_TOWN_INITIAL_SIZE_SMALL_BUTTON                        :{BLACK}Pequeña
 STR_FOUND_TOWN_INITIAL_SIZE_MEDIUM_BUTTON                       :{BLACK}Mediana
 STR_FOUND_TOWN_INITIAL_SIZE_LARGE_BUTTON                        :{BLACK}Grande
 STR_FOUND_TOWN_SIZE_RANDOM                                      :{BLACK}Aleatorio
-STR_FOUND_TOWN_INITIAL_SIZE_TOOLTIP                             :{BLACK}Selecciona el tamaño del pueblo
+STR_FOUND_TOWN_INITIAL_SIZE_TOOLTIP                             :{BLACK}Seleccione el tamaño del pueblo
 STR_FOUND_TOWN_CITY                                             :{BLACK}Ciudad
 STR_FOUND_TOWN_CITY_TOOLTIP                                     :{BLACK}Las ciudades crecen más rápido que los pueblos{}Dependiendo de los ajustes, son mayores al ser fundadas
 
@@ -4271,6 +4271,7 @@ STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLAC
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_ORANGE_STRING                                               :{ORANGE}{STRING}
 STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_HEIGHT                                           :{TINYFONT}{BLACK}{HEIGHT}

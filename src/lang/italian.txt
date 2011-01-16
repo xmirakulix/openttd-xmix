@@ -1164,8 +1164,8 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Rinnova
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Rinnova un veicolo {ORANGE}{STRING}{LTBLUE} mes{P 0:1 e i} prima/dopo l'età massima
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Rinnova solo se disponibile il fondo minimo di {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Durata dei messaggi d'errore: {ORANGE}{STRING} second{P 0:1 o i}
-STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Ritardo eventi mouse: {ORANGE}{STRING} second{P 0:1 o i}
-STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Ritardo eventi mouse: {ORANGE}eventi disabilitati
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Mostra suggerimenti: {ORANGE}Al passaggio del mouse dopo {STRING} second{P 0:1 o i}
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Mostra suggerimenti: {ORANGE}A clic col pulsante destro
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Mostra la popolazione di una città nell'etichetta del nome: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Generatore terreno: {ORANGE}{STRING}
@@ -2086,7 +2086,7 @@ STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Acquista
 # Object construction window
 STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Selezione oggetto
 STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Seleziona l'oggetto da costruire. MAIUSC alterna fra costruzione e stima dei costi
-STR_OBJECT_BUILD_CLASS_LABEL                                    :{BLACK}Categoria oggetto
+STR_OBJECT_BUILD_CLASS_TOOLTIP                                  :{BLACK}Seleziona la classe dell'oggetto da costruire
 STR_OBJECT_BUILD_PREVIEW_TOOLTIP                                :{BLACK}Anteprima dell'oggetto
 STR_OBJECT_BUILD_SIZE                                           :{BLACK}Dimensione: {GOLD}{NUM} x {NUM} riquadri
 
@@ -4272,6 +4272,7 @@ STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLAC
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_ORANGE_STRING                                               :{ORANGE}{STRING}
 STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_HEIGHT                                           :{TINYFONT}{BLACK}{HEIGHT}

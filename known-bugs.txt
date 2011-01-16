@@ -1,13 +1,13 @@
 OpenTTD's known bugs
-Last updated:    2010-12-31
-Release version: 1.1.0-beta2
+Last updated:    2010-01-09
+Release version: 1.1.0-beta3
 ------------------------------------------------------------------------
 
 
 Table of Contents:
 ------------------
 1) About
-2) Known bugs in the this stable release
+2) Known bugs in this release
 3) Known bugs that will not be solved
 
 
@@ -22,12 +22,12 @@ specifics, we welcome you to report them. React to the given bug indicated
 by the number below on http://bugs.openttd.org.
 
 
-2) Known bugs in this stable release:
--- ----------------------------------
-The following bugs are known to exist in this stable release and
-we intend to fix them. Some bugs are known but are not fixable or
-fixing them would cause further problems. Those bugs can be found
-in the "Known bugs that will not be solved" section.
+2) Known bugs in this release:
+-- ---------------------------
+The following bugs are known to exist in this release and we intend to
+fix them. Some bugs are known but are not fixable or fixing them would
+cause further problems. Those bugs can be found in the "Known bugs that
+will not be solved" section.
 
 The bugs in this section all refer to a ticket in our bug tracking system
 that you can find at: http://bugs.openttd.org
@@ -259,3 +259,12 @@ OpenTTD hangs when started on 32 bits Windows [FS#4083]
 	The reason we do not use the "win32" music driver as default are
 	described in the "Long delay between switching music/song" section
 	of this document.
+
+Pre- and exit signals are not dragged [FS#4378]
+	Unlike all other signal types, the entry- and exit signals are not
+	dragged but instead normal signals are placed on subsequent track
+	sections. This is done on purpose as this is the usually more con-
+	venient solution. There are little to no occasions where more than
+	one entry or exit signal in a row are useful. This is different
+	for all other signal types where several in a row can serve one
+	purpose or another.
