@@ -39,6 +39,7 @@
 #include "company_base.h"
 #include "newgrf_railtype.h"
 #include "object_base.h"
+#include "water.h"
 
 #include "table/sprites.h"
 #include "table/strings.h"
@@ -1104,7 +1105,12 @@ static void DrawTile_TunnelBridge(TileInfo *ti)
 		}
 
 		if (!ice) {
-			DrawClearLandTile(ti, 3);
+			TileIndex next = ti->tile + TileOffsByDiagDir(tunnelbridge_direction);
+			if (ti->tileh != SLOPE_FLAT && ti->z == 0 && HasTileWaterClass(next) && GetWaterClass(next) == WATER_CLASS_SEA) {
+				DrawShoreTile(ti->tileh);
+			} else {
+				DrawClearLandTile(ti, 3);
+			}
 		} else {
 			DrawGroundSprite(SPR_FLAT_SNOW_DESERT_TILE + SlopeToSpriteOffset(ti->tileh), PAL_NONE);
 		}
@@ -1479,12 +1485,13 @@ static void ChangeTileOwner_TunnelBridge(TileIndex tile, Owner old_owner, Owner 
 	if (new_owner != INVALID_OWNER) {
 		SetTileOwner(tile, new_owner);
 	} else {
-		if (DoCommand(tile, 0, 0, DC_EXEC | DC_BANKRUPT, CMD_LANDSCAPE_CLEAR).Failed()) {
-			/* When clearing the bridge/tunnel failed there are still vehicles on/in
-			 * the bridge/tunnel. As all *our* vehicles are already removed, they
-			 * must be of another owner. Therefore this can't be rail tunnel/bridge.
-			 * In that case we can safely reassign the ownership to OWNER_NONE. */
-			assert(GetTunnelBridgeTransportType(tile) != TRANSPORT_RAIL);
+		if (GetTunnelBridgeTransportType(tile) == TRANSPORT_RAIL) {
+			/* Since all of our vehicles have been removed, it is safe to remove the rail
+			 * bridge / tunnel. */
+			CommandCost ret = DoCommand(tile, 0, 0, DC_EXEC | DC_BANKRUPT, CMD_LANDSCAPE_CLEAR);
+			assert(ret.Succeeded());
+		} else {
+			/* In any other case, we can safely reassign the ownership to OWNER_NONE. */
 			SetTileOwner(tile, OWNER_NONE);
 		}
 	}

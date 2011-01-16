@@ -2084,7 +2084,7 @@ STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Koop lan
 # Object construction window
 STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Keuze van Object
 STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Kies het te bouwen object. Shift+Klik wisselt tussen bouwen/tonen verwachte kosten
-STR_OBJECT_BUILD_CLASS_LABEL                                    :{BLACK}Object klasse
+STR_OBJECT_BUILD_CLASS_TOOLTIP                                  :{BLACK}Kies klasse van het te bouwen object
 STR_OBJECT_BUILD_PREVIEW_TOOLTIP                                :{BLACK}Bekijk het object
 STR_OBJECT_BUILD_SIZE                                           :{BLACK}Grootte: {GOLD}{NUM} x {NUM} tegels
 
@@ -4270,6 +4270,7 @@ STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLAC
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_ORANGE_STRING                                               :{ORANGE}{STRING}
 STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_HEIGHT                                           :{TINYFONT}{BLACK}{HEIGHT}
