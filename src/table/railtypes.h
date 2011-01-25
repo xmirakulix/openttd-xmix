@@ -95,6 +95,18 @@ static const RailtypeInfo _original_railtypes[] = {
 		/* map colour */
 		0x0A,
 
+		/* introduction date */
+		INVALID_DATE,
+
+		/* railtypes required for this to be introduced */
+		RAILTYPES_NONE,
+
+		/* introduction rail types */
+		RAILTYPES_RAIL,
+
+		/* sort order */
+		0 << 4 | 7,
+
 		{ NULL },
 	},
 
@@ -178,6 +190,18 @@ static const RailtypeInfo _original_railtypes[] = {
 		/* map colour */
 		0x0A,
 
+		/* introduction date */
+		INVALID_DATE,
+
+		/* railtypes required for this to be introduced */
+		RAILTYPES_NONE,
+
+		/* introduction rail types */
+		RAILTYPES_ELECTRIC,
+
+		/* sort order */
+		1 << 4 | 7,
+
 		{ NULL },
 	},
 
@@ -257,6 +281,18 @@ static const RailtypeInfo _original_railtypes[] = {
 		/* map colour */
 		0x0A,
 
+		/* introduction date */
+		INVALID_DATE,
+
+		/* railtypes required for this to be introduced */
+		RAILTYPES_NONE,
+
+		/* introduction rail types */
+		RAILTYPES_MONO,
+
+		/* sort order */
+		2 << 4 | 7,
+
 		{ NULL },
 	},
 
@@ -335,6 +371,18 @@ static const RailtypeInfo _original_railtypes[] = {
 
 		/* map colour */
 		0x0A,
+
+		/* introduction date */
+		INVALID_DATE,
+
+		/* railtypes required for this to be introduced */
+		RAILTYPES_NONE,
+
+		/* introduction rail types */
+		RAILTYPES_MAGLEV,
+
+		/* sort order */
+		3 << 4 | 7,
 
 		{ NULL },
 	},

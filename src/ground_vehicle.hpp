@@ -75,6 +75,8 @@ struct GroundVehicle : public SpecializedVehicle<T, Type> {
 	GroundVehicleCache gcache; ///< Cache of often calculated values.
 	uint16 gv_flags;           ///< @see GroundVehicleFlags.
 
+	typedef GroundVehicle<T, Type> GroundVehicleBase; ///< Our type
+
 	/**
 	 * The constructor at SpecializedVehicle must be called.
 	 */
@@ -83,6 +85,21 @@ struct GroundVehicle : public SpecializedVehicle<T, Type> {
 	void PowerChanged();
 	void CargoChanged();
 	int GetAcceleration() const;
+
+	/**
+	 * Common code executed for crashed ground vehicles
+	 * @param flooded was this vehicle flooded?
+	 * @return number of victims
+	 */
+	/* virtual */ uint Crash(bool flooded)
+	{
+		/* Crashed vehicles aren't going up or down */
+		for (T *v = T::From(this); v != NULL; v = v->Next()) {
+			ClrBit(v->gv_flags, GVF_GOINGUP_BIT);
+			ClrBit(v->gv_flags, GVF_GOINGDOWN_BIT);
+		}
+		return this->Vehicle::Crash(flooded);
+	}
 
 	/**
 	 * Calculates the total slope resistance for this vehicle.
@@ -104,6 +121,103 @@ struct GroundVehicle : public SpecializedVehicle<T, Type> {
 	}
 
 	/**
+	 * Updates vehicle's Z position and inclination.
+	 * Used when the vehicle entered given tile.
+	 * @pre The vehicle has to be at (or near to) a border of the tile,
+	 *      directed towards tile centre
+	 */
+	FORCEINLINE void UpdateZPositionAndInclination()
+	{
+		this->z_pos = GetSlopeZ(this->x_pos, this->y_pos);
+		ClrBit(this->gv_flags, GVF_GOINGUP_BIT);
+		ClrBit(this->gv_flags, GVF_GOINGDOWN_BIT);
+
+		if (T::From(this)->TileMayHaveSlopedTrack()) {
+			/* To check whether the current tile is sloped, and in which
+			 * direction it is sloped, we get the 'z' at the center of
+			 * the tile (middle_z) and the edge of the tile (old_z),
+			 * which we then can compare. */
+			byte middle_z = GetSlopeZ((this->x_pos & ~TILE_UNIT_MASK) | HALF_TILE_SIZE, (this->y_pos & ~TILE_UNIT_MASK) | HALF_TILE_SIZE);
+
+			if (middle_z != this->z_pos) {
+				SetBit(this->gv_flags, (middle_z > this->z_pos) ? GVF_GOINGUP_BIT : GVF_GOINGDOWN_BIT);
+			}
+		}
+	}
+
+	/**
+	 * Updates vehicle's Z position.
+	 * Inclination can't change in the middle of a tile.
+	 * The faster code is used for trains and road vehicles unless they are
+	 * reversing on a sloped tile.
+	 */
+	FORCEINLINE void UpdateZPosition()
+	{
+#if 0
+		/* The following code does this: */
+
+		if (HasBit(this->gv_flags, GVF_GOINGUP_BIT)) {
+			switch (this->direction) {
+				case DIR_NE:
+					this->z_pos += (this->x_pos & 1); break;
+				case DIR_SW:
+					this->z_pos += (this->x_pos & 1) ^ 1; break;
+				case DIR_NW:
+					this->z_pos += (this->y_pos & 1); break;
+				case DIR_SE:
+					this->z_pos += (this->y_pos & 1) ^ 1; break;
+				default: break;
+			}
+		} else if (HasBit(this->gv_flags, GVF_GOINGDOWN_BIT)) {
+			switch (this->direction) {
+				case DIR_NE:
+					this->z_pos -= (this->x_pos & 1); break;
+				case DIR_SW:
+					this->z_pos -= (this->x_pos & 1) ^ 1; break;
+				case DIR_NW:
+					this->z_pos -= (this->y_pos & 1); break;
+				case DIR_SE:
+					this->z_pos -= (this->y_pos & 1) ^ 1; break;
+				default: break;
+			}
+		}
+
+		/* But gcc 4.4.5 isn't able to nicely optimise it, and the resulting
+		 * code is full of conditional jumps. */
+#endif
+
+		/* Vehicle's Z position can change only if it has GVF_GOINGUP_BIT or GVF_GOINGDOWN_BIT set.
+		 * Furthermore, if this function is called once every time the vehicle's position changes,
+		 * we know the Z position changes by +/-1 at certain moments - when x_pos, y_pos is odd/even,
+		 * depending on orientation of the slope and vehicle's direction */
+
+		if (HasBit(this->gv_flags, GVF_GOINGUP_BIT) || HasBit(this->gv_flags, GVF_GOINGDOWN_BIT)) {
+			if (T::From(this)->HasToUseGetSlopeZ()) {
+				/* In some cases, we have to use GetSlopeZ() */
+				this->z_pos = GetSlopeZ(this->x_pos, this->y_pos);
+				return;
+			}
+			/* DirToDiagDir() is a simple right shift */
+			DiagDirection dir = DirToDiagDir(this->direction);
+			/* Read variables, so the compiler knows the access doesn't trap */
+			int8 x_pos = this->x_pos;
+			int8 y_pos = this->y_pos;
+			/* DiagDirToAxis() is a simple mask */
+			int8 d = DiagDirToAxis(dir) == AXIS_X ? x_pos : y_pos;
+			/* We need only the least significant bit */
+			d &= 1;
+			/* Conditional "^ 1". Optimised to "(dir - 1) <= 1". */
+			d ^= (int8)(dir == DIAGDIR_SW || dir == DIAGDIR_SE);
+			/* Subtraction instead of addition because we are testing for GVF_GOINGUP_BIT.
+			 * GVF_GOINGUP_BIT is used because it's bit 0, so simple AND can be used,
+			 * without any shift */
+			this->z_pos += HasBit(this->gv_flags, GVF_GOINGUP_BIT) ? d : -d;
+		}
+
+		assert(this->z_pos == GetSlopeZ(this->x_pos, this->y_pos));
+	}
+
+	/**
 	 * Checks if the vehicle is in a slope and sets the required flags in that case.
 	 * @param new_tile True if the vehicle reached a new tile.
 	 * @param turned Indicates if the vehicle has turned.
@@ -114,41 +228,135 @@ struct GroundVehicle : public SpecializedVehicle<T, Type> {
 		byte old_z = this->z_pos;
 
 		if (new_tile) {
-			this->z_pos = GetSlopeZ(this->x_pos, this->y_pos);
-			ClrBit(this->gv_flags, GVF_GOINGUP_BIT);
-			ClrBit(this->gv_flags, GVF_GOINGDOWN_BIT);
-
-			if (T::From(this)->TileMayHaveSlopedTrack()) {
-				/* To check whether the current tile is sloped, and in which
-				 * direction it is sloped, we get the 'z' at the center of
-				 * the tile (middle_z) and the edge of the tile (old_z),
-				 * which we then can compare. */
-				static const int HALF_TILE_SIZE = TILE_SIZE / 2;
-				static const int INV_TILE_SIZE_MASK = ~(TILE_SIZE - 1);
-
-				byte middle_z = GetSlopeZ((this->x_pos & INV_TILE_SIZE_MASK) | HALF_TILE_SIZE, (this->y_pos & INV_TILE_SIZE_MASK) | HALF_TILE_SIZE);
-
-				if (middle_z != this->z_pos) {
-					SetBit(this->gv_flags, (middle_z > old_z) ? GVF_GOINGUP_BIT : GVF_GOINGDOWN_BIT);
-				}
-			}
+			this->UpdateZPositionAndInclination();
 		} else {
-			/* Flat tile, tile with two opposing corners raised and tile with 3 corners
-			 * raised can never have sloped track ... */
-			static const uint32 never_sloped = 1 << SLOPE_FLAT | 1 << SLOPE_EW | 1 << SLOPE_NS | 1 << SLOPE_NWS | 1 << SLOPE_WSE | 1 << SLOPE_SEN | 1 << SLOPE_ENW;
-			/* ... unless it's a bridge head. */
-			if (IsTileType(this->tile, MP_TUNNELBRIDGE) || // the following check would be true for tunnels anyway
-					(T::From(this)->TileMayHaveSlopedTrack() && !HasBit(never_sloped, GetTileSlope(this->tile, NULL)))) {
-				this->z_pos = GetSlopeZ(this->x_pos, this->y_pos);
-			} else {
-				/* Verify that assumption. */
-				assert(this->z_pos == GetSlopeZ(this->x_pos, this->y_pos));
-			}
+			this->UpdateZPosition();
 		}
 
 		this->UpdateViewport(true, turned);
 		return old_z;
 	}
+
+	/**
+	 * Enum to handle ground vehicle subtypes.
+	 * Do not access it directly unless you have to. Use the subtype access functions.
+	 */
+	enum GroundVehicleSubtypeFlags {
+		GVSF_FRONT            = 0, ///< Leading engine of a consist.
+		GVSF_ARTICULATED_PART = 1, ///< Articulated part of an engine.
+		GVSF_WAGON            = 2, ///< Wagon (not used for road vehicles).
+		GVSF_ENGINE           = 3, ///< Engine that can be front engine, but might be placed behind another engine (not used for road vehicles).
+		GVSF_FREE_WAGON       = 4, ///< First in a wagon chain (in depot) (not used for road vehicles).
+		GVSF_MULTIHEADED      = 5, ///< Engine is multiheaded (not used for road vehicles).
+	};
+
+	/**
+	 * Set front engine state.
+	 */
+	FORCEINLINE void SetFrontEngine() { SetBit(this->subtype, GVSF_FRONT); }
+
+	/**
+	 * Remove the front engine state.
+	 */
+	FORCEINLINE void ClearFrontEngine() { ClrBit(this->subtype, GVSF_FRONT); }
+
+	/**
+	 * Set a vehicle to be an articulated part.
+	 */
+	FORCEINLINE void SetArticulatedPart() { SetBit(this->subtype, GVSF_ARTICULATED_PART); }
+
+	/**
+	 * Clear a vehicle from being an articulated part.
+	 */
+	FORCEINLINE void ClearArticulatedPart() { ClrBit(this->subtype, GVSF_ARTICULATED_PART); }
+
+	/**
+	 * Set a vehicle to be a wagon.
+	 */
+	FORCEINLINE void SetWagon() { SetBit(this->subtype, GVSF_WAGON); }
+
+	/**
+	 * Clear wagon property.
+	 */
+	FORCEINLINE void ClearWagon() { ClrBit(this->subtype, GVSF_WAGON); }
+
+	/**
+	 * Set engine status.
+	 */
+	FORCEINLINE void SetEngine() { SetBit(this->subtype, GVSF_ENGINE); }
+
+	/**
+	 * Clear engine status.
+	 */
+	FORCEINLINE void ClearEngine() { ClrBit(this->subtype, GVSF_ENGINE); }
+
+	/**
+	 * Set a vehicle as a free wagon.
+	 */
+	FORCEINLINE void SetFreeWagon() { SetBit(this->subtype, GVSF_FREE_WAGON); }
+
+	/**
+	 * Clear a vehicle from being a free wagon.
+	 */
+	FORCEINLINE void ClearFreeWagon() { ClrBit(this->subtype, GVSF_FREE_WAGON); }
+
+	/**
+	 * Set a vehicle as a multiheaded engine.
+	 */
+	FORCEINLINE void SetMultiheaded() { SetBit(this->subtype, GVSF_MULTIHEADED); }
+
+	/**
+	 * Clear multiheaded engine property.
+	 */
+	FORCEINLINE void ClearMultiheaded() { ClrBit(this->subtype, GVSF_MULTIHEADED); }
+
+	/**
+	 * Check if the vehicle is a front engine.
+	 * @return Returns true if the vehicle is a front engine.
+	 */
+	FORCEINLINE bool IsFrontEngine() const { return HasBit(this->subtype, GVSF_FRONT); }
+
+	/**
+	 * Check if the vehicle is a free wagon (got no engine in front of it).
+	 * @return Returns true if the vehicle is a free wagon.
+	 */
+	FORCEINLINE bool IsFreeWagon() const { return HasBit(this->subtype, GVSF_FREE_WAGON); }
+
+	/**
+	 * Check if a vehicle is an engine (can be first in a consist).
+	 * @return Returns true if vehicle is an engine.
+	 */
+	FORCEINLINE bool IsEngine() const { return HasBit(this->subtype, GVSF_ENGINE); }
+
+	/**
+	 * Check if a vehicle is a wagon.
+	 * @return Returns true if vehicle is a wagon.
+	 */
+	FORCEINLINE bool IsWagon() const { return HasBit(this->subtype, GVSF_WAGON); }
+
+	/**
+	 * Check if the vehicle is a multiheaded engine.
+	 * @return Returns true if the vehicle is a multiheaded engine.
+	 */
+	FORCEINLINE bool IsMultiheaded() const { return HasBit(this->subtype, GVSF_MULTIHEADED); }
+
+	/**
+	 * Tell if we are dealing with the rear end of a multiheaded engine.
+	 * @return True if the engine is the rear part of a dualheaded engine.
+	 */
+	FORCEINLINE bool IsRearDualheaded() const { return this->IsMultiheaded() && !this->IsEngine(); }
+
+	/**
+	 * Check if the vehicle is an articulated part of an engine.
+	 * @return Returns true if the vehicle is an articulated part.
+	 */
+	FORCEINLINE bool IsArticulatedPart() const { return HasBit(this->subtype, GVSF_ARTICULATED_PART); }
+
+	/**
+	 * Check if an engine has an articulated part.
+	 * @return True if the engine has an articulated part.
+	 */
+	FORCEINLINE bool HasArticulatedPart() const { return this->Next() != NULL && this->Next()->IsArticulatedPart(); }
 };
 
 #endif /* GROUND_VEHICLE_HPP */

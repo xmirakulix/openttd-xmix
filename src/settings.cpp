@@ -36,7 +36,6 @@
 #include "train.h"
 #include "news_func.h"
 #include "window_func.h"
-#include "strings_func.h"
 #include "vehicle_func.h"
 #include "sound_func.h"
 #include "company_func.h"
@@ -843,7 +842,7 @@ static bool RoadVehAccelerationModelChanged(int32 p1)
 	if (_settings_game.vehicle.roadveh_acceleration_model != AM_ORIGINAL) {
 		RoadVehicle *rv;
 		FOR_ALL_ROADVEHICLES(rv) {
-			if (rv->IsRoadVehFront()) {
+			if (rv->IsFrontEngine()) {
 				rv->CargoChanged();
 			}
 		}
@@ -866,7 +865,7 @@ static bool RoadVehSlopeSteepnessChanged(int32 p1)
 {
 	RoadVehicle *rv;
 	FOR_ALL_ROADVEHICLES(rv) {
-		if (rv->IsRoadVehFront()) rv->CargoChanged();
+		if (rv->IsFrontEngine()) rv->CargoChanged();
 	}
 
 	return true;

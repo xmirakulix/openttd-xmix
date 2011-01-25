@@ -32,7 +32,6 @@
 #include "string_func.h"
 #include "widgets/dropdown_func.h"
 #include "timetable.h"
-#include "vehiclelist.h"
 #include "articulated_vehicles.h"
 #include "spritecache.h"
 #include "core/geometry_func.hpp"
@@ -588,7 +587,7 @@ struct RefitWindow : public Window {
 	{
 		Vehicle *v = Vehicle::Get(this->window_number);
 		CommandCost cost = DoCommand(v->tile, this->selected_vehicle, option->cargo | option->subtype << 8 |
-				this->num_vehicles << 17, DC_QUERY_COST, GetCmdRefitVeh(v->type));
+				this->num_vehicles << 16, DC_QUERY_COST, GetCmdRefitVeh(v->type));
 
 		if (cost.Failed()) return INVALID_STRING_ID;
 
@@ -615,6 +614,7 @@ struct RefitWindow : public Window {
 					r.top + WD_FRAMERECT_TOP, INVALID_VEHICLE, this->hscroll != NULL ? this->hscroll->GetPosition() : 0);
 
 				/* Highlight selected vehicles. */
+				if (this->order != INVALID_VEH_ORDER_ID) break;
 				int x = 0;
 				switch (v->type) {
 					case VEH_TRAIN: {
@@ -758,9 +758,14 @@ struct RefitWindow : public Window {
 						if (left_x < 0 && !start_counting) {
 							this->selected_vehicle = u->index;
 							start_counting = true;
+
+							/* Count the first vehicle, even if articulated part */
+							this->num_vehicles++;
+						} else if (start_counting && !u->IsArticulatedPart()) {
+							/* Do not count articulated parts */
+							this->num_vehicles++;
 						}
 
-						if (start_counting) this->num_vehicles++;
 						if (right_x < 0) break;
 					}
 				}
@@ -810,7 +815,7 @@ struct RefitWindow : public Window {
 
 					if (this->order == INVALID_VEH_ORDER_ID) {
 						bool delete_window = this->selected_vehicle == v->index && this->num_vehicles == UINT8_MAX;
-						if (DoCommandP(v->tile, this->selected_vehicle, this->cargo->cargo | this->cargo->subtype << 8 | this->num_vehicles << 17, GetCmdRefitVeh(v)) && delete_window) delete this;
+						if (DoCommandP(v->tile, this->selected_vehicle, this->cargo->cargo | this->cargo->subtype << 8 | this->num_vehicles << 16, GetCmdRefitVeh(v)) && delete_window) delete this;
 					} else {
 						if (DoCommandP(v->tile, v->index, this->cargo->cargo | this->cargo->subtype << 8 | this->order << 16, CMD_ORDER_REFIT)) delete this;
 					}
@@ -1416,7 +1421,7 @@ public:
 					case VL_SHARED_ORDERS: // Shared Orders
 						if (this->vehicles.Length() == 0) {
 							/* We can't open this window without vehicles using this order
-							* and we should close the window when deleting the order      */
+							 * and we should close the window when deleting the order. */
 							NOT_REACHED();
 						}
 						SetDParam(0, this->vscroll->GetCount());

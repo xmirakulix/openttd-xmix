@@ -221,8 +221,9 @@
  *  154   21426
  *  155   21453
  *  156   21728
+ *  157   21862
  */
-extern const uint16 SAVEGAME_VERSION = 156; ///< Current savegame version of OpenTTD.
+extern const uint16 SAVEGAME_VERSION = 157; ///< Current savegame version of OpenTTD.
 
 SavegameType _savegame_type; ///< type of savegame we are loading
 
@@ -2025,12 +2026,12 @@ struct ZlibSaveFilter : SaveFilter {
 			this->z.avail_out = sizeof(buf);
 
 			/**
-			* For the poor next soul who sees many valgrind warnings of the
-			* "Conditional jump or move depends on uninitialised value(s)" kind:
-			* According to the author of zlib it is not a bug and it won't be fixed.
-			* http://groups.google.com/group/comp.compression/browse_thread/thread/b154b8def8c2a3ef/cdf9b8729ce17ee2
-			* [Mark Adler, Feb 24 2004, 'zlib-1.2.1 valgrind warnings' in the newgroup comp.compression]
-			*/
+			 * For the poor next soul who sees many valgrind warnings of the
+			 * "Conditional jump or move depends on uninitialised value(s)" kind:
+			 * According to the author of zlib it is not a bug and it won't be fixed.
+			 * http://groups.google.com/group/comp.compression/browse_thread/thread/b154b8def8c2a3ef/cdf9b8729ce17ee2
+			 * [Mark Adler, Feb 24 2004, 'zlib-1.2.1 valgrind warnings' in the newgroup comp.compression]
+			 */
 			int r = deflate(&this->z, mode);
 
 			/* bytes were emitted? */
@@ -2615,7 +2616,7 @@ SaveOrLoadResult LoadWithFilter(LoadFilter *reader)
 SaveOrLoadResult SaveOrLoad(const char *filename, int mode, Subdirectory sb, bool threaded)
 {
 	/* An instance of saving is already active, so don't go saving again */
-	if (_sl.saveinprogress && mode == SL_SAVE) {
+	if (_sl.saveinprogress && mode == SL_SAVE && threaded) {
 		/* if not an autosave, but a user action, show error message */
 		if (!_do_autosave) ShowErrorMessage(STR_ERROR_SAVE_STILL_IN_PROGRESS, INVALID_STRING_ID, WL_ERROR);
 		return SL_OK;

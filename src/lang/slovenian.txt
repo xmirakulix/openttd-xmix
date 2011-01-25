@@ -706,6 +706,8 @@ STR_SMALLMAP_TOOLTIP_SHOW_INDUSTRIES_ON_MAP                     :{BLACK}Prikaži
 STR_SMALLMAP_TOOLTIP_SHOW_TRANSPORT_ROUTES_ON                   :{BLACK}Prikaži transportne poti na zemljevidu
 STR_SMALLMAP_TOOLTIP_SHOW_VEGETATION_ON_MAP                     :{BLACK}Prikaži vegetacijo na zemljevidu
 STR_SMALLMAP_TOOLTIP_SHOW_LAND_OWNERS_ON_MAP                    :{BLACK}Prikaži lastnike terena na zemljevidu
+STR_SMALLMAP_TOOLTIP_INDUSTRY_SELECTION                         :{BLACK}Klikni na tip industrije za preklop vidljivosti. Ctrl+Klik onemogoči vse tipe razen izbranega. Ctrl+Klik še enkrat omogoči vse tipe
+STR_SMALLMAP_TOOLTIP_COMPANY_SELECTION                          :{BLACK}Klikni na podjetje za preklop vidljivosti njenih nepremičnin. Ctrl+Klik onemogoči vsa podjetja razen izbranega. Ctrl+Klik še enkrat omogoči vsa podjetja
 
 STR_SMALLMAP_LEGENDA_ROADS                                      :{TINYFONT}{BLACK}Ceste
 STR_SMALLMAP_LEGENDA_RAILROADS                                  :{TINYFONT}{BLACK}Železnice
@@ -1202,8 +1204,8 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Samoobn
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Samoobnovi, ko je vozilo {ORANGE}{STRING}{LTBLUE} mesec{P "" a e ev} pred/po največji starosti
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Samoobnovi najmanj potrebnega denarja za obnovo: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Trajanje sporočila o napaki: {ORANGE}{STRING} sekund{P a i e ""}
-STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Zamik lebdečih dogodkov: {ORANGE}{STRING} sekund{P a i e ""}
-STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Zamik lebdečih dogodkov: {ORANGE}onemogočeno
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Pokaži obvestilo: {ORANGE}Lebdi {STRING} sekund{P o i e ""}
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Pokaži obvestilo: {ORANGE}Desni klik
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Prikaz števila prebivalcev ob imenu mesta: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Urejevalnik terena: {ORANGE}{STRING}
@@ -1287,6 +1289,7 @@ STR_CONFIG_SETTING_SHOW_TRACK_RESERVATION                       :{LTBLUE}Prikaz 
 STR_CONFIG_SETTING_PERSISTENT_BUILDINGTOOLS                     :{LTBLUE}Ohrani orodja za gradnjo aktivna po uporabi: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXPENSES_LAYOUT                              :{LTBLUE}Prikaži stroške v tabeli financ po skupinah: {ORANGE}{STRING}
 
+STR_CONFIG_SETTING_DISABLE_UNSUITABLE_BUILDING                  :{LTBLUE}Onemogoči infrastrukurno stavbo, če ni na voljo nobenih ustreznih vozil: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_TRAINS                                   :{LTBLUE}Največ vlakov na podjetje: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_ROAD_VEHICLES                            :{LTBLUE}Največ cestnih vozil na podjetje: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_AIRCRAFT                                 :{LTBLUE}Največ letal na podjetje: {ORANGE}{STRING}
@@ -1638,9 +1641,6 @@ STR_NETWORK_START_SERVER_NEW_GAME_NAME                          :{BLACK}Ime igre
 STR_NETWORK_START_SERVER_NEW_GAME_NAME_TOOLTIP                  :{BLACK}Ime bo prikazano drugim igralcem na večigralskem seznamu
 STR_NETWORK_START_SERVER_SET_PASSWORD                           :{BLACK}Nastavi geslo
 STR_NETWORK_START_SERVER_PASSWORD_TOOLTIP                       :{BLACK}Zaščiti igro z geslom, če želiš preprečiti dostop nepovabljenim
-STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Izberi ozemlje:
-STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Kateri zemljevid želiš igrati?
-STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Ustvari naključno novo igro
 
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :Lokalno omrežje / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (oglašuj)
@@ -1655,11 +1655,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Največj
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Omeji strežnik na določeno število opazovalcev
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Govorni jezik:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Drugi igralci bodo lahko vedeli, kateri jezik se govori na strežniku
-
-STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Začni igro
-STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Poženi novo večigralsko igro na naključnem ozemlju ali v izbranem scenariju
-STR_NETWORK_START_SERVER_LOAD_GAME                              :{BLACK}Naloži igro
-STR_NETWORK_START_SERVER_LOAD_GAME_TOOLTIP                      :{BLACK}Nadaljuj prej shranjeno večigralsko igro (pazi, da se povežeš v pravilno podjetje)
 
 STR_NETWORK_START_SERVER_NEW_GAME_NAME_OSKTITLE                 :{BLACK}Vpiši ime za mrežno igro
 
@@ -2123,6 +2118,7 @@ STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Kupi zem
 # Object construction window
 STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Izbor zgradbe
 STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Izberi zgradbo za postavitev. Shift preklaplja med izgradnjo in predvidenimi stroški
+STR_OBJECT_BUILD_CLASS_TOOLTIP                                  :{BLACK}Izberi vrsto objekta za gradnjo
 STR_OBJECT_BUILD_PREVIEW_TOOLTIP                                :{BLACK}Predogled zgradbe
 STR_OBJECT_BUILD_SIZE                                           :{BLACK}Velikost: {GOLD}{NUM} x {NUM} plošč
 
@@ -2463,6 +2459,7 @@ STR_NEWGRF_SETTINGS_PARAMETER                                   :{BLACK}Parametr
 STR_NEWGRF_SETTINGS_NO_INFO                                     :{BLACK}Ni informacij
 STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Ni ujemajoče datoteke
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Onemogočeno
+STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}Nekompatibilno s to različico OpenTTD
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Vnesi NewGRF parametre
 

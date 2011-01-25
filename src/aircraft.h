@@ -26,31 +26,9 @@ enum AircraftSubType {
 };
 
 
-/**
- * Handle Aircraft specific tasks when an Aircraft enters a hangar
- * @param *v Vehicle that enters the hangar
- */
 void HandleAircraftEnterHangar(Aircraft *v);
-
-/**
- * Get the size of the sprite of an aircraft sprite heading west (used for lists)
- * @param engine The engine to get the sprite from
- * @param width The width of the sprite
- * @param height The height of the sprite
- */
 void GetAircraftSpriteSize(EngineID engine, uint &width, uint &height);
-
-/**
- * Updates the status of the Aircraft heading or in the station
- * @param st Station been updated
- */
 void UpdateAirplanesOnNewStation(const Station *st);
-
-/**
- * Update cached values of an aircraft.
- * Currently caches callback 36 max speed.
- * @param v Vehicle
- */
 void UpdateAircraftCache(Aircraft *v);
 
 void AircraftLeaveHangar(Aircraft *v);
@@ -72,7 +50,7 @@ struct Aircraft : public SpecializedVehicle<Aircraft, VEH_AIRCRAFT> {
 	byte turn_counter;             ///< Ticks between each turn to prevent > 45 degree turns.
 
 	/** We don't want GCC to zero our struct! It already is zeroed and has an index! */
-	Aircraft() : SpecializedVehicle<Aircraft, VEH_AIRCRAFT>() {}
+	Aircraft() : SpecializedVehicleBase() {}
 	/** We want to 'destruct' the right class. */
 	virtual ~Aircraft() { this->PreDestructor(); }
 

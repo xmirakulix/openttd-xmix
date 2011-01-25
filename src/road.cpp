@@ -10,7 +10,6 @@
 /** @file road.cpp Generic road related functions. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "rail_map.h"
 #include "road_map.h"
 #include "water_map.h"
@@ -36,6 +35,12 @@ static bool IsPossibleCrossing(const TileIndex tile, Axis ax)
 		GetFoundationSlope(tile, NULL) == SLOPE_FLAT);
 }
 
+/**
+ * Clean up unneccesary RoadBits of a planed tile.
+ * @param tile current tile
+ * @param org_rb planed RoadBits
+ * @return optimised RoadBits
+ */
 RoadBits CleanUpRoadBits(const TileIndex tile, RoadBits org_rb)
 {
 	if (!IsValidTile(tile)) return ROAD_NONE;
@@ -91,6 +96,12 @@ RoadBits CleanUpRoadBits(const TileIndex tile, RoadBits org_rb)
 	return org_rb;
 }
 
+/**
+ * Finds out, whether given company has all given RoadTypes available
+ * @param company ID of company
+ * @param rts RoadTypes to test
+ * @return true if company has all requested RoadTypes available
+ */
 bool HasRoadTypesAvail(const CompanyID company, const RoadTypes rts)
 {
 	RoadTypes avail_roadtypes;
@@ -105,11 +116,21 @@ bool HasRoadTypesAvail(const CompanyID company, const RoadTypes rts)
 	return (rts & ~avail_roadtypes) == 0;
 }
 
+/**
+ * Validate functions for rail building.
+ * @param rt road type to check.
+ * @return true if the current company may build the road.
+ */
 bool ValParamRoadType(const RoadType rt)
 {
 	return HasRoadTypesAvail(_current_company, RoadTypeToRoadTypes(rt));
 }
 
+/**
+ * Get the road types the given company can build.
+ * @param company the company to get the roadtypes for.
+ * @return the road types.
+ */
 RoadTypes GetCompanyRoadtypes(CompanyID company)
 {
 	RoadTypes rt = ROADTYPES_NONE;

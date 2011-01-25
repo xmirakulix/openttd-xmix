@@ -104,6 +104,7 @@ static void RailVehicleLengthChanged(const Train *u)
 void CheckTrainsLengths()
 {
 	const Train *v;
+	bool first = true;
 
 	FOR_ALL_TRAINS(v) {
 		if (v->First() == v && !(v->vehstatus & VS_CRASHED)) {
@@ -116,7 +117,12 @@ void CheckTrainsLengths()
 						SetDParam(1, v->owner);
 						ShowErrorMessage(STR_BROKEN_VEHICLE_LENGTH, INVALID_STRING_ID, WL_CRITICAL);
 
-						if (!_networking) DoCommandP(0, PM_PAUSED_ERROR, 1, CMD_PAUSE);
+						if (!_networking && first) {
+							first = false;
+							DoCommandP(0, PM_PAUSED_ERROR, 1, CMD_PAUSE);
+						}
+						/* Break so we warn only once for each train. */
+						break;
 					}
 				}
 			}
@@ -1442,6 +1448,39 @@ static void SwapTrainFlags(uint16 *swap_flag1, uint16 *swap_flag2)
 	}
 }
 
+/**
+ * Updates some variables after swapping the vehicle.
+ * @param v swapped vehicle
+ */
+static void UpdateStatusAfterSwap(Train *v)
+{
+	/* Reverse the direction. */
+	if (v->track != TRACK_BIT_DEPOT) v->direction = ReverseDir(v->direction);
+
+	/* Call the proper EnterTile function unless we are in a wormhole. */
+	if (v->track != TRACK_BIT_WORMHOLE) {
+		VehicleEnterTile(v, v->tile, v->x_pos, v->y_pos);
+	} else {
+		/* VehicleEnter_TunnelBridge() sets TRACK_BIT_WORMHOLE when the vehicle
+		 * is on the last bit of the bridge head (frame == TILE_SIZE - 1).
+		 * If we were swapped with such a vehicle, we have set TRACK_BIT_WORMHOLE,
+		 * when we shouldn't have. Check if this is the case. */
+		TileIndex vt = TileVirtXY(v->x_pos, v->y_pos);
+		if (IsTileType(vt, MP_TUNNELBRIDGE)) {
+			VehicleEnterTile(v, vt, v->x_pos, v->y_pos);
+			if (v->track != TRACK_BIT_WORMHOLE && IsBridgeTile(v->tile)) {
+				/* We have just left the wormhole, possibly set the
+				 * "goingdown" bit. UpdateInclination() can be used
+				 * because we are at the border of the tile. */
+				v->UpdateInclination(true, true);
+				return;
+			}
+		}
+	}
+
+	v->UpdateViewport(true, true);
+}
+
 static void ReverseTrainSwapVeh(Train *v, int l, int r)
 {
 	Train *a, *b;
@@ -1460,11 +1499,6 @@ static void ReverseTrainSwapVeh(Train *v, int l, int r)
 
 		Swap(a->track, b->track);
 		Swap(a->direction, b->direction);
-
-		/* toggle direction */
-		if (a->track != TRACK_BIT_DEPOT) a->direction = ReverseDir(a->direction);
-		if (b->track != TRACK_BIT_DEPOT) b->direction = ReverseDir(b->direction);
-
 		Swap(a->x_pos, b->x_pos);
 		Swap(a->y_pos, b->y_pos);
 		Swap(a->tile,  b->tile);
@@ -1472,18 +1506,14 @@ static void ReverseTrainSwapVeh(Train *v, int l, int r)
 
 		SwapTrainFlags(&a->gv_flags, &b->gv_flags);
 
-		/* update other vars */
-		a->UpdateViewport(true, true);
-		b->UpdateViewport(true, true);
-
-		/* call the proper EnterTile function unless we are in a wormhole */
-		if (a->track != TRACK_BIT_WORMHOLE) VehicleEnterTile(a, a->tile, a->x_pos, a->y_pos);
-		if (b->track != TRACK_BIT_WORMHOLE) VehicleEnterTile(b, b->tile, b->x_pos, b->y_pos);
+		UpdateStatusAfterSwap(a);
+		UpdateStatusAfterSwap(b);
 	} else {
-		if (a->track != TRACK_BIT_DEPOT) a->direction = ReverseDir(a->direction);
-		a->UpdateViewport(true, true);
-
-		if (a->track != TRACK_BIT_WORMHOLE) VehicleEnterTile(a, a->tile, a->x_pos, a->y_pos);
+		/* Swap GVF_GOINGUP_BIT/GVF_GOINGDOWN_BIT.
+		 * This is a little bit redundant way, a->gv_flags will
+		 * be (re)set twice, but it reduces code duplication */
+		SwapTrainFlags(&a->gv_flags, &a->gv_flags);
+		UpdateStatusAfterSwap(a);
 	}
 
 	/* Update power of the train in case tiles were different rail type. */
@@ -2631,7 +2661,7 @@ int Train::UpdateSpeed()
 	{
 		int tempmax = max_speed;
 		if (this->cur_speed > max_speed) {
-			tempmax = this->cur_speed - (this->cur_speed / 10) - 1;
+			tempmax = max(this->cur_speed - (this->cur_speed / 10) - 1, tempmax);
 		}
 		/* Force a minimum speed of 1 km/h when realistic acceleration is on and the train is not braking. */
 		int min_speed = (_settings_game.vehicle.train_acceleration_model == AM_ORIGINAL || this->GetAccelerationStatus() == AS_BRAKE) ? 0 : 2;
@@ -2764,7 +2794,7 @@ uint Train::Crash(bool flooded)
 		}
 
 		/* we may need to update crossing we were approaching,
-		* but must be updated after the train has been marked crashed */
+		 * but must be updated after the train has been marked crashed */
 		TileIndex crossing = TrainApproachingCrossingTile(this);
 		if (crossing != INVALID_TILE) UpdateLevelCrossing(crossing);
 
@@ -2772,7 +2802,7 @@ uint Train::Crash(bool flooded)
 		HideFillingPercent(&this->fill_percent_te_id);
 	}
 
-	pass += Vehicle::Crash(flooded);
+	pass += this->GroundVehicleBase::Crash(flooded);
 
 	this->crash_anim_pos = flooded ? 4000 : 1; // max 4440, disappear pretty fast when flooded
 	return pass;
@@ -3141,6 +3171,11 @@ static void TrainController(Train *v, Vehicle *nomove)
 				if (v->IsFrontEngine()) {
 					TryReserveRailTrack(gp.new_tile, DiagDirToDiagTrack(GetTunnelBridgeDirection(gp.new_tile)));
 					CheckNextTrainTile(v);
+				}
+				/* Prevent v->UpdateInclination() being called with wrong parameters.
+				 * This could happen if the train was reversed inside the tunnel/bridge. */
+				if (gp.old_tile == gp.new_tile) {
+					gp.old_tile = GetOtherTunnelBridgeEnd(gp.old_tile);
 				}
 			} else {
 				v->x_pos = gp.x;

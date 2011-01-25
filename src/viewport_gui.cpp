@@ -13,11 +13,9 @@
 #include "landscape.h"
 #include "window_gui.h"
 #include "viewport_func.h"
-#include "gfx_func.h"
 #include "strings_func.h"
 #include "zoom_func.h"
 #include "window_func.h"
-#include "tilehighlight_func.h"
 
 #include "table/strings.h"
 #include "table/sprites.h"
@@ -137,11 +135,8 @@ public:
 
 	virtual void OnScroll(Point delta)
 	{
-		const ViewPort *vp = IsPtInWindowViewport(this, _cursor.pos.x, _cursor.pos.y);
-		if (vp == NULL) return;
-
-		this->viewport->scrollpos_x += ScaleByZoom(delta.x, vp->zoom);
-		this->viewport->scrollpos_y += ScaleByZoom(delta.y, vp->zoom);
+		this->viewport->scrollpos_x += ScaleByZoom(delta.x, this->viewport->zoom);
+		this->viewport->scrollpos_y += ScaleByZoom(delta.y, this->viewport->zoom);
 		this->viewport->dest_scrollpos_x = this->viewport->scrollpos_x;
 		this->viewport->dest_scrollpos_y = this->viewport->scrollpos_y;
 	}

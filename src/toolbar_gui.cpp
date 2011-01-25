@@ -37,8 +37,6 @@
 #include "news_gui.h"
 #include "ai/ai_gui.hpp"
 #include "tilehighlight_func.h"
-#include "rail.h"
-#include "widgets/dropdown_type.h"
 #include "smallmap_gui.h"
 #include "graph_gui.h"
 #include "textbuf_gui.h"
@@ -693,34 +691,7 @@ static CallBackFunction ToolbarZoomOutClick(Window *w)
 
 static CallBackFunction ToolbarBuildRailClick(Window *w)
 {
-	/* Use C++ spec to zero whole array. */
-	bool used_railtype[RAILTYPE_END] = { false };
-
-	/* Find the used railtypes. */
-	Engine *e;
-	FOR_ALL_ENGINES_OF_TYPE(e, VEH_TRAIN) {
-		if (!HasBit(e->info.climates, _settings_game.game_creation.landscape)) continue;
-
-		used_railtype[e->u.rail.railtype] = true;
-	}
-
-	const Company *c = Company::Get(_local_company);
-	DropDownList *list = new DropDownList();
-	for (RailType rt = RAILTYPE_BEGIN; rt != RAILTYPE_END; rt++) {
-		/* If it's not used ever, don't show it to the user. */
-		if (!used_railtype[rt]) continue;
-
-		const RailtypeInfo *rti = GetRailTypeInfo(rt);
-		/* Skip rail type if it has no label */
-		if (rti->label == 0) continue;
-
-		StringID str = rti->max_speed > 0 ? STR_TOOLBAR_RAILTYPE_VELOCITY : STR_JUST_STRING;
-		DropDownListParamStringItem *item = new DropDownListParamStringItem(str, rt, !HasBit(c->avail_railtypes, rt));
-		item->SetParam(0, rti->strings.menu_text);
-		item->SetParam(1, rti->max_speed);
-		list->push_back(item);
-	}
-	ShowDropDownList(w, list, _last_built_railtype, TBN_RAILS, 140, true, true);
+	ShowDropDownList(w, GetRailTypeDropDownList(), _last_built_railtype, TBN_RAILS, 140, true, true);
 	SndPlayFx(SND_15_BEEP);
 	return CBF_NONE;
 }
