@@ -134,6 +134,7 @@ enum EngineMiscFlags {
 	EF_ROAD_TRAM  = 0, ///< Road vehicle is a tram/light rail vehicle
 	EF_USES_2CC   = 1, ///< Vehicle uses two company colours
 	EF_RAIL_IS_MU = 2, ///< Rail vehicle is a multiple-unit (DMU/EMU)
+	EF_RAIL_FLIPS = 3, ///< Rail vehicle can be flipped in the depot
 };
 
 /**
@@ -146,7 +147,7 @@ enum EngineFlags {
 };
 
 static const uint NUM_VEHICLE_TYPES             =   6;
-static const uint MAX_LENGTH_ENGINE_NAME_CHARS  =  31; ///< The maximum length of an engine name in characters including '\0'
+static const uint MAX_LENGTH_ENGINE_NAME_CHARS  =  32; ///< The maximum length of an engine name in characters including '\0'
 static const uint MAX_LENGTH_ENGINE_NAME_PIXELS = 160; ///< The maximum length of an engine name in pixels
 
 static const EngineID INVALID_ENGINE = 0xFFFF;

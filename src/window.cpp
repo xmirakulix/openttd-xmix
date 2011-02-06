@@ -11,7 +11,6 @@
 
 #include "stdafx.h"
 #include <stdarg.h>
-#include "openttd.h"
 #include "company_func.h"
 #include "gfx_func.h"
 #include "console_func.h"
@@ -20,9 +19,7 @@
 #include "genworld.h"
 #include "blitter/factory.hpp"
 #include "zoom_func.h"
-#include "map_func.h"
 #include "vehicle_base.h"
-#include "cheat_type.h"
 #include "window_func.h"
 #include "tilehighlight_func.h"
 #include "network/network.h"
@@ -35,10 +32,10 @@
 #include "toolbar_gui.h"
 #include "statusbar_gui.h"
 
-#include "table/sprites.h"
 
 static Point _drag_delta; ///< delta between mouse cursor and upper left corner of dragged window
 static Window *_mouseover_last_w = NULL; ///< Window of the last #MOUSEOVER event.
+static Window *_last_scroll_window = NULL; ///< Window of the last scroll event.
 
 /** List of windows opened at the screen sorted from the front. */
 Window *_z_front_window = NULL;
@@ -442,13 +439,23 @@ static void DispatchHoverEvent(Window *w, int x, int y)
  * @param nwid the widget where the scrollwheel was used
  * @param wheel scroll up or down
  */
-static void DispatchMouseWheelEvent(Window *w, const NWidgetCore *nwid, int wheel)
+static void DispatchMouseWheelEvent(Window *w, NWidgetCore *nwid, int wheel)
 {
 	if (nwid == NULL) return;
 
 	/* Using wheel on caption/shade-box shades or unshades the window. */
 	if (nwid->type == WWT_CAPTION || nwid->type == WWT_SHADEBOX) {
 		w->SetShaded(wheel < 0);
+		return;
+	}
+
+	/* Wheeling a vertical scrollbar. */
+	if (nwid->type == NWID_VSCROLLBAR) {
+		NWidgetScrollbar *sb = static_cast<NWidgetScrollbar *>(nwid);
+		if (sb->GetCount() > sb->GetCapacity()) {
+			sb->UpdatePosition(wheel);
+			w->SetDirty();
+		}
 		return;
 	}
 
@@ -660,6 +667,9 @@ Window::~Window()
 
 	/* Prevent Mouseover() from resetting mouse-over coordinates on a non-existing window */
 	if (_mouseover_last_w == this) _mouseover_last_w = NULL;
+
+	/* We can't scroll the window when it's closed. */
+	if (_last_scroll_window == this) _last_scroll_window = NULL;
 
 	/* Make sure we don't try to access this window as the focused window when it doesn't exist anymore. */
 	if (_focused_window == this) _focused_window = NULL;
@@ -1335,6 +1345,7 @@ void InitWindowSystem()
 	_z_front_window = NULL;
 	_focused_window = NULL;
 	_mouseover_last_w = NULL;
+	_last_scroll_window = NULL;
 	_scrolling_viewport = false;
 	_mouse_hovering = false;
 
@@ -1414,48 +1425,29 @@ static void HandlePlacePresize()
 }
 
 /**
- * Handle drop in mouse dragging mode (#WSM_DRAGDROP).
+ * Handle dragging and dropping in mouse dragging mode (#WSM_DRAGDROP).
  * @return State of handling the event.
  */
-static EventState HandleDragDrop()
+static EventState HandleMouseDragDrop()
 {
 	if (_special_mouse_mode != WSM_DRAGDROP) return ES_NOT_HANDLED;
-	if (_left_button_down) return ES_HANDLED;
+
+	if (_left_button_down && _cursor.delta.x == 0 && _cursor.delta.y == 0) return ES_HANDLED; // Dragging, but the mouse did not move.
 
 	Window *w = _thd.GetCallbackWnd();
-
-	if (w != NULL) {
-		/* send an event in client coordinates. */
-		Point pt;
-		pt.x = _cursor.pos.x - w->left;
-		pt.y = _cursor.pos.y - w->top;
-		w->OnDragDrop(pt, GetWidgetFromPos(w, pt.x, pt.y));
-	}
-
-	ResetObjectToPlace();
-
-	return ES_HANDLED;
-}
-
-/**
- * Handle dragging in mouse dragging mode (#WSM_DRAGDROP).
- * @return State of handling the event.
- */
-static EventState HandleMouseDrag()
-{
-	if (_special_mouse_mode != WSM_DRAGDROP) return ES_NOT_HANDLED;
-	if (!_left_button_down || (_cursor.delta.x == 0 && _cursor.delta.y == 0)) return ES_NOT_HANDLED;
-
-	Window *w = _thd.GetCallbackWnd();
-
 	if (w != NULL) {
 		/* Send an event in client coordinates. */
 		Point pt;
 		pt.x = _cursor.pos.x - w->left;
 		pt.y = _cursor.pos.y - w->top;
-		w->OnMouseDrag(pt, GetWidgetFromPos(w, pt.x, pt.y));
+		if (_left_button_down) {
+			w->OnMouseDrag(pt, GetWidgetFromPos(w, pt.x, pt.y));
+		} else {
+			w->OnDragDrop(pt, GetWidgetFromPos(w, pt.x, pt.y));
+		}
 	}
 
+	if (!_left_button_down) ResetObjectToPlace(); // Button released, finished dragging.
 	return ES_HANDLED;
 }
 
@@ -1891,17 +1883,21 @@ static EventState HandleViewportScroll()
 
 	if (!_scrolling_viewport) return ES_NOT_HANDLED;
 
-	Window *w = FindWindowFromPt(_cursor.pos.x, _cursor.pos.y);
+	/* When we don't have a last scroll window we are starting to scroll.
+	 * When the last scroll window and this are not the same we went
+	 * outside of the window and should not left-mouse scroll anymore. */
+	if (_last_scroll_window == NULL) _last_scroll_window = FindWindowFromPt(_cursor.pos.x, _cursor.pos.y);
 
-	if (!(_right_button_down || scrollwheel_scrolling || (_settings_client.gui.left_mouse_btn_scrolling && _left_button_down)) || w == NULL) {
+	if (_last_scroll_window == NULL || !(_right_button_down || scrollwheel_scrolling || (_settings_client.gui.left_mouse_btn_scrolling && _left_button_down))) {
 		_cursor.fix_at = false;
 		_scrolling_viewport = false;
+		_last_scroll_window = NULL;
 		return ES_NOT_HANDLED;
 	}
 
-	if (w == FindWindowById(WC_MAIN_WINDOW, 0) && w->viewport->follow_vehicle != INVALID_VEHICLE) {
+	if (_last_scroll_window == FindWindowById(WC_MAIN_WINDOW, 0) && _last_scroll_window->viewport->follow_vehicle != INVALID_VEHICLE) {
 		/* If the main window is following a vehicle, then first let go of it! */
-		const Vehicle *veh = Vehicle::Get(w->viewport->follow_vehicle);
+		const Vehicle *veh = Vehicle::Get(_last_scroll_window->viewport->follow_vehicle);
 		ScrollMainWindowTo(veh->x_pos, veh->y_pos, veh->z_pos, true); // This also resets follow_vehicle
 		return ES_NOT_HANDLED;
 	}
@@ -1924,7 +1920,7 @@ static EventState HandleViewportScroll()
 	}
 
 	/* Create a scroll-event and send it to the window */
-	if (delta.x != 0 || delta.y != 0) w->OnScroll(delta);
+	if (delta.x != 0 || delta.y != 0) _last_scroll_window->OnScroll(delta);
 
 	_cursor.delta.x = 0;
 	_cursor.delta.y = 0;
@@ -2166,8 +2162,7 @@ static void MouseLoop(MouseClick click, int mousewheel)
 	UpdateTileSelection();
 
 	if (VpHandlePlaceSizingDrag()  == ES_HANDLED) return;
-	if (HandleMouseDrag()          == ES_HANDLED) return;
-	if (HandleDragDrop()           == ES_HANDLED) return;
+	if (HandleMouseDragDrop()      == ES_HANDLED) return;
 	if (HandleWindowDragging()     == ES_HANDLED) return;
 	if (HandleScrollbarScrolling() == ES_HANDLED) return;
 	if (HandleViewportScroll()     == ES_HANDLED) return;

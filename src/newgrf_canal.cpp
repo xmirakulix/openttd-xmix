@@ -47,13 +47,18 @@ static uint32 CanalGetVariable(const ResolverObject *object, byte variable, byte
 
 	switch (variable) {
 		/* Height of tile */
-		case 0x80: return GetTileZ(tile) / TILE_HEIGHT;
+		case 0x80: {
+			uint z = GetTileZ(tile) / TILE_HEIGHT;
+			/* Return consistent height within locks */
+			if (IsTileType(tile, MP_WATER) && IsLock(tile) && GetSection(tile) == LOCK_UPPER) z--;
+			return z;
+		}
 
 		/* Terrain type */
 		case 0x81: return GetTerrainType(tile);
 
 		/* Random data for river or canal tiles, otherwise zero */
-		case 0x83: return GetWaterTileRandomBits(tile);
+		case 0x83: return IsTileType(tile, MP_WATER) ? GetWaterTileRandomBits(tile) : 0;
 	}
 
 	DEBUG(grf, 1, "Unhandled canal variable 0x%02X", variable);
@@ -92,6 +97,12 @@ static void NewCanalResolver(ResolverObject *res, TileIndex tile, const GRFFile 
 }
 
 
+/**
+ * Lookup the base sprite to use for a canal.
+ * @param feature Which canal feature we want.
+ * @param tile Tile index of canal, if appropriate.
+ * @return Base sprite returned by GRF, or 0 if none.
+ */
 SpriteID GetCanalSprite(CanalFeature feature, TileIndex tile)
 {
 	ResolverObject object;

@@ -190,7 +190,7 @@ CommandCost CmdBuildRailWaypoint(TileIndex start_tile, DoCommandFlag flags, uint
 	TileIndexDiff offset = TileOffsByDiagDir(AxisToDiagDir(OtherAxis(axis)));
 	for (int i = 0; i < count; i++) {
 		TileIndex tile = start_tile + i * offset;
-		CommandCost ret = IsValidTileForWaypoint(tile, axis, _settings_game.station.nonuniform_stations ? &est : NULL);
+		CommandCost ret = IsValidTileForWaypoint(tile, axis, &est);
 		if (ret.Failed()) return ret;
 	}
 
@@ -273,7 +273,7 @@ CommandCost CmdBuildRailWaypoint(TileIndex start_tile, DoCommandFlag flags, uint
 
 /**
  * Build a buoy.
- * @param tile tile where to place the bouy
+ * @param tile tile where to place the buoy
  * @param flags operation to perform
  * @param p1 unused
  * @param p2 unused

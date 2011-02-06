@@ -23,7 +23,6 @@
 #include "tree_map.h"
 #include "newgrf_cargo.h"
 #include "newgrf_debug.h"
-#include "newgrf_industries.h"
 #include "newgrf_industrytiles.h"
 #include "autoslope.h"
 #include "water.h"
@@ -1896,6 +1895,7 @@ static uint GetNumberOfIndustries()
 	/* Number of industries on a 256x256 map. */
 	static const uint16 numof_industry_table[] = {
 		0,    // none
+		0,    // minimal
 		10,   // very low
 		25,   // low
 		55,   // normal
@@ -2010,10 +2010,7 @@ void IndustryBuildData::MonthlyLoop()
  */
 void GenerateIndustries()
 {
-	uint total_amount = GetNumberOfIndustries();
-
-	/* Do not create any industries? */
-	if (total_amount == 0) return;
+	if (_settings_game.difficulty.number_industries == 0) return; // No industries.
 
 	uint32 industry_probs[NUM_INDUSTRYTYPES];
 	bool force_at_least_one[NUM_INDUSTRYTYPES];
@@ -2026,6 +2023,7 @@ void GenerateIndustries()
 		if (force_at_least_one[it]) num_forced++;
 	}
 
+	uint total_amount = GetNumberOfIndustries();
 	if (total_prob == 0 || total_amount < num_forced) {
 		/* Only place the forced ones */
 		total_amount = num_forced;
@@ -2299,7 +2297,7 @@ static int WhoCanServiceIndustry(Industry *ind)
 		/* Check whether it accepts the right kind of cargo */
 		bool c_accepts = false;
 		bool c_produces = false;
-		if (v->type == VEH_TRAIN && Train::From(v)->IsFrontEngine()) {
+		if (v->type == VEH_TRAIN && v->IsFrontEngine()) {
 			for (const Vehicle *u = v; u != NULL; u = u->Next()) {
 				CanCargoServiceIndustry(u->cargo_type, ind, &c_accepts, &c_produces);
 			}
@@ -2644,6 +2642,10 @@ void InitializeIndustries()
 	_industry_builder.Reset();
 }
 
+/**
+ * Is an industry with the spec a raw industry?
+ * @return true if it should be handled as a raw industry
+ */
 bool IndustrySpec::IsRawIndustry() const
 {
 	/* Lumber mills are extractive/organic, but can always be built like a non-raw industry */
@@ -2651,6 +2653,10 @@ bool IndustrySpec::IsRawIndustry() const
 			(this->behaviour & INDUSTRYBEH_CUT_TREES) == 0;
 }
 
+/**
+ * Get the cost for constructing this industry
+ * @return the cost (inflation corrected etc)
+ */
 Money IndustrySpec::GetConstructionCost() const
 {
 	/* Building raw industries like secondary uses different price base */
@@ -2658,11 +2664,21 @@ Money IndustrySpec::GetConstructionCost() const
 			PR_BUILD_INDUSTRY_RAW : PR_BUILD_INDUSTRY] * this->cost_multiplier) >> 8;
 }
 
+/**
+ * Get the cost for removing this industry
+ * Take note that the cost will always be zero for non-grf industries.
+ * Only if the grf author did specified a cost will it be applicable.
+ * @return the cost (inflation corrected etc)
+ */
 Money IndustrySpec::GetRemovalCost() const
 {
 	return (_price[PR_CLEAR_INDUSTRY] * this->removal_cost_multiplier) >> 8;
 }
 
+/**
+ * Determines whether this industrytype uses smooth economy or whether it uses standard/newgrf production changes.
+ * @return true if smooth economy is used.
+ */
 bool IndustrySpec::UsesSmoothEconomy() const
 {
 	return _settings_game.economy.smooth_economy &&

@@ -10,7 +10,6 @@
 /** @file genworld_gui.cpp GUI to configure and show progress during map generation. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "heightmap.h"
 #include "debug.h"
 #include "genworld.h"
@@ -337,7 +336,7 @@ static const StringID _tree_placer[] = {STR_CONFIG_SETTING_TREE_PLACER_NONE, STR
 static const StringID _rotation[]    = {STR_CONFIG_SETTING_HEIGHTMAP_ROTATION_COUNTER_CLOCKWISE, STR_CONFIG_SETTING_HEIGHTMAP_ROTATION_CLOCKWISE, INVALID_STRING_ID};
 static const StringID _landscape[]   = {STR_CONFIG_SETTING_LAND_GENERATOR_ORIGINAL, STR_CONFIG_SETTING_LAND_GENERATOR_TERRA_GENESIS, INVALID_STRING_ID};
 static const StringID _num_towns[]   = {STR_NUM_VERY_LOW, STR_NUM_LOW, STR_NUM_NORMAL, STR_NUM_HIGH, STR_NUM_CUSTOM, INVALID_STRING_ID};
-static const StringID _num_inds[]    = {STR_NONE, STR_NUM_VERY_LOW, STR_NUM_LOW, STR_NUM_NORMAL, STR_NUM_HIGH, INVALID_STRING_ID};
+static const StringID _num_inds[]    = {STR_FUNDING_ONLY, STR_MINIMAL, STR_NUM_VERY_LOW, STR_NUM_LOW, STR_NUM_NORMAL, STR_NUM_HIGH, INVALID_STRING_ID};
 static const StringID _variety[]     = {STR_VARIETY_NONE, STR_VARIETY_VERY_LOW, STR_VARIETY_LOW, STR_VARIETY_MEDIUM, STR_VARIETY_HIGH, STR_VARIETY_VERY_HIGH, INVALID_STRING_ID};
 
 struct GenerateLandscapeWindow : public QueryStringBaseWindow {
@@ -755,7 +754,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 					this->widget_id = widget;
 					SetDParam(0, _settings_newgame.game_creation.custom_town_number);
 					ShowQueryString(STR_JUST_INT, STR_MAPGEN_NUMBER_OF_TOWNS, 5, 50, this, CS_NUMERAL, QSF_NONE);
-				};
+				}
 				IConsoleSetSetting("difficulty.number_towns", index);
 				break;
 
@@ -776,7 +775,7 @@ struct GenerateLandscapeWindow : public QueryStringBaseWindow {
 					this->widget_id = widget;
 					SetDParam(0, _settings_newgame.game_creation.custom_sea_level);
 					ShowQueryString(STR_JUST_INT, STR_MAPGEN_QUANTITY_OF_SEA_LAKES, 3, 50, this, CS_NUMERAL, QSF_NONE);
-				};
+				}
 				GameMode old_gm = _game_mode;
 				_game_mode = GM_MENU;
 				IConsoleSetSetting("difficulty.quantity_sea_lakes", index);

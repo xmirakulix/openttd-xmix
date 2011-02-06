@@ -11,7 +11,6 @@
 
 #include "stdafx.h"
 
-#include "map_func.h"
 #include "tilearea_type.h"
 
 /**
@@ -104,6 +103,11 @@ void TileArea::ClampToMap()
 	this->h = min(this->h, MapSizeY() - TileY(this->tile));
 }
 
+/**
+ * Construct the iterator.
+ * @param begin Tile from where to begin iterating.
+ * @param end   Tile where to end the iterating.
+ */
 DiagonalTileIterator::DiagonalTileIterator(TileIndex corner1, TileIndex corner2) : TileIterator(corner2), base_x(TileX(corner2)), base_y(TileY(corner2)), a_cur(0), b_cur(0)
 {
 	assert(corner1 < MapSize());
@@ -135,23 +139,45 @@ DiagonalTileIterator::DiagonalTileIterator(TileIndex corner1, TileIndex corner2)
 	}
 }
 
+/**
+ * Move ourselves to the next tile in the rectange on the map.
+ */
 TileIterator &DiagonalTileIterator::operator++()
 {
 	assert(this->tile != INVALID_TILE);
 
+	/* Determine the next tile, while clipping at map borders */
+	bool new_line = false;
 	do {
 		/* Iterate using the rotated coordinates. */
-		if (this->a_max > 0) {
-			++this->a_cur;
-		} else {
-			--this->a_cur;
-		}
-		if (this->a_cur == this->a_max) {
+		if (this->a_max == 1 || this->a_max == -1) {
+			/* Special case: Every second column has zero length, skip them completely */
 			this->a_cur = 0;
 			if (this->b_max > 0) {
-				++this->b_cur;
+				this->b_cur = min(this->b_cur + 2, this->b_max);
 			} else {
-				--this->b_cur;
+				this->b_cur = max(this->b_cur - 2, this->b_max);
+			}
+		} else {
+			/* Every column has at least one tile to process */
+			if (this->a_max > 0) {
+				this->a_cur += 2;
+				new_line = this->a_cur >= this->a_max;
+			} else {
+				this->a_cur -= 2;
+				new_line = this->a_cur <= this->a_max;
+			}
+			if (new_line) {
+				/* offset of initial a_cur: one tile in the same direction as a_max
+				 * every second line.
+				 */
+				this->a_cur = abs(this->a_cur) % 2 ? 0 : (this->a_max > 0 ? 1 : -1);
+
+				if (this->b_max > 0) {
+					++this->b_cur;
+				} else {
+					--this->b_cur;
+				}
 			}
 		}
 

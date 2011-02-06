@@ -688,8 +688,6 @@ STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHIT
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Alles ûtsette
 STR_SMALLMAP_ENABLE_ALL                                         :{BLACK}Alles oansette
 STR_SMALLMAP_SHOW_HEIGHT                                        :{BLACK}Lit hichte sjen
-STR_SMALLMAP_TOOLTIP_DISABLE_ALL                                :{BLACK}Lit gjin yndustrieën sjen op de kaart
-STR_SMALLMAP_TOOLTIP_ENABLE_ALL                                 :{BLACK}Lit alle yndustrieën sjen op de kaart
 
 # Status bar messages
 STR_STATUSBAR_TOOLTIP_SHOW_LAST_NEWS                            :{BLACK}Lit lêste (neis)berjocht sjen
@@ -995,14 +993,11 @@ STR_DISASTERS_ON                                                :Oan
 STR_CONFIG_SETTING_OFF                                          :út
 STR_CONFIG_SETTING_ON                                           :oan
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Stea it bouen op in helling ta: {ORANGE}{STRING}
-STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Stea ekstra lange treinen ta: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Utjefte fan steam/fonken by treinen: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Gjin
 STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Orizjiniel
 STR_CONFIG_SETTING_SMOKE_AMOUNT_REALISTIC                       :Realistysk
 STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_ORIGINAL     :Orizjiniel
-STR_CONFIG_SETTING_LONGBRIDGES                                  :{LTBLUE}Stea ekstra lange brêgen ta: {ORANGE}{STRING}
-STR_CONFIG_SETTING_GOTODEPOT                                    :{LTBLUE}Stea gea nij depot opdrachten ta: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :neat
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :lyk as oare yndustrieën
 STR_CONFIG_SETTING_INDUSTRY_PLATFORM                            :{LTBLUE}Meitsje Lân om de yndustry hinne flak: {ORANGE}{STRING} tile{P 0:1 "" s}
@@ -1152,14 +1147,10 @@ STR_NETWORK_SERVER_LIST_START_SERVER_TOOLTIP                    :{BLACK}Start di
 STR_NETWORK_START_SERVER_CAPTION                                :{WHITE}Start in spul foar multispilers
 
 STR_NETWORK_START_SERVER_NEW_GAME_NAME                          :{BLACK}Spulnamme:
-STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Selektear in lân:
 
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Ynternet
 STR_NETWORK_START_SERVER_SPECTATORS_SELECT                      :{BLACK}{NUM} taskôger{P "" s}
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Maksimaal tal taskôgers:
-
-STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Start Spul
-STR_NETWORK_START_SERVER_LOAD_GAME                              :{BLACK}Laad Spul
 
 
 # Network game languages
@@ -1410,7 +1401,6 @@ STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Keapje l
 # Object construction window
 STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Objekt seleksje
 STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Selektearje te bouen objekt
-STR_OBJECT_BUILD_CLASS_LABEL                                    :{BLACK}objekt klasse
 STR_OBJECT_BUILD_PREVIEW_TOOLTIP                                :{BLACK}Besjoch objekt yn it foar
 STR_OBJECT_BUILD_SIZE                                           :{BLACK}Grutte: {GOLD}{NUM} x {NUM} Flakken
 
@@ -1940,14 +1930,8 @@ STR_REPLACE_VEHICLE_AIRCRAFT                                    :Fleanmasine
 
 # Messages in the start stop button in the vehicle view
 
-
-STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT                         :{LTBLUE}Ûnderweis nei {WAYPOINT}
 STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL                     :{LTBLUE}Ûnderweis nei {WAYPOINT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT                            :{ORANGE}Ûnderweis nei {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_VEL                        :{ORANGE}Ûnderweis nei{DEPOT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE                    :{LTBLUE}Ûnderhâld yn {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL                :{LTBLUE}ûnderhâld yn {DEPOT}, {VELOCITY}
 
 # Vehicle stopped/started animations
@@ -2822,7 +2806,6 @@ STR_COMPANY_MONEY                                               :{WHITE}{CURRENC
 STR_BLACK_DATE_LONG                                             :{BLACK}{DATE_LONG}
 STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
 STR_SILVER_CROSS                                                :{SILVER}{CROSS}
-STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}

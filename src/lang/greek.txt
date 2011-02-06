@@ -230,10 +230,10 @@ STR_ABBREV_ALL                                                  :{TINYFONT}ΟΛ�
 
 # 'Mode' of transport for cargoes
 STR_PASSENGERS                                                  :{COMMA} επιβάτ{P ης ες}
-STR_BAGS                                                        :{COMMA} Σάκκοι
+STR_BAGS                                                        :{COMMA} σάκκ {P ος οι}
 STR_TONS                                                        :{COMMA} Τόνοι
-STR_LITERS                                                      :{COMMA} Λίτρα
-STR_ITEMS                                                       :{COMMA} αντικείμενα
+STR_LITERS                                                      :{COMMA} Λίτρ{P ο α}
+STR_ITEMS                                                       :{COMMA} αντικείμεν{P ο α}
 STR_CRATES                                                      :{COMMA} Κουτ{P ί ιά}
 
 # Colours, do not shuffle
@@ -305,7 +305,7 @@ STR_TOOLTIP_DEMOLISH_BUILDINGS_ETC                              :{BLACK}Κατε
 # Query window
 STR_BUTTON_DEFAULT                                              :{BLACK}Προεπιλογή
 STR_BUTTON_CANCEL                                               :{BLACK}Ακύρωση
-STR_BUTTON_OK                                                   :{BLACK}Εντάξει
+STR_BUTTON_OK                                                   :{BLACK}OK
 
 # On screen keyboard window
 STR_OSK_KEYBOARD_LAYOUT                                         :`1234567890-=\qwertyuiop[]asdfghjkl;'  zxcvbnm,./ .
@@ -412,6 +412,7 @@ STR_SCENEDIT_FILE_MENU_QUIT                                     :Έξοδος
 STR_SETTINGS_MENU_GAME_OPTIONS                                  :Επιλογές παιχνιδιού
 STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Ρυθμίσεις δυσκολίας
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Προχωρημένες ρυθμίσεις
+STR_SETTINGS_MENU_AI_SETTINGS                                   :Ρυθμίσεις AI
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :Ρυθμίσεις NewGRF
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Επιλογές διαφάνειας
 STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Εμφάνιση ονομάτων πόλεων
@@ -505,9 +506,9 @@ STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :Πληροφο�
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Εναλλαγή Κονσόλας
 STR_ABOUT_MENU_AI_DEBUG                                         :Αποσφαλμάτωση AI
-STR_ABOUT_MENU_SCREENSHOT                                       :Φωτογραφία Οθόνης
+STR_ABOUT_MENU_SCREENSHOT                                       :Στιγμιότυπο οθόνης
 STR_ABOUT_MENU_ZOOMIN_SCREENSHOT                                :Μεγένθυση στη φωτογραφία εικόνας
-STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Μεγάλη Φωτογραφία Οθόνης (Ctrl-G)
+STR_ABOUT_MENU_GIANT_SCREENSHOT                                 :Στιγμιότυπο οθόνης για ολο το χάρτη(Ctrl-G)
 STR_ABOUT_MENU_ABOUT_OPENTTD                                    :Σχετικά με το 'OpenTTD'
 STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Ευθυγραμμιστής Sprite
 ############ range ends here
@@ -791,6 +792,7 @@ STR_SMALLMAP_LEGENDA_SNOW                                       :{TINYFONT}{BLAC
 STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF                   :{BLACK}Εναλλαγή ονομάτων πόλεων στο χάρτη
 STR_SMALLMAP_CENTER                                             :{BLACK}Κεντράρισμα του μικρού χάρτη στην τρέχουσα θέση
 STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRING} ({NUM})
+STR_SMALLMAP_COMPANY                                            :{TINYFONT}{COMPANY}
 STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Απενεργοποίηση όλων
 STR_SMALLMAP_ENABLE_ALL                                         :{BLACK}Ενεργοποίηση όλων
@@ -798,6 +800,8 @@ STR_SMALLMAP_SHOW_HEIGHT                                        :{BLACK}Εμφά
 STR_SMALLMAP_TOOLTIP_DISABLE_ALL_INDUSTRIES                     :{BLACK}Εμφάνιση καμίας βιομηχανίας στο χάρτη
 STR_SMALLMAP_TOOLTIP_ENABLE_ALL_INDUSTRIES                      :{BLACK}Εμφάνιση όλων των βιομηχανιών στο χάρτη
 STR_SMALLMAP_TOOLTIP_SHOW_HEIGHT                                :{BLACK}Εναλλάγη εμφάνισης υψομετρικού χάρτη
+STR_SMALLMAP_TOOLTIP_DISABLE_ALL_COMPANIES                      :{BLACK}Απόκρυψη όλων των ιδιοκτησιών των εταιριών στο χάρτη
+STR_SMALLMAP_TOOLTIP_ENABLE_ALL_COMPANIES                       :{BLACK}Εμφάνιση όλων των ιδιοκτησιών των εταιριών στο χάρτη
 
 # Status bar messages
 STR_STATUSBAR_TOOLTIP_SHOW_LAST_NEWS                            :{BLACK}Εμφάνιση τελευταίου μηνύματος ή αναφοράς νέων
@@ -1038,8 +1042,8 @@ STR_GAME_OPTIONS_RESOLUTION                                     :{BLACK}Ανάλ
 STR_GAME_OPTIONS_RESOLUTION_TOOLTIP                             :{BLACK}Διαλέξτε την ανάλυση της οθόνης που θέλετε
 STR_GAME_OPTIONS_RESOLUTION_OTHER                               :άλλη
 
-STR_GAME_OPTIONS_SCREENSHOT_FORMAT                              :{BLACK}Τύπος αρχείου φωτογραφίας οθόνης
-STR_GAME_OPTIONS_SCREENSHOT_FORMAT_TOOLTIP                      :{BLACK}Επιλογή του τύπου αρχείου για τη φωτογραφίας οθόνης
+STR_GAME_OPTIONS_SCREENSHOT_FORMAT                              :{BLACK}Τύπος αρχείου στιγμιότυπου οθόνης
+STR_GAME_OPTIONS_SCREENSHOT_FORMAT_TOOLTIP                      :{BLACK}Επιλογή του τύπου αρχείου για το στιγμιότυπο οθόνης
 
 STR_GAME_OPTIONS_BASE_GRF                                       :{BLACK}Βασικό σετ γραφικών
 STR_GAME_OPTIONS_BASE_GRF_TOOLTIP                               :{BLACK}Επιλογή του βασικού σετ γραφικών που θα χρησιμοποιηθεί
@@ -1179,12 +1183,10 @@ STR_CONFIG_SETTING_CAPTION                                      :{WHITE}Προη
 STR_CONFIG_SETTING_OFF                                          :Ανενεργό
 STR_CONFIG_SETTING_ON                                           :Ενεργό
 STR_CONFIG_SETTING_DISABLED                                     :απενεργοποιημένο
-STR_CONFIG_SETTING_VEHICLESPEED                                 :{LTBLUE}Εμφάνιση της ταχύτητας του οχήματος στη γραμμή κατάστασης: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Επιτρέπεται το χτίσιμο σε πλαγιές και ακτές: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Να επιτρέπεται η διαμόρφωση εδάφους κάτω από κτίρια, γραμμές, κλπ. (αυτόματη κλίση): {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Επιτρέπονται πιο ρεαλιστικά ταξινομημένες περιοχές συλλογής : {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Επιτρέπεται η αφαίρεση περισσότερων ιδιοκτησιών πόλεων: {ORANGE}{STRING}
-STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Επιτρέπεται η δημιουργία πολύ μακριών τρένων: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Κανένα
 STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Γνήσιο
 STR_CONFIG_SETTING_SMOKE_AMOUNT_REALISTIC                       :Ρεαλιστικό
@@ -1197,21 +1199,17 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Ρεαλιστ�
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Υπερβολική κλίση γραμμης τρένων κατά {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Υπερβολική κλίση για τα οχήματα δρόμου {ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Απαγόρευση στα τρένα και πλοια να κάνουν στροφες 90°: {ORANGE}{STRING}
-STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Συνένωση σταθμών τρένων χτισμένων δίπλα σε άλλο: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Να επιτρέπεται η συνένωση μη παρακείμενων σταθμών: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Χρησιμοποίηση βελτιωμένου αλγόριθμου φόρτωσης: {ORANGE}{STRING}
 STR_CONFIG_SETTING_GRADUAL_LOADING                              :{LTBLUE}Φόρτωση οχημάτων σταδιακά: {ORANGE}{STRING}
 STR_CONFIG_SETTING_INFLATION                                    :{LTBLUE}Πληθωρισμός: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SELECTGOODS                                  :{LTBLUE}Παράδοση φορτίου σε σταθμό μόνο όταν υπάρχει ζήτηση: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LONGBRIDGES                                  :{LTBLUE}Επιτρέπεται να χτίζονται πολύ μακριές γέφυρες: {ORANGE}{STRING}
-STR_CONFIG_SETTING_GOTODEPOT                                    :{LTBLUE}Επιτρέπονται οι εντολές αποστολής σε αμαξοστάσιο: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD             :{LTBLUE}Χειροκίνητη μέθοδος κατασκευής βιομηχανιών πρώτων υλών: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :κανένα
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :όπως σε άλλες βιομηχανίες
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_PROSPECTING :επικείμενη
 STR_CONFIG_SETTING_INDUSTRY_PLATFORM                            :{LTBLUE}Έπιπεδη περιοχή γύρω από τις βιομηχανίες: {ORANGE}{STRING} tile{P 0:1 "" s}
 STR_CONFIG_SETTING_MULTIPINDTOWN                                :{LTBLUE}Επιτρέπονται πολλαπλές όμοιες βιομηχανίες ανα πόλη: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LONGDATE                                     :{LTBLUE}Εμφάνιση ολόκληρης ημερομηνίας στη γραμμή κατάστασης: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SIGNALSIDE                                   :{LTBLUE}Εμφάνιση σήμανσης στην πλευρά οδήγησης: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SHOWFINANCES                                 :{LTBLUE}Εμφάνιση παράθυρου οικονομικών στο τέλος του έτους: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NONSTOP_BY_DEFAULT                           :{LTBLUE}Οι νέες οδηγίες είναι 'χωρίς στάση' από προεπιλογή: {ORANGE}{STRING}
@@ -1224,7 +1222,6 @@ STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Μετ�
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Επιτρέπεται η δωροδοκία της τοπικής αρχής: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Επιτρέπεται η αγορά αποκλειστικών δικαιωμάτων μεταφοράς: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Να επιτρέπεται η αποστολή χρημάτων σε άλλες εταιρίες: {ORANGE}{STRING}
-STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Ανομοιόμορφοι σταθμοί: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Πολλαπλασιαστής βάρους σε φορτία για εξομοίωση βαρέων τρένων: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Συντελεστής ταχύτητας αεροπλάνων: {ORANGE}1 / {STRING}
 STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Αριθμός των αεροπορικών ατυχυμάτων: {ORANGE}{STRING}
@@ -1251,7 +1248,7 @@ STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Αυτ�
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Αυτόματη Ανανέωση με τα ελάχιστα απαιτούμενα χρήματα: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Διάρκεια μηνύματος σφάλματος: {ORANGE}{STRING}
 STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Καθυστέρηση για αναδυόμενα γεγονότα: {ORANGE}{STRING}
-STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Καθυστέρηση για αναδυόμενα γεγονότα: {ORANGE}απενεργοποιημένο
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Εμφάνιση αναδυόμενων γεγονότων: {ORANGE}Δεξί κλικ
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Εμφάνιση πληθυσμού πόλης στο όνομα της πόλης: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Γεννήτρια Γης: {ORANGE}{STRING}
@@ -1323,7 +1320,6 @@ STR_CONFIG_SETTING_LOADING_INDICATORS                           :{LTBLUE}Χρή�
 STR_CONFIG_SETTING_LOADING_INDICATORS_OFF                       :όχι
 STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Η εταιρία μου
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Όλες οι εταιρίες
-STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Ενεργοποίηση δρομολογίων για τα οχήματα: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Εμφάνιση δρομολογίων σε στιγμές αντί για ημέρες: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Εμφάνιση άφιξη και αναχώρηση στα δρομολόγια: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Γρήγορη δημιουργία εντολών για τα οχήματα: {ORANGE}{STRING}
@@ -1335,7 +1331,7 @@ STR_CONFIG_SETTING_SHOW_TRACK_RESERVATION                       :{LTBLUE}Εμφ�
 STR_CONFIG_SETTING_PERSISTENT_BUILDINGTOOLS                     :{LTBLUE}Διατήρηση των οικοδομικών εργαλείων ενεργών μετά από χρήση τους: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXPENSES_LAYOUT                              :{LTBLUE}Ομαδοποίηση εξόδων στο παράθυρο οικονομικών της εταιρίας: {ORANGE}{STRING}
 
-STR_CONFIG_SETTING_ALWAYS_BUILD_INFRASTRUCTURE                  :{LTBLUE}Εμφάνιση οικοδομικών εργαλίων όταν δεν υπάρχουν κατάλληλα οχήματα: {ORANGE}{STRING}
+STR_CONFIG_SETTING_DISABLE_UNSUITABLE_BUILDING                  :{LTBLUE}Απενεργοποιήση των υποδομών για τα οχήματα που δεν είναι διαθέσιμα: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_TRAINS                                   :{LTBLUE}Μέγιστος αριθμός τρένων ανα παίκτη: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_ROAD_VEHICLES                            :{LTBLUE}Μέγιστα οχήματα ανα παίκτη: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_AIRCRAFT                                 :{LTBLUE}Μέγιστα αεροπλάνα ανα παίκτη: {ORANGE}{STRING}
@@ -1686,9 +1682,6 @@ STR_NETWORK_START_SERVER_NEW_GAME_NAME                          :{BLACK}Όνομ
 STR_NETWORK_START_SERVER_NEW_GAME_NAME_TOOLTIP                  :{BLACK}Το όνομα του παιχνιδιού θα εμφανιστεί στους άλλους παίκτες στο μενού επιλογής παιχνιδιού για πολλούς παίκτες
 STR_NETWORK_START_SERVER_SET_PASSWORD                           :{BLACK}Θέστε κωδικό
 STR_NETWORK_START_SERVER_PASSWORD_TOOLTIP                       :{BLACK}Προστατέψτε το παιχνίδι με έναν κωδικό εάν δε θέλετε να είναι δημοσίως προσβάσιμο
-STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Επιλέξτε έναν χάρτη:
-STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Σε ποιό χάρτη θέλετε να παίξετε;
-STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Δημιουργία τυχαίου νέου παιχνιδιού
 
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (αναγγελία)
@@ -1703,11 +1696,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Μέγι
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Περιορισμός του διακομιστή σε συγκεκριμένο αριθμό θεατών
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Ομιλούμενη γλώσσα:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Οι υπόλοιποι παίκτες θα γνωρίζουν ποια γλώσσα ομιλείται στο διακομιστή
-
-STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Έναρξη παιχνιδιού
-STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Έναρξη νέου δικτυακού παιχνιδιού από τυχαίο χάρτη ή από επιλεγμένο σενάριο
-STR_NETWORK_START_SERVER_LOAD_GAME                              :{BLACK}Φόρτωση παιχνιδιού
-STR_NETWORK_START_SERVER_LOAD_GAME_TOOLTIP                      :{BLACK}Συνέχεια ενός αποθηκευμένου παιχνιδιού με πολλούς παίκτες (επιβεβαιώστε πως συνδέεστε στη σωστή εταιρία)
 
 STR_NETWORK_START_SERVER_NEW_GAME_NAME_OSKTITLE                 :{BLACK}Εισάγετε το όνομα του δικτυακού παιχνιδιού
 
@@ -2067,6 +2055,7 @@ STR_SELECT_RAIL_BRIDGE_CAPTION                                  :{WHITE}Επιλ
 STR_SELECT_ROAD_BRIDGE_CAPTION                                  :{WHITE}Επιλογή Γέφυρας Δρόμου
 STR_SELECT_BRIDGE_SELECTION_TOOLTIP                             :{BLACK}Επιλογή γέφυρας - κάντε κλικ στην γέφυρα της προτίμησής σας για κατασκευή
 STR_SELECT_BRIDGE_INFO                                          :{GOLD}{STRING},{} {VELOCITY} {WHITE}{CURRENCY}
+STR_SELECT_BRIDGE_SCENEDIT_INFO                                 :{GOLD}{STRING},{} {VELOCITY}
 STR_BRIDGE_NAME_SUSPENSION_STEEL                                :Ατσάλινη, με Αναρτήσεις
 STR_BRIDGE_NAME_GIRDER_STEEL                                    :Ατσάλινη, Με Δοκούς
 STR_BRIDGE_NAME_CANTILEVER_STEEL                                :Ατσάλινη, Κρεμαστή
@@ -2170,7 +2159,7 @@ STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Αγορ
 # Object construction window
 STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Επιλογή Αντικείμενου
 STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Επιλογή αντικείμενου για κατασκευή. Shift εναλλάσει χτίσιμο/εμφάνιση εκτίμησης κόστος
-STR_OBJECT_BUILD_CLASS_LABEL                                    :{BLACK}Κλάση αντικείμενου
+STR_OBJECT_BUILD_CLASS_TOOLTIP                                  :{BLACK}Επιλογή της κλάσης του αντικείμενου για χτήσιμο
 STR_OBJECT_BUILD_PREVIEW_TOOLTIP                                :{BLACK}Προεπισκόπιση του αντικείμενου
 STR_OBJECT_BUILD_SIZE                                           :{BLACK}Μέγεθος: {GOLD}{NUM} x {NUM} τετράγωνα
 
@@ -2511,6 +2500,7 @@ STR_NEWGRF_SETTINGS_PARAMETER                                   :{BLACK}Παρά
 STR_NEWGRF_SETTINGS_NO_INFO                                     :{BLACK}Δεν υπάρχουν διαθέσιμες πληροφορίες
 STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Δεν βρέθηκε το ταυτοποιημένο αρχείο
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Απενεργοποιημένο
+STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}Μη συμβατό με αυτή την έκδοση του OpenTTD
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Εισαγώγη παραμέτρων NewGRF
 
@@ -2686,7 +2676,7 @@ STR_SUBSIDIES_SUBSIDISED_FROM_TO                                :{ORANGE}{STRING
 STR_SUBSIDIES_TOOLTIP_CLICK_ON_SERVICE_TO_CENTER                :{BLACK}Κάντε κλίκ στην υπηρεσία για κεντράρισμα στην βιομηχανία/πόλη. Ctrl-κλικ ανοίγει ένα νεο παράθυρο προβολής στην τοποθεσία της βιομηχανίας/πόλης
 
 # Station list window
-STR_STATION_LIST_TOOLTIP                                        :{BLACK}Ονόματα σταθμών - Κλικ στο όνομα για κεντράρισμα εικόνας. Ctrl-κλικ ανοίγει ένα νεο παράθυρο προβολής στην τοποθεσία του σταθμού
+STR_STATION_LIST_TOOLTIP                                        :{BLACK}Ονόματα σταθμών - Κλικ στο όνομα για κεντράρισμα στο σταθμό. Ctrl-κλικ ανοίγει ένα νεο παράθυρο προβολής στην τοποθεσία του σταθμού
 STR_STATION_LIST_USE_CTRL_TO_SELECT_MORE                        :{BLACK}Κρατήστε πατημένο το Ctrl για να επιλέξετε περισσοτέρα αντικείμενα
 STR_STATION_LIST_CAPTION                                        :{WHITE}{COMPANY} - {COMMA} Σταθμ{P ός οί}
 STR_STATION_LIST_STATION                                        :{YELLOW}{STATION} {STATIONFEATURES}
@@ -3134,23 +3124,14 @@ STR_VEHICLE_STATUS_LEAVING                                      :{LTBLUE}Ανα�
 STR_VEHICLE_STATUS_CRASHED                                      :{RED}Κατεστραμμένο!
 STR_VEHICLE_STATUS_BROKEN_DOWN                                  :{RED}Χαλασμένο
 STR_VEHICLE_STATUS_STOPPED                                      :{RED}Σταματημένο
-STR_VEHICLE_STATUS_TRAIN_STOPPING                               :{RED}Σταματάει
 STR_VEHICLE_STATUS_TRAIN_STOPPING_VEL                           :{RED}Σταματάει, {VELOCITY}
 STR_VEHICLE_STATUS_TRAIN_NO_POWER                               :{RED}Χώρις ενέργεια κίνησης
 STR_VEHICLE_STATUS_TRAIN_STUCK                                  :{ORANGE}Αναμονή για ελεύθερη τροχιά
 
-STR_VEHICLE_STATUS_HEADING_FOR_STATION                          :{LTBLUE}Πάει προς {STATION}
 STR_VEHICLE_STATUS_HEADING_FOR_STATION_VEL                      :{LTBLUE}Πάει προς {STATION}, {VELOCITY}
-STR_VEHICLE_STATUS_NO_ORDERS                                    :{LTBLUE}Δεν έχει οδηγίες
 STR_VEHICLE_STATUS_NO_ORDERS_VEL                                :{LTBLUE}Δεν έχει οδηγίες, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT                         :{LTBLUE}Καθ' οδόν {WAYPOINT}
 STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL                     :{LTBLUE}Πορεία προς {WAYPOINT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT                            :{ORANGE}Κατεύθυνση για το {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_VEL                        :{ORANGE}Κατεύθυνση για το {DEPOT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE                    :{LTBLUE}Επισκευή στο {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL                :{LTBLUE}Επισκευή στο {DEPOT}, {VELOCITY}
 
 # Vehicle stopped/started animations
@@ -3544,8 +3525,8 @@ STR_WARNING_HEIGHTMAP_SCALE_MESSAGE                             :{YELLOW}Αλλ�
 STR_WARNING_FALLBACK_SOUNDSET                                   :{WHITE}Μόνο το σετ ανάγκης ήχου βρέθηκε.Αν θέλετε ήχους, εγκαταστήστε ένα πακέτο ήχων μέσω του συστήματος μεταφόρτωσης υλικού.
 
 # Screenshot related messages
-STR_MESSAGE_SCREENSHOT_SUCCESSFULLY                             :{WHITE}Φωτογραφία εικόνας αποθηκεύθηκε επιτυχώς ώς '{STRING}'
-STR_ERROR_SCREENSHOT_FAILED                                     :{WHITE}Φωτογραφία εικόνας απέτυχε!
+STR_MESSAGE_SCREENSHOT_SUCCESSFULLY                             :{WHITE}Το στιγμιότυπο οθόνης αποθηκεύθηκε επιτυχώς ώς '{STRING}'
+STR_ERROR_SCREENSHOT_FAILED                                     :{WHITE}Το στιγμιότυπο οθόνης απέτυχε!
 
 # Error message titles
 STR_ERROR_MESSAGE_CAPTION                                       :{YELLOW}Μήνυμα
@@ -3641,7 +3622,6 @@ STR_ERROR_CAN_T_BUILD_AIRPORT_HERE                              :{WHITE}Δεν �
 
 STR_ERROR_ADJOINS_MORE_THAN_ONE_EXISTING                        :{WHITE}Γειτονεύει με περισσότερες από μια υπάρχουσες περιοχές σταθμών/φόρτωσης
 STR_ERROR_STATION_TOO_SPREAD_OUT                                :{WHITE}... ο σταθμός είναι υπερβολικά απλωμένος
-STR_ERROR_NONUNIFORM_STATIONS_DISALLOWED                        :{WHITE}... ανομοιόμορφοι σταθμοί απενεργοποιημένοι
 STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Πάρα πολλές περιοχές σταθμών/φόρτωσης
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Πάρα πολλά κομμάτια σιδηροδρομικού σταθμού
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Πάρα πολλές στάσεις λεωφορείου
@@ -4346,7 +4326,6 @@ STR_COMPANY_MONEY                                               :{WHITE}{CURRENC
 STR_BLACK_DATE_LONG                                             :{BLACK}{DATE_LONG}
 STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
 STR_SILVER_CROSS                                                :{SILVER}{CROSS}
-STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
@@ -4358,6 +4337,7 @@ STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLAC
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_ORANGE_STRING                                               :{ORANGE}{STRING}
 STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_HEIGHT                                           :{TINYFONT}{BLACK}{HEIGHT}

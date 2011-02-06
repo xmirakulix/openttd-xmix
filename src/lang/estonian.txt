@@ -1147,12 +1147,10 @@ STR_CONFIG_SETTING_CAPTION                                      :{WHITE}Täpsema
 STR_CONFIG_SETTING_OFF                                          :Väljas
 STR_CONFIG_SETTING_ON                                           :Sees
 STR_CONFIG_SETTING_DISABLED                                     :väljas
-STR_CONFIG_SETTING_VEHICLESPEED                                 :{LTBLUE}Sõidukiirus olekuribal: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Nõlvadele ja kallastele ehitamine: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Maastikukujundus majade, rööbaste jms. all (autoslope): {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Reaalsemad veekogud: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Linnateede, -sildade, -tunnelite jne lammutamine: {ORANGE}{STRING}
-STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Väga pikkade rongide ehitamine: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Vedurisuitsu ja -sädemete hulk: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Pole
 STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Originaal
@@ -1166,21 +1164,17 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realistlik
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Järsakute kalde suurus rongide jaoks {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Järsakute kalde suurus maanteesõidukite jaoks {ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Rongidel ja laevadel keelatakse 90 kraadised pöörded: {ORANGE}{STRING}
-STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Kõrvuti ehitatud jaamade ühendamine: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Mitte kõrvuti asetsevate jaamade liitmine: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Täiustatud laadimisalgoritm: {ORANGE}{STRING}
 STR_CONFIG_SETTING_GRADUAL_LOADING                              :{LTBLUE}Veovahendite järkjärguline laadimine: {ORANGE}{STRING}
 STR_CONFIG_SETTING_INFLATION                                    :{LTBLUE}Inflatsioon: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SELECTGOODS                                  :{LTBLUE}Kauba toimetamine jaama ainult nõudluse korral: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LONGBRIDGES                                  :{LTBLUE}Väga pikkade sildade ehitamine: {ORANGE}{STRING}
-STR_CONFIG_SETTING_GOTODEPOT                                    :{LTBLUE}Depoosse minemise käsud: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD             :{LTBLUE}Põhitööstuse rajamismeetod: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :pole
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :nagu muud tööstused
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_PROSPECTING :eeluuringutega
 STR_CONFIG_SETTING_INDUSTRY_PLATFORM                            :{LTBLUE}Tasane pinnas tehaste ümber: {ORANGE}{STRING} ruut{P 0:1 "" u}
 STR_CONFIG_SETTING_MULTIPINDTOWN                                :{LTBLUE}Samalaadsed tööstused ühes linnas: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LONGDATE                                     :{LTBLUE}Täispikk kuupäev olekuribal: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SIGNALSIDE                                   :{LTBLUE}Signaalide paigutamine sõidusuunda: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SHOWFINANCES                                 :{LTBLUE}Aastalõpu rahavoogude aruanne: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NONSTOP_BY_DEFAULT                           :{LTBLUE}Uued sihtpunktid on vaikimisi 'peatusteta': {ORANGE}{STRING}
@@ -1193,7 +1187,6 @@ STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Vaate k
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Altkäemaksud kohalikele omavalitsustele: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Ainuveoõiguste ostmine: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Raha saatmine teistele ettevõtetele: {ORANGE}{STRING}
-STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Suvalise kujuga jaamad: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Raskete rongide simuleerimiseks kasutatav raskustegur: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Lennukite kiirustegur: {ORANGE}1 / {STRING}
 STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Lennuõnnetuste hulk: {ORANGE}{STRING}
@@ -1219,8 +1212,8 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Vananen
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Piirvanuse saavutanud veovahendit uuendatakse {ORANGE}{STRING}{LTBLUE} kuu piires
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Nõutud rahasumma uuendamiseks: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Veateadete kestus: {ORANGE}{STRING} sekund{P 0:1 "" it}
-STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Ülelibistussündmuste viivitus: {ORANGE}{STRING} sekund{P 0:1 "" it}
-STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Ülelibistussündmuste viivitus: {ORANGE}keelatud
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Kuva spikreid: {ORANGE}Hõljudes objekti kohal {STRING} sekundit
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Kuva spikker: {ORANGE}Paremklõpsuga
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Rahvaarv alevike nimesiltidel: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Maaala Generaator: {ORANGE}{STRING}
@@ -1292,7 +1285,6 @@ STR_CONFIG_SETTING_LOADING_INDICATORS                           :{LTBLUE}Laadimi
 STR_CONFIG_SETTING_LOADING_INDICATORS_OFF                       :Väljas
 STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Oma ettevõtel
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Igal ettevõttel
-STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Sõiduplaanide määramine: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Sõiduplaanis kasutatakse päevade asemel tiksumist: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Saabumiste ja väljumiste näitamine sõiduplaanis: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Sõidukikäskude kiirloomine: {ORANGE}{STRING}
@@ -1304,7 +1296,7 @@ STR_CONFIG_SETTING_SHOW_TRACK_RESERVATION                       :{LTBLUE}Varunda
 STR_CONFIG_SETTING_PERSISTENT_BUILDINGTOOLS                     :{LTBLUE}Ehitustööriistad pärast kasutamist tegusad: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXPENSES_LAYOUT                              :{LTBLUE}Kulutuste rühmitamine ettevõtte finantsaknas: {ORANGE}{STRING}
 
-STR_CONFIG_SETTING_ALWAYS_BUILD_INFRASTRUCTURE                  :{LTBLUE}Ehitustööriistade näitamine ka vastavate sõidukite puudumisel: {ORANGE}{STRING}
+STR_CONFIG_SETTING_DISABLE_UNSUITABLE_BUILDING                  :{LTBLUE}Blokeeri infrastruktuuri ehitamine kui sobivad sõidukid puuduvad: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_TRAINS                                   :{LTBLUE}Enim ronge ettevõtte kohta: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_ROAD_VEHICLES                            :{LTBLUE}Enim mootorsõidukeid ettevõtte kohta: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_AIRCRAFT                                 :{LTBLUE}Enim õhusõidukeid ettevõtte kohta: {ORANGE}{STRING}
@@ -1656,9 +1648,6 @@ STR_NETWORK_START_SERVER_NEW_GAME_NAME                          :{BLACK}Mängu n
 STR_NETWORK_START_SERVER_NEW_GAME_NAME_TOOLTIP                  :{BLACK}Mängu nime näidatakse teistele mänijatele võrgumängu serverite nimekirjas
 STR_NETWORK_START_SERVER_SET_PASSWORD                           :{BLACK}Sea parool
 STR_NETWORK_START_SERVER_PASSWORD_TOOLTIP                       :{BLACK}Kaitse oma mäng parooliga, kui sa ei taha, et kõik sellele ligi pääseksid
-STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Vali kaart:
-STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Millist kaarti sa tahad mängida?
-STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Tekita suvaline kaart
 
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (reklaami)
@@ -1673,11 +1662,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Enim pea
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Teatud vaatlejate piirang serveris
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Räägitav keel:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Teistele mängijatele teadmiseks, et mis keelt serveris räägitakse
-
-STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Alusta mängu
-STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Uue võrgumängu alustamine suvalise kaardiga või valitud stsenaariumiga
-STR_NETWORK_START_SERVER_LOAD_GAME                              :{BLACK}Mängu laadimine
-STR_NETWORK_START_SERVER_LOAD_GAME_TOOLTIP                      :{BLACK}Varasema võrgumängu jätkamine (vaata, et ühendad ennast õige mängijana)
 
 STR_NETWORK_START_SERVER_NEW_GAME_NAME_OSKTITLE                 :{BLACK}Sisesta võrgumängu nimi
 
@@ -2141,7 +2125,7 @@ STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Maa ostm
 # Object construction window
 STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Objekti valik
 STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Vali ehitatav objekt. Shift valib ehitamise/hinna kuvamise režiimi
-STR_OBJECT_BUILD_CLASS_LABEL                                    :{BLACK}Objektiklass
+STR_OBJECT_BUILD_CLASS_TOOLTIP                                  :{BLACK}Vali ehitatava objekti klass
 STR_OBJECT_BUILD_PREVIEW_TOOLTIP                                :{BLACK}Objekti eelvaade
 STR_OBJECT_BUILD_SIZE                                           :{BLACK}Suurus: {GOLD}{NUM} x {NUM} ruutu
 
@@ -2482,6 +2466,7 @@ STR_NEWGRF_SETTINGS_PARAMETER                                   :{BLACK}Parameet
 STR_NEWGRF_SETTINGS_NO_INFO                                     :{BLACK}Andmed puuduvad
 STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Sobivat faili ei leitud
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Väljas
+STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}Mitteühilduv selle OpenTTD versiooniga
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Sisesta NewGRF parameetrid
 
@@ -2565,6 +2550,7 @@ STR_NEWGRF_LIST_MISSING                                         :{RED}Puuduvad f
 
 # NewGRF 'it's broken' warnings
 STR_NEWGRF_BROKEN                                               :{WHITE}NewGRF '{STRING}' käitumine põhjustab tõenäoliselt sünkrooni katkemisi ja/või mängu kokkujooksmiseid.
+STR_NEWGRF_BROKEN_POWERED_WAGON                                 :{WHITE}See muutis sõiduki '{1:ENGINE}' vedavate vagunite olekut väljaspool depood
 STR_NEWGRF_BROKEN_VEHICLE_LENGTH                                :{WHITE}Depoost väljas asudes on sõiduki '{1:ENGINE}' pikkus muudetud.
 STR_BROKEN_VEHICLE_LENGTH                                       :{WHITE}Ettevõtte '{1:COMPANY}' rongil '{0:VEHICLE}' on ebasobiv pikkus. See on tõenäoliselt põhjustatud problemaatilistest NewGRF-dest. Mäng võib kokku joosta või sünkroonist välja minna
 
@@ -3102,23 +3088,14 @@ STR_VEHICLE_STATUS_LEAVING                                      :{LTBLUE}Lahkub
 STR_VEHICLE_STATUS_CRASHED                                      :{RED}Kokkupõrge!
 STR_VEHICLE_STATUS_BROKEN_DOWN                                  :{RED}Rike
 STR_VEHICLE_STATUS_STOPPED                                      :{RED}Peatatud
-STR_VEHICLE_STATUS_TRAIN_STOPPING                               :{RED}Peatub
 STR_VEHICLE_STATUS_TRAIN_STOPPING_VEL                           :{RED}Peatub, {VELOCITY}
 STR_VEHICLE_STATUS_TRAIN_NO_POWER                               :{RED}Vool puudub
 STR_VEHICLE_STATUS_TRAIN_STUCK                                  :{ORANGE}Ootamas vaba rada
 
-STR_VEHICLE_STATUS_HEADING_FOR_STATION                          :{LTBLUE}Siht: {STATION}
 STR_VEHICLE_STATUS_HEADING_FOR_STATION_VEL                      :{LTBLUE}Siht: {STATION}, {VELOCITY}
-STR_VEHICLE_STATUS_NO_ORDERS                                    :{LTBLUE}Sihita
 STR_VEHICLE_STATUS_NO_ORDERS_VEL                                :{LTBLUE}Sihita, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT                         :{LTBLUE}Suudub meldepunkti: {WAYPOINT}
 STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL                     :{LTBLUE}Suundub {WAYPOINT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT                            :{ORANGE}Suundub {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_VEL                        :{ORANGE}Suundub {DEPOT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE                    :{LTBLUE}Teenus kohas {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL                :{LTBLUE}Teenus kohas {DEPOT}, {VELOCITY}
 
 # Vehicle stopped/started animations
@@ -3350,6 +3327,7 @@ STR_TIMETABLE_ORDER_VIEW_TOOLTIP                                :{BLACK}Lülita 
 STR_TIMETABLE_TOOLTIP                                           :{BLACK}Sõiduplaan - esiletõstmiseks klõpsa sihtpunktil
 
 STR_TIMETABLE_NO_TRAVEL                                         :Sõitu pole
+STR_TIMETABLE_NOT_TIMETABLEABLE                                 :Reisi (automaatne; ajakava järgmise manuaalse käsu järgi)
 STR_TIMETABLE_TRAVEL_NOT_TIMETABLED                             :Sõitmine (sõiduplaanita)
 STR_TIMETABLE_TRAVEL_FOR                                        :Sõida {STRING}
 STR_TIMETABLE_STAY_FOR                                          :ja oota {STRING}
@@ -3610,7 +3588,6 @@ STR_ERROR_CAN_T_BUILD_AIRPORT_HERE                              :{WHITE}Siia ei 
 
 STR_ERROR_ADJOINS_MORE_THAN_ONE_EXISTING                        :{WHITE}Mitme olemasoleva jaama ühendamine
 STR_ERROR_STATION_TOO_SPREAD_OUT                                :{WHITE}... jaam on liiga laiaks venitatud
-STR_ERROR_NONUNIFORM_STATIONS_DISALLOWED                        :{WHITE}... korrapäratud jaamad keelatud
 STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Liiga palju jaamu
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Liiga palju raudteejaama osasid
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Liiga palju bussipeatusi
@@ -4313,7 +4290,6 @@ STR_COMPANY_MONEY                                               :{WHITE}{CURRENC
 STR_BLACK_DATE_LONG                                             :{BLACK}{DATE_LONG}
 STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
 STR_SILVER_CROSS                                                :{SILVER}{CROSS}
-STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
@@ -4325,6 +4301,7 @@ STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLAC
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_ORANGE_STRING                                               :{ORANGE}{STRING}
 STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_HEIGHT                                           :{TINYFONT}{BLACK}{HEIGHT}

@@ -36,7 +36,6 @@
 #include "train.h"
 #include "news_func.h"
 #include "window_func.h"
-#include "strings_func.h"
 #include "vehicle_func.h"
 #include "sound_func.h"
 #include "company_func.h"
@@ -843,7 +842,7 @@ static bool RoadVehAccelerationModelChanged(int32 p1)
 	if (_settings_game.vehicle.roadveh_acceleration_model != AM_ORIGINAL) {
 		RoadVehicle *rv;
 		FOR_ALL_ROADVEHICLES(rv) {
-			if (rv->IsRoadVehFront()) {
+			if (rv->IsFrontEngine()) {
 				rv->CargoChanged();
 			}
 		}
@@ -866,7 +865,7 @@ static bool RoadVehSlopeSteepnessChanged(int32 p1)
 {
 	RoadVehicle *rv;
 	FOR_ALL_ROADVEHICLES(rv) {
-		if (rv->IsRoadVehFront()) rv->CargoChanged();
+		if (rv->IsFrontEngine()) rv->CargoChanged();
 	}
 
 	return true;
@@ -1352,7 +1351,7 @@ static GRFConfig *GRFLoadConfig(IniFile *ini, const char *grpname, bool is_stati
 		}
 
 		/* Check if item is valid */
-		if (!FillGRFDetails(c, is_static)) {
+		if (!FillGRFDetails(c, is_static) || HasBit(c->flags, GCF_INVALID)) {
 			const char *msg;
 
 			if (c->status == GCS_NOT_FOUND) {
@@ -1361,6 +1360,8 @@ static GRFConfig *GRFLoadConfig(IniFile *ini, const char *grpname, bool is_stati
 				msg = "unsafe for static use";
 			} else if (HasBit(c->flags, GCF_SYSTEM)) {
 				msg = "system NewGRF";
+			} else if (HasBit(c->flags, GCF_INVALID)) {
+				msg = "incompatible to this version of OpenTTD";
 			} else {
 				msg = "unknown";
 			}

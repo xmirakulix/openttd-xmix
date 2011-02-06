@@ -37,13 +37,12 @@
 #include "news_gui.h"
 #include "ai/ai_gui.hpp"
 #include "tilehighlight_func.h"
-#include "rail.h"
-#include "widgets/dropdown_type.h"
 #include "smallmap_gui.h"
 #include "graph_gui.h"
 #include "textbuf_gui.h"
 #include "newgrf_debug.h"
 #include "hotkeys.h"
+#include "engine_base.h"
 
 #include "network/network.h"
 #include "network/network_gui.h"
@@ -692,20 +691,7 @@ static CallBackFunction ToolbarZoomOutClick(Window *w)
 
 static CallBackFunction ToolbarBuildRailClick(Window *w)
 {
-	const Company *c = Company::Get(_local_company);
-	DropDownList *list = new DropDownList();
-	for (RailType rt = RAILTYPE_BEGIN; rt != RAILTYPE_END; rt++) {
-		const RailtypeInfo *rti = GetRailTypeInfo(rt);
-		/* Skip rail type if it has no label */
-		if (rti->label == 0) continue;
-
-		StringID str = rti->max_speed > 0 ? STR_TOOLBAR_RAILTYPE_VELOCITY : STR_JUST_STRING;
-		DropDownListParamStringItem *item = new DropDownListParamStringItem(str, rt, !HasBit(c->avail_railtypes, rt));
-		item->SetParam(0, rti->strings.menu_text);
-		item->SetParam(1, rti->max_speed);
-		list->push_back(item);
-	}
-	ShowDropDownList(w, list, _last_built_railtype, TBN_RAILS, 140, true, true);
+	ShowDropDownList(w, GetRailTypeDropDownList(), _last_built_railtype, TBN_RAILS, 140, true, true);
 	SndPlayFx(SND_15_BEEP);
 	return CBF_NONE;
 }
@@ -723,9 +709,18 @@ static CallBackFunction ToolbarBuildRoadClick(Window *w)
 {
 	const Company *c = Company::Get(_local_company);
 	DropDownList *list = new DropDownList();
-	for (RoadType rt = ROADTYPE_BEGIN; rt != ROADTYPE_END; rt++) {
-		/* The standard road button is *always* available */
-		list->push_back(new DropDownListStringItem(STR_ROAD_MENU_ROAD_CONSTRUCTION + rt, rt, !(HasBit(c->avail_roadtypes, rt) || rt == ROADTYPE_ROAD)));
+
+	/* Road is always visible and available. */
+	list->push_back(new DropDownListStringItem(STR_ROAD_MENU_ROAD_CONSTRUCTION, ROADTYPE_ROAD, false));
+
+	/* Tram is only visible when there will be a tram, and available when that has been introduced. */
+	Engine *e;
+	FOR_ALL_ENGINES_OF_TYPE(e, VEH_ROAD) {
+		if (!HasBit(e->info.climates, _settings_game.game_creation.landscape)) continue;
+		if (!HasBit(e->info.misc_flags, EF_ROAD_TRAM)) continue;
+
+		list->push_back(new DropDownListStringItem(STR_ROAD_MENU_TRAM_CONSTRUCTION, ROADTYPE_TRAM, !HasBit(c->avail_roadtypes, ROADTYPE_TRAM)));
+		break;
 	}
 	ShowDropDownList(w, list, _last_built_roadtype, TBN_ROADS, 140, true, true);
 	SndPlayFx(SND_15_BEEP);

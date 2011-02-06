@@ -13,8 +13,11 @@
 #define ROAD_GUI_H
 
 #include "road_type.h"
+#include "tile_type.h"
+#include "direction_type.h"
 
 struct Window *ShowBuildRoadToolbar(RoadType roadtype);
 struct Window *ShowBuildRoadScenToolbar();
+void ConnectRoadToStructure(TileIndex tile, DiagDirection direction);
 
 #endif /* ROAD_GUI_H */

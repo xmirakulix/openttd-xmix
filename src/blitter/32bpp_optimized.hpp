@@ -13,7 +13,6 @@
 #define BLITTER_32BPP_OPTIMIZED_HPP
 
 #include "32bpp_simple.hpp"
-#include "factory.hpp"
 
 class Blitter_32bppOptimized : public Blitter_32bppSimple {
 public:
@@ -23,7 +22,7 @@ public:
 	};
 
 	/* virtual */ void Draw(Blitter::BlitterParams *bp, BlitterMode mode, ZoomLevel zoom);
-	/* virtual */ Sprite *Encode(SpriteLoader::Sprite *sprite, Blitter::AllocatorProc *allocator);
+	/* virtual */ Sprite *Encode(SpriteLoader::Sprite *sprite, AllocatorProc *allocator);
 
 	/* virtual */ const char *GetName() { return "32bpp-optimized"; }
 

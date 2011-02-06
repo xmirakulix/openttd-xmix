@@ -19,7 +19,6 @@
 #include "engine_type.h"
 #include "transport_type.h"
 #include "newgrf_config.h"
-#include "company_type.h"
 #include "track_type.h"
 #include "livery.h"
 
@@ -105,19 +104,7 @@ static inline bool IsCompanyBuildableVehicleType(const BaseVehicle *v)
 LiveryScheme GetEngineLiveryScheme(EngineID engine_type, EngineID parent_engine_type, const Vehicle *v);
 const struct Livery *GetEngineLivery(EngineID engine_type, CompanyID company, EngineID parent_engine_type, const Vehicle *v, byte livery_setting);
 
-/**
- * Get the colour map for an engine. This used for unbuilt engines in the user interface.
- * @param engine_type ID of engine
- * @param company ID of company
- * @return A ready-to-use palette modifier
- */
 SpriteID GetEnginePalette(EngineID engine_type, CompanyID company);
-
-/**
- * Get the colour map for a vehicle.
- * @param v Vehicle to get colour map for
- * @return A ready-to-use palette modifier
- */
 SpriteID GetVehiclePalette(const Vehicle *v);
 
 uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity = NULL);
@@ -170,9 +157,7 @@ static inline uint32 GetCmdSendToDepot(const BaseVehicle *v)
 
 CommandCost EnsureNoVehicleOnGround(TileIndex tile);
 CommandCost EnsureNoTrainOnTrackBits(TileIndex tile, TrackBits track_bits);
-void StopAllVehicles();
 
-extern VehicleID _vehicle_id_ctr_day;
 extern VehicleID _new_vehicle_id;
 extern uint16 _returned_refit_capacity;
 extern uint16 _returned_mail_refit_capacity;

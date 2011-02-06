@@ -34,9 +34,11 @@
 #include "../table/engines.h"
 #include "../table/townname.h"
 
-static bool   _read_ttdpatch_flags;
+static bool _read_ttdpatch_flags;    ///< Have we (tried to) read TTDPatch extra flags?
+static uint16 _old_extra_chunk_nums; ///< Number of extra TTDPatch chunks
+static byte _old_vehicle_multiplier; ///< TTDPatch vehicle multiplier
 
-static uint8  *_old_map3;
+static uint8 *_old_map3;
 
 void FixOldMapArray()
 {
@@ -106,7 +108,7 @@ static void FixTTDDepots()
 {
 	const Depot *d;
 	FOR_ALL_DEPOTS_FROM(d, 252) {
-		if (!IsRoadDepotTile(d->xy) && !IsRailDepotTile(d->xy) && !IsShipDepotTile(d->xy) && !IsHangarTile(d->xy)) {
+		if (!IsDepotTile(d->xy) || GetDepotIndex(d->xy) != d->index) {
 			/** Workaround for SVXConverter bug, depots 252-255 could be invalid */
 			delete d;
 		}
@@ -161,6 +163,11 @@ static void FixOldTowns()
 
 static StringID *_old_vehicle_names;
 
+/**
+ * Convert the old style vehicles into something that resembles
+ * the old new style savegames. Then #AfterLoadGame can handle
+ * the rest of the conversion.
+ */
 void FixOldVehicles()
 {
 	Vehicle *v;
@@ -189,6 +196,10 @@ void FixOldVehicles()
 			RoadVehicle *rv = RoadVehicle::From(v);
 			if (rv->state != RVSB_IN_DEPOT && rv->state != RVSB_WORMHOLE) {
 				ClrBit(rv->state, 2);
+				if (IsTileType(rv->tile, MP_STATION) && _m[rv->tile].m5 >= 168) {
+					/* Update the vehicle's road state to show we're in a drive through road stop. */
+					SetBit(rv->state, RVS_IN_DT_ROAD_STOP);
+				}
 			}
 		}
 
@@ -479,11 +490,9 @@ extern TileIndex *_animated_tile_list;
 extern uint _animated_tile_count;
 extern char *_old_name_array;
 
-static byte   _old_vehicle_multiplier;
 static uint32 _old_town_index;
 static uint16 _old_string_id;
 static uint16 _old_string_id_2;
-static uint16 _old_extra_chunk_nums;
 
 static void ReadTTDPatchFlags()
 {
@@ -491,10 +500,13 @@ static void ReadTTDPatchFlags()
 
 	_read_ttdpatch_flags = true;
 
-	if (_savegame_type == SGT_TTO) {
-		_old_vehicle_multiplier = 1;
-		return;
-	}
+	/* Set default values */
+	_old_vehicle_multiplier = 1;
+	_ttdp_version = 0;
+	_old_extra_chunk_nums = 0;
+	_bump_assert_value = 0;
+
+	if (_savegame_type == SGT_TTO) return;
 
 	/* TTDPatch misuses _old_map3 for flags.. read them! */
 	_old_vehicle_multiplier = _old_map3[0];
@@ -658,7 +670,10 @@ static bool LoadOldDepot(LoadgameState *ls, int num)
 	if (!LoadChunk(ls, d, depot_chunk)) return false;
 
 	if (d->xy != 0) {
-		d->town = Town::Get(RemapTownIndex(_old_town_index));
+		/* In some cases, there could be depots referencing invalid town. */
+		Town *t = Town::GetIfValid(RemapTownIndex(_old_town_index));
+		if (t == NULL) t = Town::GetRandom();
+		d->town = t;
 	} else {
 		delete d;
 	}
@@ -1126,7 +1141,7 @@ static const OldChunks vehicle_chunk[] = {
 	OCL_VAR ( OC_UINT16,   1, &_old_order ),
 
 	OCL_NULL ( 1 ), ///< num_orders, now calculated
-	OCL_SVAR(  OC_UINT8, Vehicle, cur_order_index ),
+	OCL_SVAR(  OC_UINT8, Vehicle, cur_auto_order_index ),
 	OCL_SVAR(   OC_TILE, Vehicle, dest_tile ),
 	OCL_SVAR( OC_UINT16, Vehicle, load_unload_ticks ),
 	OCL_SVAR( OC_FILE_U16 | OC_VAR_U32, Vehicle, date_of_last_service ),
@@ -1205,6 +1220,12 @@ static const OldChunks vehicle_chunk[] = {
 	OCL_END()
 };
 
+/**
+ * Load the vehicles of an old style savegame.
+ * @param ls  State (buffer) of the currently loaded game.
+ * @param num The number of vehicles to load.
+ * @return True iff loading went without problems.
+ */
 bool LoadOldVehicle(LoadgameState *ls, int num)
 {
 	/* Read the TTDPatch flags, because we need some info from it */
@@ -1523,7 +1544,7 @@ static bool LoadTTDPatchExtraChunks(LoadgameState *ls, int num)
 						DEBUG(oldloader, 3, "TTDPatch game using GRF file with GRFID %0X", BSWAP32(c->ident.grfid));
 					}
 					len -= 5;
-				};
+				}
 
 				/* Append static NewGRF configuration */
 				AppendStaticGRFConfigs(&_grfconfig);
@@ -1649,7 +1670,7 @@ static const OldChunks main_chunk[] = {
 
 	OCL_ASSERT( OC_TTO, 0x496AC ),
 
-	OCL_VAR ( OC_UINT16,    1, &_vehicle_id_ctr_day ),
+	OCL_NULL ( 2 ), // _vehicle_id_ctr_day
 
 	OCL_CHUNK(  8, LoadOldSubsidy ),
 
@@ -1724,10 +1745,10 @@ static const OldChunks main_chunk[] = {
 
 bool LoadTTDMain(LoadgameState *ls)
 {
-	_read_ttdpatch_flags = false;
-	_ttdp_version = 0;
-
 	DEBUG(oldloader, 3, "Reading main chunk...");
+
+	_read_ttdpatch_flags = false;
+
 	/* Load the biggest chunk */
 	SmallStackSafeStackAlloc<byte, OLD_MAP_SIZE * 2> map3;
 	_old_map3 = map3.data;
@@ -1769,6 +1790,8 @@ bool LoadTTDMain(LoadgameState *ls)
 bool LoadTTOMain(LoadgameState *ls)
 {
 	DEBUG(oldloader, 3, "Reading main chunk...");
+
+	_read_ttdpatch_flags = false;
 
 	SmallStackSafeStackAlloc<byte, 103 * sizeof(Engine)> engines; // we don't want to call Engine constructor here
 	_old_engines = (Engine *)engines.data;

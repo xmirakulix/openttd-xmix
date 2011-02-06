@@ -21,26 +21,16 @@
 
 struct Train;
 
+/** Rail vehicle flags. */
 enum VehicleRailFlags {
-	VRF_REVERSING         = 0,
+	VRF_REVERSING                     = 0,
+	VRF_POWEREDWAGON                  = 3, ///< Wagon is powered.
+	VRF_REVERSE_DIRECTION             = 4, ///< Reverse the visible direction of the vehicle.
 
-	/* used to store if a wagon is powered or not */
-	VRF_POWEREDWAGON      = 3,
-
-	/* used to reverse the visible direction of the vehicle */
-	VRF_REVERSE_DIRECTION = 4,
-
-	/* used to mark that electric train engine is allowed to run on normal rail */
-	VRF_EL_ENGINE_ALLOWED_NORMAL_RAIL = 6,
-
-	/* used for vehicle var 0xFE bit 8 (toggled each time the train is reversed, accurate for first vehicle only) */
-	VRF_TOGGLE_REVERSE = 7,
-
-	/* used to mark a train that can't get a path reservation */
-	VRF_TRAIN_STUCK    = 8,
-
-	/* used to mark a train that is just leaving a station */
-	VRF_LEAVING_STATION = 9,
+	VRF_EL_ENGINE_ALLOWED_NORMAL_RAIL = 6, ///< Electric train engine is allowed to run on normal rail. */
+	VRF_TOGGLE_REVERSE                = 7, ///< Used for vehicle var 0xFE bit 8 (toggled each time the train is reversed, accurate for first vehicle only).
+	VRF_TRAIN_STUCK                   = 8, ///< Train can't get a path reservation.
+	VRF_LEAVING_STATION               = 9, ///< Train is just leaving a station.
 };
 
 /** Modes for ignoring signals. */
@@ -64,8 +54,6 @@ int GetTrainStopLocation(StationID station_id, TileIndex tile, const Train *v, i
 struct TrainCache {
 	/* Cached wagon override spritegroup */
 	const struct SpriteGroup *cached_override;
-
-	uint16 last_speed; // NOSAVE: only used in UI
 
 	/* cached values, recalculated on load and each time a vehicle is added to/removed from the consist. */
 	bool cached_tilt;           ///< train can tilt; feature provides a bonus in curves
@@ -97,20 +85,19 @@ struct Train : public GroundVehicle<Train, VEH_TRAIN> {
 	uint16 wait_counter;
 
 	/** We don't want GCC to zero our struct! It already is zeroed and has an index! */
-	Train() : GroundVehicle<Train, VEH_TRAIN>() {}
+	Train() : GroundVehicleBase() {}
 	/** We want to 'destruct' the right class. */
 	virtual ~Train() { this->PreDestructor(); }
 
 	friend struct GroundVehicle<Train, VEH_TRAIN>; // GroundVehicle needs to use the acceleration functions defined at Train.
 
-	const char *GetTypeString() const { return "train"; }
 	void MarkDirty();
 	void UpdateDeltaXY(Direction direction);
 	ExpensesType GetExpenseType(bool income) const { return income ? EXPENSES_TRAIN_INC : EXPENSES_TRAIN_RUN; }
 	void PlayLeaveStationSound() const;
 	bool IsPrimaryVehicle() const { return this->IsFrontEngine(); }
 	SpriteID GetImage(Direction direction) const;
-	int GetDisplaySpeed() const { return this->tcache.last_speed; }
+	int GetDisplaySpeed() const { return this->gcache.last_speed; }
 	int GetDisplayMaxSpeed() const { return this->vcache.cached_max_speed; }
 	Money GetRunningCost() const;
 	int GetDisplayImageWidth(Point *offset = NULL) const;
@@ -136,200 +123,6 @@ struct Train : public GroundVehicle<Train, VEH_TRAIN> {
 	void UpdateAcceleration();
 
 	int GetCurrentMaxSpeed() const;
-
-	/**
-	 * enum to handle train subtypes
-	 * Do not access it directly unless you have to. Use the access functions below
-	 * This is an enum to tell what bit to access as it is a bitmask
-	 */
-	enum TrainSubtype {
-		TS_FRONT             = 0, ///< Leading engine of a train
-		TS_ARTICULATED_PART  = 1, ///< Articulated part of an engine
-		TS_WAGON             = 2, ///< Wagon
-		TS_ENGINE            = 3, ///< Engine that can be front engine, but might be placed behind another engine.
-		TS_FREE_WAGON        = 4, ///< First in a wagon chain (in depot)
-		TS_MULTIHEADED       = 5, ///< Engine is multiheaded
-	};
-
-	/**
-	 * Set front engine state
-	 */
-	FORCEINLINE void SetFrontEngine() { SetBit(this->subtype, TS_FRONT); }
-
-	/**
-	 * Remove the front engine state
-	 */
-	FORCEINLINE void ClearFrontEngine() { ClrBit(this->subtype, TS_FRONT); }
-
-	/**
-	 * Set a vehicle to be an articulated part
-	 */
-	FORCEINLINE void SetArticulatedPart() { SetBit(this->subtype, TS_ARTICULATED_PART); }
-
-	/**
-	 * Clear a vehicle from being an articulated part
-	 */
-	FORCEINLINE void ClearArticulatedPart() { ClrBit(this->subtype, TS_ARTICULATED_PART); }
-
-	/**
-	 * Set a vehicle to be a wagon
-	 */
-	FORCEINLINE void SetWagon() { SetBit(this->subtype, TS_WAGON); }
-
-	/**
-	 * Clear wagon property
-	 */
-	FORCEINLINE void ClearWagon() { ClrBit(this->subtype, TS_WAGON); }
-
-	/**
-	 * Set engine status
-	 */
-	FORCEINLINE void SetEngine() { SetBit(this->subtype, TS_ENGINE); }
-
-	/**
-	 * Clear engine status
-	 */
-	FORCEINLINE void ClearEngine() { ClrBit(this->subtype, TS_ENGINE); }
-
-	/**
-	 * Set if a vehicle is a free wagon
-	 */
-	FORCEINLINE void SetFreeWagon() { SetBit(this->subtype, TS_FREE_WAGON); }
-
-	/**
-	 * Clear a vehicle from being a free wagon
-	 */
-	FORCEINLINE void ClearFreeWagon() { ClrBit(this->subtype, TS_FREE_WAGON); }
-
-	/**
-	 * Set if a vehicle is a multiheaded engine
-	 */
-	FORCEINLINE void SetMultiheaded() { SetBit(this->subtype, TS_MULTIHEADED); }
-
-	/**
-	 * Clear multiheaded engine property
-	 */
-	FORCEINLINE void ClearMultiheaded() { ClrBit(this->subtype, TS_MULTIHEADED); }
-
-
-	/**
-	 * Check if train is a front engine
-	 * @return Returns true if train is a front engine
-	 */
-	FORCEINLINE bool IsFrontEngine() const { return HasBit(this->subtype, TS_FRONT); }
-
-	/**
-	 * Check if train is a free wagon (got no engine in front of it)
-	 * @return Returns true if train is a free wagon
-	 */
-	FORCEINLINE bool IsFreeWagon() const { return HasBit(this->subtype, TS_FREE_WAGON); }
-
-	/**
-	 * Check if a vehicle is an engine (can be first in a train)
-	 * @return Returns true if vehicle is an engine
-	 */
-	FORCEINLINE bool IsEngine() const { return HasBit(this->subtype, TS_ENGINE); }
-
-	/**
-	 * Check if a train is a wagon
-	 * @return Returns true if vehicle is a wagon
-	 */
-	FORCEINLINE bool IsWagon() const { return HasBit(this->subtype, TS_WAGON); }
-
-	/**
-	 * Check if train is a multiheaded engine
-	 * @return Returns true if vehicle is a multiheaded engine
-	 */
-	FORCEINLINE bool IsMultiheaded() const { return HasBit(this->subtype, TS_MULTIHEADED); }
-
-	/**
-	 * Tell if we are dealing with the rear end of a multiheaded engine.
-	 * @return True if the engine is the rear part of a dualheaded engine.
-	 */
-	FORCEINLINE bool IsRearDualheaded() const { return this->IsMultiheaded() && !this->IsEngine(); }
-
-	/**
-	 * Check if train is an articulated part of an engine
-	 * @return Returns true if train is an articulated part
-	 */
-	FORCEINLINE bool IsArticulatedPart() const { return HasBit(this->subtype, TS_ARTICULATED_PART); }
-
-	/**
-	 * Check if an engine has an articulated part.
-	 * @return True if the engine has an articulated part.
-	 */
-	FORCEINLINE bool HasArticulatedPart() const { return this->Next() != NULL && this->Next()->IsArticulatedPart(); }
-
-
-	/**
-	 * Get the next part of a multi-part engine.
-	 * Will only work on a multi-part engine (this->EngineHasArticPart() == true),
-	 * Result is undefined for normal engine.
-	 * @return next part of articulated engine
-	 */
-	FORCEINLINE Train *GetNextArticPart() const
-	{
-		assert(this->HasArticulatedPart());
-		return this->Next();
-	}
-
-	/**
-	 * Get the first part of a multi-part engine.
-	 * @return First part of the engine.
-	 */
-	FORCEINLINE Train *GetFirstEnginePart()
-	{
-		Train *v = this;
-		while (v->IsArticulatedPart()) v = v->Previous();
-		return v;
-	}
-
-	/**
-	 * Get the first part of a multi-part engine.
-	 * @return First part of the engine.
-	 */
-	FORCEINLINE const Train *GetFirstEnginePart() const
-	{
-		const Train *v = this;
-		while (v->IsArticulatedPart()) v = v->Previous();
-		return v;
-	}
-
-	/**
-	 * Get the last part of a multi-part engine.
-	 * @return Last part of the engine.
-	 */
-	FORCEINLINE Train *GetLastEnginePart()
-	{
-		Train *v = this;
-		while (v->HasArticulatedPart()) v = v->GetNextArticPart();
-		return v;
-	}
-
-	/**
-	 * Get the next real (non-articulated part) vehicle in the consist.
-	 * @return Next vehicle in the consist.
-	 */
-	FORCEINLINE Train *GetNextVehicle() const
-	{
-		const Train *v = this;
-		while (v->HasArticulatedPart()) v = v->GetNextArticPart();
-
-		/* v now contains the last artic part in the engine */
-		return v->Next();
-	}
-
-	/**
-	 * Get the previous real (non-articulated part) vehicle in the consist.
-	 * @return Previous vehicle in the consist.
-	 */
-	FORCEINLINE Train *GetPrevVehicle() const
-	{
-		Train *v = this->Previous();
-		while (v != NULL && v->IsArticulatedPart()) v = v->Previous();
-
-		return v;
-	}
 
 	/**
 	 * Get the next real (non-articulated part and non rear part of dualheaded engine) vehicle in the consist.
@@ -503,6 +296,16 @@ protected: // These functions should not be called outside acceleration code.
 	{
 		/* Any track that isn't TRACK_BIT_X or TRACK_BIT_Y cannot be sloped. */
 		return this->track == TRACK_BIT_X || this->track == TRACK_BIT_Y;
+	}
+
+	/**
+	 * Trains can always use the faster algorithm because they
+	 * have always the same direction as the track under them.
+	 * @return false
+	 */
+	FORCEINLINE bool HasToUseGetSlopeZ()
+	{
+		return false;
 	}
 };
 

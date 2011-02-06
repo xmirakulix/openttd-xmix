@@ -18,7 +18,6 @@
 #include "timetable.h"
 #include "strings_func.h"
 #include "window_func.h"
-#include "vehicle_func.h"
 #include "company_func.h"
 #include "widgets/dropdown_func.h"
 #include "textbuf_gui.h"
@@ -89,7 +88,7 @@ static const StringID _station_load_types[][5] = {
 		INVALID_STRING_ID,
 		STR_ORDER_NO_UNLOAD_FULL_LOAD,
 		STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY,
-		INVALID_STRING_ID,
+		STR_ORDER_NO_UNLOAD_NO_LOAD,
 	}
 };
 
@@ -196,8 +195,11 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 
 	SpriteID sprite = rtl ? SPR_ARROW_LEFT : SPR_ARROW_RIGHT;
 	Dimension sprite_size = GetSpriteSize(sprite);
-	if (v->cur_order_index == order_index) {
-		DrawSprite(sprite, PAL_NONE, rtl ? right - sprite_size.width : left, y + ((int)FONT_HEIGHT_NORMAL - (int)sprite_size.height) / 2);
+	if (v->cur_real_order_index == order_index) {
+		DrawSprite(sprite, PAL_NONE, rtl ? right -     sprite_size.width : left,                     y + ((int)FONT_HEIGHT_NORMAL - (int)sprite_size.height) / 2);
+		DrawSprite(sprite, PAL_NONE, rtl ? right - 2 * sprite_size.width : left + sprite_size.width, y + ((int)FONT_HEIGHT_NORMAL - (int)sprite_size.height) / 2);
+	} else if (v->cur_auto_order_index == order_index) {
+		DrawSprite(sprite, PAL_NONE, rtl ? right -     sprite_size.width : left,                     y + ((int)FONT_HEIGHT_NORMAL - (int)sprite_size.height) / 2);
 	}
 
 	TextColour colour = TC_BLACK;
@@ -208,7 +210,7 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 	}
 
 	SetDParam(0, order_index + 1);
-	DrawString(left, rtl ? right - sprite_size.width - 3 : middle, y, STR_ORDER_INDEX, colour, SA_RIGHT | SA_FORCE);
+	DrawString(left, rtl ? right - 2 * sprite_size.width - 3 : middle, y, STR_ORDER_INDEX, colour, SA_RIGHT | SA_FORCE);
 
 	SetDParam(5, STR_EMPTY);
 
@@ -323,49 +325,47 @@ static Order GetOrderCmdFromTile(const Vehicle *v, TileIndex tile)
 	order.index = 0;
 
 	/* check depot first */
-	if (_settings_game.order.gotodepot) {
-		switch (GetTileType(tile)) {
-			case MP_RAILWAY:
-				if (v->type == VEH_TRAIN && IsTileOwner(tile, _local_company)) {
-					if (IsRailDepot(tile)) {
-						order.MakeGoToDepot(GetDepotIndex(tile), ODTFB_PART_OF_ORDERS,
-								_settings_client.gui.new_nonstop ? ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS : ONSF_STOP_EVERYWHERE);
-						if (_ctrl_pressed) order.SetDepotOrderType((OrderDepotTypeFlags)(order.GetDepotOrderType() ^ ODTFB_SERVICE));
-						return order;
-					}
-				}
-				break;
-
-			case MP_ROAD:
-				if (IsRoadDepot(tile) && v->type == VEH_ROAD && IsTileOwner(tile, _local_company)) {
+	switch (GetTileType(tile)) {
+		case MP_RAILWAY:
+			if (v->type == VEH_TRAIN && IsTileOwner(tile, _local_company)) {
+				if (IsRailDepot(tile)) {
 					order.MakeGoToDepot(GetDepotIndex(tile), ODTFB_PART_OF_ORDERS,
 							_settings_client.gui.new_nonstop ? ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS : ONSF_STOP_EVERYWHERE);
 					if (_ctrl_pressed) order.SetDepotOrderType((OrderDepotTypeFlags)(order.GetDepotOrderType() ^ ODTFB_SERVICE));
 					return order;
 				}
-				break;
+			}
+			break;
 
-			case MP_STATION:
-				if (v->type != VEH_AIRCRAFT) break;
-				if (IsHangar(tile) && IsTileOwner(tile, _local_company)) {
-					order.MakeGoToDepot(GetStationIndex(tile), ODTFB_PART_OF_ORDERS, ONSF_STOP_EVERYWHERE);
-					if (_ctrl_pressed) order.SetDepotOrderType((OrderDepotTypeFlags)(order.GetDepotOrderType() ^ ODTFB_SERVICE));
-					return order;
-				}
-				break;
+		case MP_ROAD:
+			if (IsRoadDepot(tile) && v->type == VEH_ROAD && IsTileOwner(tile, _local_company)) {
+				order.MakeGoToDepot(GetDepotIndex(tile), ODTFB_PART_OF_ORDERS,
+						_settings_client.gui.new_nonstop ? ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS : ONSF_STOP_EVERYWHERE);
+				if (_ctrl_pressed) order.SetDepotOrderType((OrderDepotTypeFlags)(order.GetDepotOrderType() ^ ODTFB_SERVICE));
+				return order;
+			}
+			break;
 
-			case MP_WATER:
-				if (v->type != VEH_SHIP) break;
-				if (IsShipDepot(tile) && IsTileOwner(tile, _local_company)) {
-					order.MakeGoToDepot(GetDepotIndex(tile), ODTFB_PART_OF_ORDERS, ONSF_STOP_EVERYWHERE);
-					if (_ctrl_pressed) order.SetDepotOrderType((OrderDepotTypeFlags)(order.GetDepotOrderType() ^ ODTFB_SERVICE));
-					return order;
-				}
-				break;
+		case MP_STATION:
+			if (v->type != VEH_AIRCRAFT) break;
+			if (IsHangar(tile) && IsTileOwner(tile, _local_company)) {
+				order.MakeGoToDepot(GetStationIndex(tile), ODTFB_PART_OF_ORDERS, ONSF_STOP_EVERYWHERE);
+				if (_ctrl_pressed) order.SetDepotOrderType((OrderDepotTypeFlags)(order.GetDepotOrderType() ^ ODTFB_SERVICE));
+				return order;
+			}
+			break;
 
-			default:
-				break;
-		}
+		case MP_WATER:
+			if (v->type != VEH_SHIP) break;
+			if (IsShipDepot(tile) && IsTileOwner(tile, _local_company)) {
+				order.MakeGoToDepot(GetDepotIndex(tile), ODTFB_PART_OF_ORDERS, ONSF_STOP_EVERYWHERE);
+				if (_ctrl_pressed) order.SetDepotOrderType((OrderDepotTypeFlags)(order.GetDepotOrderType() ^ ODTFB_SERVICE));
+				return order;
+			}
+			break;
+
+		default:
+			break;
 	}
 
 	/* check waypoint */
@@ -689,10 +689,10 @@ private:
 	void OrderClick_Skip(int i)
 	{
 		/* Don't skip when there's nothing to skip */
-		if (_ctrl_pressed && this->vehicle->cur_order_index == this->OrderGetSel()) return;
+		if (_ctrl_pressed && this->vehicle->cur_auto_order_index == this->OrderGetSel()) return;
 		if (this->vehicle->GetNumOrders() <= 1) return;
 
-		DoCommandP(this->vehicle->tile, this->vehicle->index, _ctrl_pressed ? this->OrderGetSel() : ((this->vehicle->cur_order_index + 1) % this->vehicle->GetNumOrders()),
+		DoCommandP(this->vehicle->tile, this->vehicle->index, _ctrl_pressed ? this->OrderGetSel() : ((this->vehicle->cur_auto_order_index + 1) % this->vehicle->GetNumOrders()),
 				CMD_SKIP_TO_ORDER | CMD_MSG(_ctrl_pressed ? STR_ERROR_CAN_T_SKIP_TO_ORDER : STR_ERROR_CAN_T_SKIP_ORDER));
 	}
 
@@ -780,10 +780,6 @@ public:
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
-			case ORDER_WIDGET_TIMETABLE_VIEW:
-				if (!_settings_game.order.timetabling) size->width = 0;
-				break;
-
 			case ORDER_WIDGET_ORDER_LIST:
 				resize->height = FONT_HEIGHT_NORMAL;
 				size->height = 6 * resize->height + WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
@@ -1031,7 +1027,7 @@ public:
 
 		bool rtl = _current_text_dir == TD_RTL;
 		SetDParam(0, 99);
-		int index_column_width = GetStringBoundingBox(STR_ORDER_INDEX).width + GetSpriteSize(rtl ? SPR_ARROW_RIGHT : SPR_ARROW_LEFT).width + 3;
+		int index_column_width = GetStringBoundingBox(STR_ORDER_INDEX).width + 2 * GetSpriteSize(rtl ? SPR_ARROW_RIGHT : SPR_ARROW_LEFT).width + 3;
 		int middle = rtl ? r.right - WD_FRAMETEXT_RIGHT - index_column_width : r.left + WD_FRAMETEXT_LEFT + index_column_width;
 
 		int y = r.top + WD_FRAMERECT_TOP;
@@ -1433,7 +1429,7 @@ public:
 	static Hotkey<OrdersWindow> order_hotkeys[];
 };
 
-Hotkey<OrdersWindow> OrdersWindow::order_hotkeys[]= {
+Hotkey<OrdersWindow> OrdersWindow::order_hotkeys[] = {
 	Hotkey<OrdersWindow>('D', "skip", 0, &OrdersWindow::OrderClick_Skip),
 	Hotkey<OrdersWindow>('F', "delete", 0, &OrdersWindow::OrderClick_Delete),
 	Hotkey<OrdersWindow>('G', "goto", 0, &OrdersWindow::OrderClick_Goto),

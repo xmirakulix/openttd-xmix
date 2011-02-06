@@ -103,9 +103,9 @@ static void ScrollbarClickPositioning(Window *w, NWidgetScrollbar *sb, int x, in
 		Point pt = HandleScrollbarHittest(sb, mi, ma, sb->type == NWID_HSCROLLBAR);
 
 		if (pos < pt.x) {
-			sb->UpdatePosition(rtl ? sb->GetCapacity() : -sb->GetCapacity());
+			sb->UpdatePosition(rtl ? 1 : -1, Scrollbar::SS_BIG);
 		} else if (pos > pt.y) {
-			sb->UpdatePosition(rtl ? -sb->GetCapacity() : sb->GetCapacity());
+			sb->UpdatePosition(rtl ? -1 : 1, Scrollbar::SS_BIG);
 		} else {
 			_scrollbar_start_pos = pt.x - mi - 9;
 			_scrollbar_size = ma - mi - 23;
@@ -1374,6 +1374,13 @@ void NWidgetMatrix::SetColour(Colours colour)
 void NWidgetMatrix::SetClicked(int clicked)
 {
 	this->clicked = clicked;
+	if (this->clicked >= 0 && this->sb != NULL && this->widgets_x != 0) {
+		int vpos = (this->clicked / this->widgets_x) * this->widget_h; // Vertical position of the top.
+		/* Need to scroll down -> Scroll to the bottom.
+		 * However, last entry has no 'this->pip_inter' underneath, and we must stay below this->sb->GetCount() */
+		if (this->sb->GetPosition() < vpos) vpos += this->widget_h - this->pip_inter - 1;
+		this->sb->ScrollTowards(vpos);
+	}
 }
 
 /**
@@ -1397,6 +1404,7 @@ void NWidgetMatrix::SetCount(int count)
 	count += -this->pip_inter + this->pip_pre + this->pip_post; // We counted an inter too much in the multiplication above
 	this->sb->SetCount(count);
 	this->sb->SetCapacity(this->sb->IsVertical() ? this->current_y : this->current_x);
+	this->sb->SetStepSize(this->sb->IsVertical() ? this->widget_h  : this->widget_w);
 }
 
 /**

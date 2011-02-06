@@ -12,7 +12,6 @@
 #ifndef STATION_TYPE_H
 #define STATION_TYPE_H
 
-#include "core/enum_type.hpp"
 #include "core/smallvec_type.hpp"
 #include "tilearea_type.h"
 #include <list>
@@ -87,7 +86,7 @@ enum CatchmentArea {
 	MAX_CATCHMENT      = 10, ///< Maximum catchment for airports with "modified catchment" enabled
 };
 
-static const uint MAX_LENGTH_STATION_NAME_CHARS  =  31; ///< The maximum length of a station name in characters including '\0'
+static const uint MAX_LENGTH_STATION_NAME_CHARS  =  32; ///< The maximum length of a station name in characters including '\0'
 static const uint MAX_LENGTH_STATION_NAME_PIXELS = 180; ///< The maximum length of a station name in pixels
 
 /** List of station IDs */

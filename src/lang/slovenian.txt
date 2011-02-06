@@ -390,6 +390,7 @@ STR_SCENEDIT_FILE_MENU_QUIT                                     :Izhod
 STR_SETTINGS_MENU_GAME_OPTIONS                                  :Možnosti igre
 STR_SETTINGS_MENU_DIFFICULTY_SETTINGS                           :Nastavitve težavnosti
 STR_SETTINGS_MENU_CONFIG_SETTINGS                               :Napredne nastavitve
+STR_SETTINGS_MENU_AI_SETTINGS                                   :Nastavitve UI
 STR_SETTINGS_MENU_NEWGRF_SETTINGS                               :NewGRF nastavitve
 STR_SETTINGS_MENU_TRANSPARENCY_OPTIONS                          :Nastavitve prozornega pogleda
 STR_SETTINGS_MENU_TOWN_NAMES_DISPLAYED                          :Imena mest prikazana
@@ -705,6 +706,8 @@ STR_SMALLMAP_TOOLTIP_SHOW_INDUSTRIES_ON_MAP                     :{BLACK}Prikaži
 STR_SMALLMAP_TOOLTIP_SHOW_TRANSPORT_ROUTES_ON                   :{BLACK}Prikaži transportne poti na zemljevidu
 STR_SMALLMAP_TOOLTIP_SHOW_VEGETATION_ON_MAP                     :{BLACK}Prikaži vegetacijo na zemljevidu
 STR_SMALLMAP_TOOLTIP_SHOW_LAND_OWNERS_ON_MAP                    :{BLACK}Prikaži lastnike terena na zemljevidu
+STR_SMALLMAP_TOOLTIP_INDUSTRY_SELECTION                         :{BLACK}Klikni na tip industrije za preklop vidljivosti. Ctrl+Klik onemogoči vse tipe razen izbranega. Ctrl+Klik še enkrat omogoči vse tipe
+STR_SMALLMAP_TOOLTIP_COMPANY_SELECTION                          :{BLACK}Klikni na podjetje za preklop vidljivosti njenih nepremičnin. Ctrl+Klik onemogoči vsa podjetja razen izbranega. Ctrl+Klik še enkrat omogoči vsa podjetja
 
 STR_SMALLMAP_LEGENDA_ROADS                                      :{TINYFONT}{BLACK}Ceste
 STR_SMALLMAP_LEGENDA_RAILROADS                                  :{TINYFONT}{BLACK}Železnice
@@ -738,6 +741,7 @@ STR_SMALLMAP_LEGENDA_SNOW                                       :{TINYFONT}{BLAC
 STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF                   :{BLACK}Vključi/izključi imena mest na zemljevidu
 STR_SMALLMAP_CENTER                                             :{BLACK}Centrira majhen zemljevid na trenutno lokacijo
 STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRING} ({NUM})
+STR_SMALLMAP_COMPANY                                            :{TINYFONT}{COMPANY}
 STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Onemogoči vse
 STR_SMALLMAP_ENABLE_ALL                                         :{BLACK}Omogoči vse
@@ -745,6 +749,8 @@ STR_SMALLMAP_SHOW_HEIGHT                                        :{BLACK}Prikaži
 STR_SMALLMAP_TOOLTIP_DISABLE_ALL_INDUSTRIES                     :{BLACK}Na zemljevidu ne prikaži nobene industrije
 STR_SMALLMAP_TOOLTIP_ENABLE_ALL_INDUSTRIES                      :{BLACK}Na zemljevidu prikaži vse industrije
 STR_SMALLMAP_TOOLTIP_SHOW_HEIGHT                                :{BLACK}Preklopi vidljivost višinske karte
+STR_SMALLMAP_TOOLTIP_DISABLE_ALL_COMPANIES                      :{BLACK}Ne prikaži lastnine podjetja na zemljevidu
+STR_SMALLMAP_TOOLTIP_ENABLE_ALL_COMPANIES                       :{BLACK}Prikaži vso lastnino podjetja na zemljevidu
 
 # Status bar messages
 STR_STATUSBAR_TOOLTIP_SHOW_LAST_NEWS                            :{BLACK}Prikaži zadnje sporočilo ali novico
@@ -1126,12 +1132,10 @@ STR_CONFIG_SETTING_CAPTION                                      :{WHITE}Napredne
 STR_CONFIG_SETTING_OFF                                          :Izklopi
 STR_CONFIG_SETTING_ON                                           :Vklopi
 STR_CONFIG_SETTING_DISABLED                                     :onemogočeno
-STR_CONFIG_SETTING_VEHICLESPEED                                 :{LTBLUE}Prikaz hitrosti vozil v vrstici stanja: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Dovoli gradnjo hiš na nagibih ali obali: {ORANGE}{STRING}
-STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Dovoli oblikovanje terena pod objekti (tiri, hiše) (samonaklon): {ORANGE}{STRING}
+STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Dovoli oblikovanje terena pod objekti, tiri, ipd. (samonaklon): {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Dovoli bolj resnični območni zajem postaj: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Dovoli odstanitev mestnih cest in mostov: {ORANGE}{STRING}
-STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Omogoči gradnjo zelo dolgih vlakov: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Količina dima/isker vozil: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Brez
 STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Originalno
@@ -1145,21 +1149,17 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realistično
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Naklon vzpona za vlake {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Naklon vzpona za cestna vozila {ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Prepreči vlakom in ladjam 90° zavoje: {ORANGE}{STRING}
-STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Združi železniške postaje, ki si stojijo blizu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Dovoli združevanje postaj, ki niso v dotiku: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Uporabi izboljšan algoritem polnjenja: {ORANGE}{STRING}
 STR_CONFIG_SETTING_GRADUAL_LOADING                              :{LTBLUE}Postopno polni vozila: {ORANGE}{STRING}
 STR_CONFIG_SETTING_INFLATION                                    :{LTBLUE}Inflacija: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SELECTGOODS                                  :{LTBLUE}Dostavi tovor postaji le ob povpraševanju: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LONGBRIDGES                                  :{LTBLUE}Dovoli gradnjo zelo dolgih mostov: {ORANGE}{STRING}
-STR_CONFIG_SETTING_GOTODEPOT                                    :{LTBLUE}Dovoli ukaz 'pojdi v garažo': {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD             :{LTBLUE}Glavni ročni način gradnje industrij: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :brez
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :kot ostale industrije
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_PROSPECTING :obetaven
 STR_CONFIG_SETTING_INDUSTRY_PLATFORM                            :{LTBLUE}Izravnan teren okrog industrij: {ORANGE}{STRING} plošč{P a i e ""}
 STR_CONFIG_SETTING_MULTIPINDTOWN                                :{LTBLUE}Dovoli več enakih industrij na mesto: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LONGDATE                                     :{LTBLUE}Vedno prikaži dolg datum v vrstici stanja: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SIGNALSIDE                                   :{LTBLUE}Prikaz signalov na vozni smeri: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SHOWFINANCES                                 :{LTBLUE}Prikaz okna financ na koncu leta: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NONSTOP_BY_DEFAULT                           :{LTBLUE}Novi ukazi so privzeti 'non-stop': {ORANGE}{STRING}
@@ -1172,7 +1172,6 @@ STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Premakn
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Dovoli podkupovanje mestnih oblasti: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Dovoli nakup ekskluzivnih prevoznih dovoljenj: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Dovoli pošiljanje denarja drugim podjetjem: {ORANGE}{STRING}
-STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Neenake postaje: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Koeficient teže tovora za simulacijo težkih vlakov: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Faktor hitrosti letal: {ORANGE}1 / {STRING}
 STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Število letalskih nesreč: {ORANGE}{STRING}
@@ -1198,8 +1197,8 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Samoobn
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Samoobnovi, ko je vozilo {ORANGE}{STRING}{LTBLUE} mesec{P "" a e ev} pred/po največji starosti
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Samoobnovi najmanj potrebnega denarja za obnovo: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Trajanje sporočila o napaki: {ORANGE}{STRING} sekund{P a i e ""}
-STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Zamik lebdečih dogodkov: {ORANGE}{STRING} sekund{P a i e ""}
-STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Zamik lebdečih dogodkov: {ORANGE}onemogočeno
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Pokaži obvestilo: {ORANGE}Lebdi {STRING} sekund{P o i e ""}
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Pokaži obvestilo: {ORANGE}Desni klik
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Prikaz števila prebivalcev ob imenu mesta: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Urejevalnik terena: {ORANGE}{STRING}
@@ -1271,7 +1270,6 @@ STR_CONFIG_SETTING_LOADING_INDICATORS                           :{LTBLUE}Uporabi
 STR_CONFIG_SETTING_LOADING_INDICATORS_OFF                       :Izklop
 STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Lastno podjetje
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Vsa podjetja
-STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Omogoči urnike vozil: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Prikaz urnikov v pikah namesto dneh: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Prikaži prihod in odhod v urnikih: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Hitro ustvarjanje ukazov vozila: {ORANGE}{STRING}
@@ -1283,7 +1281,7 @@ STR_CONFIG_SETTING_SHOW_TRACK_RESERVATION                       :{LTBLUE}Prikaz 
 STR_CONFIG_SETTING_PERSISTENT_BUILDINGTOOLS                     :{LTBLUE}Ohrani orodja za gradnjo aktivna po uporabi: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXPENSES_LAYOUT                              :{LTBLUE}Prikaži stroške v tabeli financ po skupinah: {ORANGE}{STRING}
 
-STR_CONFIG_SETTING_ALWAYS_BUILD_INFRASTRUCTURE                  :{LTBLUE}Prikaz gradbenih orodij, ko ni primernih vozil na izbiro: {ORANGE}{STRING}
+STR_CONFIG_SETTING_DISABLE_UNSUITABLE_BUILDING                  :{LTBLUE}Onemogoči infrastrukurno stavbo, če ni na voljo nobenih ustreznih vozil: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_TRAINS                                   :{LTBLUE}Največ vlakov na podjetje: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_ROAD_VEHICLES                            :{LTBLUE}Največ cestnih vozil na podjetje: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_AIRCRAFT                                 :{LTBLUE}Največ letal na podjetje: {ORANGE}{STRING}
@@ -1635,9 +1633,6 @@ STR_NETWORK_START_SERVER_NEW_GAME_NAME                          :{BLACK}Ime igre
 STR_NETWORK_START_SERVER_NEW_GAME_NAME_TOOLTIP                  :{BLACK}Ime bo prikazano drugim igralcem na večigralskem seznamu
 STR_NETWORK_START_SERVER_SET_PASSWORD                           :{BLACK}Nastavi geslo
 STR_NETWORK_START_SERVER_PASSWORD_TOOLTIP                       :{BLACK}Zaščiti igro z geslom, če želiš preprečiti dostop nepovabljenim
-STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Izberi ozemlje:
-STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Kateri zemljevid želiš igrati?
-STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Ustvari naključno novo igro
 
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :Lokalno omrežje / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (oglašuj)
@@ -1652,11 +1647,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Največj
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Omeji strežnik na določeno število opazovalcev
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Govorni jezik:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Drugi igralci bodo lahko vedeli, kateri jezik se govori na strežniku
-
-STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Začni igro
-STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Poženi novo večigralsko igro na naključnem ozemlju ali v izbranem scenariju
-STR_NETWORK_START_SERVER_LOAD_GAME                              :{BLACK}Naloži igro
-STR_NETWORK_START_SERVER_LOAD_GAME_TOOLTIP                      :{BLACK}Nadaljuj prej shranjeno večigralsko igro (pazi, da se povežeš v pravilno podjetje)
 
 STR_NETWORK_START_SERVER_NEW_GAME_NAME_OSKTITLE                 :{BLACK}Vpiši ime za mrežno igro
 
@@ -2016,6 +2006,7 @@ STR_SELECT_RAIL_BRIDGE_CAPTION                                  :{WHITE}Izberi �
 STR_SELECT_ROAD_BRIDGE_CAPTION                                  :{WHITE}Izberi cestni most
 STR_SELECT_BRIDGE_SELECTION_TOOLTIP                             :{BLACK}Izbira mostu - klikni na željeni most za izgradnjo
 STR_SELECT_BRIDGE_INFO                                          :{GOLD}{STRING},{} {VELOCITY} {WHITE}{CURRENCY}
+STR_SELECT_BRIDGE_SCENEDIT_INFO                                 :{GOLD}{STRING},{} {VELOCITY}
 STR_BRIDGE_NAME_SUSPENSION_STEEL                                :Viseč, Jeklen
 STR_BRIDGE_NAME_GIRDER_STEEL                                    :Nosilni, Jeklen
 STR_BRIDGE_NAME_CANTILEVER_STEEL                                :Nosilni križi, Jeklen
@@ -2119,7 +2110,7 @@ STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Kupi zem
 # Object construction window
 STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Izbor zgradbe
 STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Izberi zgradbo za postavitev. Shift preklaplja med izgradnjo in predvidenimi stroški
-STR_OBJECT_BUILD_CLASS_LABEL                                    :{BLACK}Vrsta zgradbe
+STR_OBJECT_BUILD_CLASS_TOOLTIP                                  :{BLACK}Izberi vrsto objekta za gradnjo
 STR_OBJECT_BUILD_PREVIEW_TOOLTIP                                :{BLACK}Predogled zgradbe
 STR_OBJECT_BUILD_SIZE                                           :{BLACK}Velikost: {GOLD}{NUM} x {NUM} plošč
 
@@ -2460,6 +2451,7 @@ STR_NEWGRF_SETTINGS_PARAMETER                                   :{BLACK}Parametr
 STR_NEWGRF_SETTINGS_NO_INFO                                     :{BLACK}Ni informacij
 STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Ni ujemajoče datoteke
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Onemogočeno
+STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}Nekompatibilno s to različico OpenTTD
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Vnesi NewGRF parametre
 
@@ -3081,23 +3073,14 @@ STR_VEHICLE_STATUS_LEAVING                                      :{LTBLUE}Zapuš�
 STR_VEHICLE_STATUS_CRASHED                                      :{RED}Uničen!
 STR_VEHICLE_STATUS_BROKEN_DOWN                                  :{RED}V okvari
 STR_VEHICLE_STATUS_STOPPED                                      :{RED}Ustavljeno
-STR_VEHICLE_STATUS_TRAIN_STOPPING                               :{RED}Se ustavlja
 STR_VEHICLE_STATUS_TRAIN_STOPPING_VEL                           :{RED}Se ustavlja, {VELOCITY}
 STR_VEHICLE_STATUS_TRAIN_NO_POWER                               :{RED}Ni napetosti
 STR_VEHICLE_STATUS_TRAIN_STUCK                                  :{ORANGE}Čaka na prosto pot
 
-STR_VEHICLE_STATUS_HEADING_FOR_STATION                          :{LTBLUE}Pelje proti {STATION}
 STR_VEHICLE_STATUS_HEADING_FOR_STATION_VEL                      :{LTBLUE}Pelje proti {STATION}, {VELOCITY}
-STR_VEHICLE_STATUS_NO_ORDERS                                    :{LTBLUE}Brez ukazov
 STR_VEHICLE_STATUS_NO_ORDERS_VEL                                :{LTBLUE}Brez ukazov, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT                         :{LTBLUE}Pelje proti {WAYPOINT}
 STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL                     :{LTBLUE}Pelje proti {WAYPOINT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT                            :{ORANGE}Pelje proti {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_VEL                        :{ORANGE}Pelje proti {DEPOT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE                    :{LTBLUE}Servis v {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL                :{LTBLUE}Servis v {DEPOT}, {VELOCITY}
 
 # Vehicle stopped/started animations
@@ -3511,6 +3494,8 @@ STR_ERROR_SITE_UNSUITABLE                                       :{WHITE}... nepr
 STR_ERROR_ALREADY_BUILT                                         :{WHITE}... že zgrajeno
 STR_ERROR_OWNED_BY                                              :{WHITE}... v lasti {STRING}
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}... zemljišče je last drugega podjetja
+STR_ERROR_TERRAFORM_LIMIT_REACHED                               :{WHITE}... dosežena omejitev izdelave terena
+STR_ERROR_CLEARING_LIMIT_REACHED                                :{WHITE}... dosežena omejitev čiščenja terena
 STR_ERROR_NAME_MUST_BE_UNIQUE                                   :{WHITE}Ime mora biti edinstveno
 STR_ERROR_GENERIC_OBJECT_IN_THE_WAY                             :{WHITE}{1:STRING} na poti
 STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}Ni dovoljeno med pavzo
@@ -3588,7 +3573,6 @@ STR_ERROR_CAN_T_BUILD_AIRPORT_HERE                              :{WHITE}Tukaj ni
 
 STR_ERROR_ADJOINS_MORE_THAN_ONE_EXISTING                        :{WHITE}Združi dve ali več postaj
 STR_ERROR_STATION_TOO_SPREAD_OUT                                :{WHITE}... postaja preveč razširjena
-STR_ERROR_NONUNIFORM_STATIONS_DISALLOWED                        :{WHITE}... nehomogene postaje izklopljene
 STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Preveč postaj na zemljevidu
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Preveč delov železniške postaje
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Preveč avtobusnih postaj
@@ -4329,7 +4313,6 @@ STR_COMPANY_MONEY                                               :{WHITE}{CURRENC
 STR_BLACK_DATE_LONG                                             :{BLACK}{DATE_LONG}
 STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
 STR_SILVER_CROSS                                                :{SILVER}{CROSS}
-STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
@@ -4341,6 +4324,7 @@ STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLAC
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_ORANGE_STRING                                               :{ORANGE}{STRING}
 STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_HEIGHT                                           :{TINYFONT}{BLACK}{HEIGHT}

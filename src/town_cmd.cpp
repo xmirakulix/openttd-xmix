@@ -177,6 +177,10 @@ void Town::UpdateLabel()
 	}
 }
 
+/**
+ * Get the cost for removing this house
+ * @return the cost (inflation corrected etc)
+ */
 Money HouseSpec::GetRemovalCost() const
 {
 	return (_price[PR_CLEAR_HOUSE] * this->removal_cost) >> 8;

@@ -26,7 +26,6 @@
 #include "strings_func.h"
 #include "zoom_func.h"
 #include "window_func.h"
-#include "tilehighlight_func.h"
 #include "querystring_gui.h"
 #include "console_func.h"
 #include "core/geometry_func.hpp"
@@ -721,7 +720,7 @@ void ShowErrorMessage(StringID summary_msg, StringID detailed_msg, WarningLevel 
 		switch (wl) {
 			case WL_WARNING: IConsolePrint(CC_WARNING, buf); break;
 			default:         IConsoleError(buf); break;
-		};
+		}
 	}
 
 	bool no_timeout = wl == WL_CRITICAL;

@@ -42,14 +42,16 @@ void MoveBuoysToWaypoints()
 	/* Buoy orders become waypoint orders */
 	OrderList *ol;
 	FOR_ALL_ORDER_LISTS(ol) {
-		if (ol->GetFirstSharedVehicle()->type != VEH_SHIP) continue;
+		VehicleType vt = ol->GetFirstSharedVehicle()->type;
+		if (vt != VEH_SHIP && vt != VEH_TRAIN) continue;
 
 		for (Order *o = ol->GetFirstOrder(); o != NULL; o = o->next) UpdateWaypointOrder(o);
 	}
 
 	Vehicle *v;
 	FOR_ALL_VEHICLES(v) {
-		if (v->type != VEH_SHIP) continue;
+		VehicleType vt = v->type;
+		if (vt != VEH_SHIP && vt != VEH_TRAIN) continue;
 
 		UpdateWaypointOrder(&v->current_order);
 	}
@@ -64,26 +66,40 @@ void MoveBuoysToWaypoints()
 		Town *town         = st->town;
 		StringID string_id = st->string_id;
 		char *name         = st->name;
+		st->name           = NULL;
 		Date build_date    = st->build_date;
+		/* TTDPatch could use "buoys with rail station" for rail waypoints */
+		bool train         = st->train_station.tile != INVALID_TILE;
+		TileArea train_st  = st->train_station;
 
 		/* Delete the station, so we can make it a real waypoint. */
 		delete st;
 
-		Waypoint *wp = new (index) Waypoint(xy);
+		Waypoint *wp   = new (index) Waypoint(xy);
 		wp->town       = town;
-		wp->string_id  = STR_SV_STNAME_BUOY;
+		wp->string_id  = train ? STR_SV_STNAME_WAYPOINT : STR_SV_STNAME_BUOY;
 		wp->name       = name;
 		wp->delete_ctr = 0; // Just reset delete counter for once.
 		wp->build_date = build_date;
-		wp->owner      = OWNER_NONE;
+		wp->owner      = train ? GetTileOwner(xy) : OWNER_NONE;
 
 		if (IsInsideBS(string_id, STR_SV_STNAME_BUOY, 9)) wp->town_cn = string_id - STR_SV_STNAME_BUOY;
 
-		if (IsBuoyTile(xy) && GetStationIndex(xy) == index) {
+		if (train) {
+			/* When we make a rail waypoint of the station, convert the map as well. */
+			TILE_AREA_LOOP(t, train_st) {
+				if (!IsTileType(t, MP_STATION) || GetStationIndex(t) != index) continue;
+
+				SB(_m[t].m6, 3, 3, STATION_WAYPOINT);
+				wp->rect.BeforeAddTile(t, StationRect::ADD_FORCE);
+			}
+
+			wp->train_station = train_st;
+			wp->facilities |= FACIL_TRAIN;
+		} else if (IsBuoyTile(xy) && GetStationIndex(xy) == index) {
+			wp->rect.BeforeAddTile(xy, StationRect::ADD_FORCE);
 			wp->facilities |= FACIL_DOCK;
 		}
-
-		wp->rect.BeforeAddTile(xy, StationRect::ADD_FORCE);
 	}
 }
 
@@ -229,11 +245,11 @@ static StationID _station_id;
 const SaveLoad *GetLinkStatDesc()
 {
 	static const SaveLoad linkstat_desc[] = {
-		SLEG_CONDVAR(             _station_id,         SLE_UINT16,      SL_CAPACITIES, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    length,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    capacity,            SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    frozen,              SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
-		 SLE_CONDVAR(LinkStat,    usage,               SLE_UINT32,      SL_CAPACITIES, SL_MAX_VERSION),
+		SLEG_VAR(             _station_id,         SLE_UINT16),
+		 SLE_VAR(LinkStat,    length,              SLE_UINT32),
+		 SLE_VAR(LinkStat,    capacity,            SLE_UINT32),
+		 SLE_VAR(LinkStat,    frozen,              SLE_UINT32),
+		 SLE_VAR(LinkStat,    usage,               SLE_UINT32),
 		 SLE_END()
 	};
 
@@ -469,7 +485,7 @@ static void RealSave_STNN(BaseStation *bst)
 			_num_dests = (uint32)st->goods[c].cargo.Packets()->MapSize();
 			_num_links = (uint16)st->goods[c].link_stats.size();
 			_num_flows = 0;
-			for(FlowStatMap::const_iterator it(st->goods[c].flows.begin()); it != st->goods[c].flows.end(); ++it) {
+			for (FlowStatMap::const_iterator it(st->goods[c].flows.begin()); it != st->goods[c].flows.end(); ++it) {
 				_num_flows += (uint32)it->second.size();
 			}
 			SlObject(&st->goods[c], GetGoodsDesc());
@@ -535,7 +551,7 @@ static void Load_STNN()
 					SwapPackets(&st->goods[c]);
 				} else {
 					StationCargoPair pair;
-					for(uint i = 0; i < _num_dests; ++i) {
+					for (uint i = 0; i < _num_dests; ++i) {
 						SlObject(&pair, _cargo_list_desc);
 						const_cast<StationCargoPacketMap &>(*(st->goods[c].cargo.Packets()))[pair.first].swap(pair.second);
 						assert(pair.second.empty());

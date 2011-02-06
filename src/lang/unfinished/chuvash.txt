@@ -783,7 +783,6 @@ STR_NETWORK_START_SERVER_SET_PASSWORD                           :{BLACK}Вырн
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :Вырӑнти Тӗвӗлӗх/Тетел
 
 
-
 # Network game languages
 ############ Leave those lines in this order!!
 ############ End of leave-in-this-order
@@ -898,7 +897,6 @@ STR_AIRPORT_CLASS_HELIPORTS                                     :Вертолё�
 
 # Object construction window
 STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Объект суйлани
-STR_OBJECT_BUILD_CLASS_LABEL                                    :{BLACK}Объект класс
 STR_OBJECT_BUILD_SIZE                                           :{BLACK}Виҫе: {GOLD}{NUM} x {NUM} тӑваткалсем
 
 STR_OBJECT_CLASS_LTHS                                           :Маяксем
@@ -1146,9 +1144,6 @@ STR_INDUSTRY_DIRECTORY_NONE                                     :{ORANGE}- Ҫу�
 
 
 # Messages in the start stop button in the vehicle view
-
-
-
 
 
 # Vehicle stopped/started animations
@@ -1423,7 +1418,6 @@ STR_COMPANY_MONEY                                               :{WHITE}{CURRENC
 STR_BLACK_DATE_LONG                                             :{BLACK}{DATE_LONG}
 STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
 STR_SILVER_CROSS                                                :{SILVER}{CROSS}
-STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}

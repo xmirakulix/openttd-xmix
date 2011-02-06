@@ -153,7 +153,7 @@ static void ConvertTownOwner()
 				/* FALL THROUGH */
 
 			case MP_TUNNELBRIDGE:
-				if (GetTileOwner(tile) & 0x80) SetTileOwner(tile, OWNER_TOWN);
+				if (_m[tile].m1 & 0x80) SetTileOwner(tile, OWNER_TOWN);
 				break;
 
 			default: break;
@@ -437,6 +437,47 @@ static void FixOwnerOfRailTrack(TileIndex t)
 	MakeClear(t, CLEAR_GRASS, 0);
 }
 
+/**
+ * Fixes inclination of a vehicle. Older OpenTTD versions didn't update the bits correctly.
+ * @param v vehicle
+ * @param dir vehicle's direction, or # INVALID_DIR if it can be ignored
+ * @return inclination bits to set
+ */
+static uint FixVehicleInclination(Vehicle *v, Direction dir)
+{
+	/* Compute place where this vehicle entered the tile */
+	int entry_x = v->x_pos;
+	int entry_y = v->y_pos;
+	switch (dir) {
+		case DIR_NE: entry_x |= TILE_UNIT_MASK; break;
+		case DIR_NW: entry_y |= TILE_UNIT_MASK; break;
+		case DIR_SW: entry_x &= ~TILE_UNIT_MASK; break;
+		case DIR_SE: entry_y &= ~TILE_UNIT_MASK; break;
+		case INVALID_DIR: break;
+		default: NOT_REACHED();
+	}
+	byte entry_z = GetSlopeZ(entry_x, entry_y);
+
+	/* Compute middle of the tile. */
+	int middle_x = (v->x_pos & ~TILE_UNIT_MASK) + HALF_TILE_SIZE;
+	int middle_y = (v->y_pos & ~TILE_UNIT_MASK) + HALF_TILE_SIZE;
+	byte middle_z = GetSlopeZ(middle_x, middle_y);
+
+	/* middle_z == entry_z, no height change. */
+	if (middle_z == entry_z) return 0;
+
+	/* middle_z < entry_z, we are going downwards. */
+	if (middle_z < entry_z) return 1U << GVF_GOINGDOWN_BIT;
+
+	/* middle_z > entry_z, we are going upwards. */
+	return 1U << GVF_GOINGUP_BIT;
+}
+
+/**
+ * Perform a (large) amount of savegame conversion *magic* in order to
+ * load older savegames and to fill the caches for various purposes.
+ * @return True iff conversion went without a problem.
+ */
 bool AfterLoadGame()
 {
 	SetSignalHandlers();
@@ -469,22 +510,27 @@ bool AfterLoadGame()
 		_pause_mode &= ~PMB_PAUSED_NETWORK;
 	}
 
-	/* in very old versions, size of train stations was stored differently */
+	/* In very old versions, size of train stations was stored differently.
+	 * They had swapped width and height if station was built along the Y axis.
+	 * TTO and TTD used 3 bits for width/height, while OpenTTD used 4.
+	 * Because the data stored by TTDPatch are unusable for rail stations > 7x7,
+	 * recompute the width and height. Doing this unconditionally for all old
+	 * savegames simplifies the code. */
 	if (IsSavegameVersionBefore(2)) {
 		Station *st;
 		FOR_ALL_STATIONS(st) {
-			if (st->train_station.tile != 0 && st->train_station.h == 0) {
-				uint n = _savegame_type == SGT_OTTD ? 4 : 3; // OTTD uses 4 bits per dimensions, TTD 3 bits
-				uint w = GB(st->train_station.w, n, n);
-				uint h = GB(st->train_station.w, 0, n);
-
-				if (GetRailStationAxis(st->train_station.tile) != AXIS_X) Swap(w, h);
-
-				st->train_station.w = w;
-				st->train_station.h = h;
-
-				assert(GetStationIndex(st->train_station.tile + TileDiffXY(w - 1, h - 1)) == st->index);
-			}
+			st->train_station.w = st->train_station.h = 0;
+		}
+		for (TileIndex t = 0; t < map_size; t++) {
+			if (!IsTileType(t, MP_STATION)) continue;
+			if (_m[t].m5 > 7) continue; // is it a rail station tile?
+			st = Station::Get(_m[t].m2);
+			assert(st->train_station.tile != 0);
+			int dx = TileX(t) - TileX(st->train_station.tile);
+			int dy = TileY(t) - TileY(st->train_station.tile);
+			assert(dx >= 0 && dy >= 0);
+			st->train_station.w = max<uint>(st->train_station.w, dx + 1);
+			st->train_station.h = max<uint>(st->train_station.h, dy + 1);
 		}
 	}
 
@@ -1961,7 +2007,7 @@ bool AfterLoadGame()
 		FOR_ALL_DISASTERVEHICLES(v) {
 			if (v->subtype == 2/*ST_SMALL_UFO*/ && v->current_order.GetDestination() != 0) {
 				const Vehicle *u = Vehicle::GetIfValid(v->dest_tile);
-				if (u == NULL || u->type != VEH_ROAD || !RoadVehicle::From(u)->IsRoadVehFront()) {
+				if (u == NULL || u->type != VEH_ROAD || !RoadVehicle::From(u)->IsFrontEngine()) {
 					delete v;
 				}
 			}
@@ -2007,8 +2053,8 @@ bool AfterLoadGame()
 		}
 	}
 
-	if (IsSavegameVersionBefore(124)) {
-		/* The train station tile area was added */
+	if (IsSavegameVersionBefore(124) && !IsSavegameVersionBefore(1)) {
+		/* The train station tile area was added, but for really old (TTDPatch) it's already valid. */
 		Waypoint *wp;
 		FOR_ALL_WAYPOINTS(wp) {
 			if (wp->facilities & FACIL_TRAIN) {
@@ -2196,20 +2242,6 @@ bool AfterLoadGame()
 		}
 	}
 
-	if (IsSavegameVersionBefore(139)) {
-		Train *t;
-		FOR_ALL_TRAINS(t) {
-			/* Copy old GOINGUP / GOINGDOWN flags. */
-			if (HasBit(t->flags, 1)) {
-				ClrBit(t->flags, 1);
-				SetBit(t->gv_flags, GVF_GOINGUP_BIT);
-			} else if (HasBit(t->flags, 2)) {
-				ClrBit(t->flags, 2);
-				SetBit(t->gv_flags, GVF_GOINGDOWN_BIT);
-			}
-		}
-	}
-
 	if (IsSavegameVersionBefore(140)) {
 		Station *st;
 		FOR_ALL_STATIONS(st) {
@@ -2331,6 +2363,10 @@ bool AfterLoadGame()
 		 * get messed up just after loading the savegame. This fixes that. */
 		Vehicle *v;
 		FOR_ALL_VEHICLES(v) {
+			/* Not all vehicle types can be inside a tunnel. Furthermore,
+			 * testing IsTunnelTile() for invalid tiles causes a crash. */
+			if (!v->IsGroundVehicle()) continue;
+
 			/* Is the vehicle in a tunnel? */
 			if (!IsTunnelTile(v->tile)) continue;
 
@@ -2354,12 +2390,19 @@ bool AfterLoadGame()
 			bool hidden;
 			if (dir == vdir) { // Entering tunnel
 				hidden = frame >= _tunnel_visibility_frame[dir];
+				v->tile = vtile;
 			} else if (dir == ReverseDiagDir(vdir)) { // Leaving tunnel
 				hidden = frame < TILE_SIZE - _tunnel_visibility_frame[dir];
-			} else { // Something freaky going on?
-				NOT_REACHED();
+				/* v->tile changes at the moment when the vehicle leaves the tunnel. */
+				v->tile = hidden ? GetOtherTunnelBridgeEnd(vtile) : vtile;
+			} else {
+				/* We could get here in two cases:
+				 * - for road vehicles, it is reversing at the end of the tunnel
+				 * - it is crashed in the tunnel entry (both train or RV destroyed by UFO)
+				 * Whatever case it is, do not change anything and use the old values.
+				 * Especially changing RV's state would break its reversing in the middle. */
+				continue;
 			}
-			v->tile = vtile;
 
 			if (hidden) {
 				v->vehstatus |= VS_HIDDEN;
@@ -2411,6 +2454,118 @@ bool AfterLoadGame()
 		FOR_ALL_COMPANIES(c) {
 			c->terraform_limit = _settings_game.construction.terraform_frame_burst << 16;
 			c->clear_limit     = _settings_game.construction.clear_frame_burst << 16;
+		}
+	}
+
+	if (IsSavegameVersionBefore(158)) {
+		Vehicle *v;
+		FOR_ALL_VEHICLES(v) {
+			switch (v->type) {
+				case VEH_TRAIN: {
+					Train *t = Train::From(v);
+
+					/* Clear old GOINGUP / GOINGDOWN flags.
+					 * It was changed in savegame version 139, but savegame
+					 * version 158 doesn't use these bits, so it doesn't hurt
+					 * to clear them unconditionally. */
+					ClrBit(t->flags, 1);
+					ClrBit(t->flags, 2);
+
+					/* Clear both bits first. */
+					ClrBit(t->gv_flags, GVF_GOINGUP_BIT);
+					ClrBit(t->gv_flags, GVF_GOINGDOWN_BIT);
+
+					/* Crashed vehicles can't be going up/down. */
+					if (t->vehstatus & VS_CRASHED) break;
+
+					/* Only X/Y tracks can be sloped. */
+					if (t->track != TRACK_BIT_X && t->track != TRACK_BIT_Y) break;
+
+					t->gv_flags |= FixVehicleInclination(t, t->direction);
+					break;
+				}
+				case VEH_ROAD: {
+					RoadVehicle *rv = RoadVehicle::From(v);
+					ClrBit(rv->gv_flags, GVF_GOINGUP_BIT);
+					ClrBit(rv->gv_flags, GVF_GOINGDOWN_BIT);
+
+					/* Crashed vehicles can't be going up/down. */
+					if (rv->vehstatus & VS_CRASHED) break;
+
+					if (rv->state == RVSB_IN_DEPOT || rv->state == RVSB_WORMHOLE) break;
+
+					TrackStatus ts = GetTileTrackStatus(rv->tile, TRANSPORT_ROAD, rv->compatible_roadtypes);
+					TrackBits trackbits = TrackStatusToTrackBits(ts);
+
+					/* Only X/Y tracks can be sloped. */
+					if (trackbits != TRACK_BIT_X && trackbits != TRACK_BIT_Y) break;
+
+					Direction dir = rv->direction;
+
+					/* Test if we are reversing. */
+					Axis a = trackbits == TRACK_BIT_X ? AXIS_X : AXIS_Y;
+					if (AxisToDirection(a) != dir &&
+							AxisToDirection(a) != ReverseDir(dir)) {
+						/* When reversing, the road vehicle is on the edge of the tile,
+						 * so it can be safely compared to the middle of the tile. */
+						dir = INVALID_DIR;
+					}
+
+					rv->gv_flags |= FixVehicleInclination(rv, dir);
+					break;
+				}
+				case VEH_SHIP:
+					break;
+
+				default:
+					continue;
+			}
+
+			if (IsBridgeTile(v->tile) && TileVirtXY(v->x_pos, v->y_pos) == v->tile) {
+				/* In old versions, z_pos was 1 unit lower on bridge heads.
+				 * However, this invalid state could be converted to new savegames
+				 * by loading and saving the game in a new version. */
+				v->z_pos = GetSlopeZ(v->x_pos, v->y_pos);
+				DiagDirection dir = GetTunnelBridgeDirection(v->tile);
+				if (v->type == VEH_TRAIN && !(v->vehstatus & VS_CRASHED) &&
+						v->direction != DiagDirToDir(dir)) {
+					/* If the train has left the bridge, it shouldn't have
+					 * track == TRACK_BIT_WORMHOLE - this could happen
+					 * when the train was reversed while on the last "tick"
+					 * on the ramp before leaving the ramp to the bridge. */
+					Train::From(v)->track = DiagDirToDiagTrackBits(dir);
+				}
+			}
+
+			/* If the vehicle is really above v->tile (not in a wormhole),
+			 * it should have set v->z_pos correctly. */
+			assert(v->tile != TileVirtXY(v->x_pos, v->y_pos) || v->z_pos == GetSlopeZ(v->x_pos, v->y_pos));
+		}
+
+		/* Fill Vehicle::cur_real_order_index */
+		FOR_ALL_VEHICLES(v) {
+			if (!v->IsPrimaryVehicle()) continue;
+
+			v->cur_real_order_index = v->cur_auto_order_index;
+			v->UpdateRealOrderIndex();
+		}
+	}
+
+	if (IsSavegameVersionBefore(159)) {
+		/* If the savegame is old (before version 100), then the value of 255
+		 * for these settings did not mean "disabled". As such everything
+		 * before then did reverse.
+		 * To simplify stuff we disable all turning around or we do not
+		 * disable anything at all. So, if some reversing was disabled we
+		 * will keep reversing disabled, otherwise it'll be turned on. */
+		_settings_game.pf.reverse_at_signals = IsSavegameVersionBefore(100) || (_settings_game.pf.wait_oneway_signal != 255 && _settings_game.pf.wait_twoway_signal != 255 && _settings_game.pf.wait_for_pbs_path != 255);
+	}
+
+	if (IsSavegameVersionBefore(160)) {
+		/* Setting difficulty number_industries other than zero get bumped to +1
+		 * since a new option (very low at position1) has been added */
+		if (_settings_game.difficulty.number_industries > 0) {
+			_settings_game.difficulty.number_industries++;
 		}
 	}
 

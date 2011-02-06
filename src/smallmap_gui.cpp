@@ -64,35 +64,33 @@ static const int NUM_NO_COMPANY_ENTRIES = 4; ///< Number of entries in the owner
 static int _smallmap_cargo_count; ///< number of cargos in the link stats legend
 
 /** Macro for ordinary entry of LegendAndColour */
-#define MK(a, b) {a, b, {INVALID_INDUSTRYTYPE}, true, false, false}
+#define MK(a, b) {a, b, INVALID_INDUSTRYTYPE, 0, INVALID_COMPANY, true, false, false}
 
 /** Macro for a height legend entry with configurable colour. */
-#define MC(height)  {0, STR_TINY_BLACK_HEIGHT, {height}, true, false, false}
+#define MC(height)  {0, STR_TINY_BLACK_HEIGHT, INVALID_INDUSTRYTYPE, height, INVALID_COMPANY, true, false, false}
 
 /** Macro for non-company owned property entry of LegendAndColour */
-#define MO(a, b) {a, b, {INVALID_COMPANY}, true, false, false}
+#define MO(a, b) {a, b, INVALID_INDUSTRYTYPE, 0, INVALID_COMPANY, true, false, false}
 
 /** Macro used for forcing a rebuild of the owner legend the first time it is used. */
-#define MOEND() {0, 0, {OWNER_NONE}, true, true, false}
+#define MOEND() {0, 0, INVALID_INDUSTRYTYPE, 0, OWNER_NONE, true, true, false}
 
 /** Macro for end of list marker in arrays of LegendAndColour */
-#define MKEND() {0, STR_NULL, {INVALID_INDUSTRYTYPE}, true, true, false}
+#define MKEND() {0, STR_NULL, INVALID_INDUSTRYTYPE, 0, INVALID_COMPANY, true, true, false}
 
 /**
  * Macro for break marker in arrays of LegendAndColour.
  * It will have valid data, though
  */
-#define MS(a, b) {a, b, {INVALID_INDUSTRYTYPE}, true, false, true}
+#define MS(a, b) {a, b, INVALID_INDUSTRYTYPE, 0, INVALID_COMPANY, true, false, true}
 
 /** Structure for holding relevant data for legends in small map */
 struct LegendAndColour {
 	uint8 colour;              ///< Colour of the item on the map.
 	StringID legend;           ///< String corresponding to the coloured item.
-	union {
-		IndustryType type;     ///< Type of industry.
-		uint8 height;          ///< Height in tiles.
-		CompanyID company;     ///< Company to display.
-	} u;
+	IndustryType type;         ///< Type of industry. Only valid for industry entries.
+	uint8 height;              ///< Height in tiles. Only valid for height legend entries.
+	CompanyID company;         ///< Company to display. Only valid for company entries of the owner legend.
 	bool show_on_map;          ///< For filtering industries, if \c true, industry is shown on the map in colour.
 	bool end;                  ///< This is the end of the list.
 	bool col_break;            ///< Perform a column break and go further at the next column.
@@ -193,6 +191,9 @@ static const uint8 _smallmap_link_colours[] = {
 	0xba, 0xb9, 0xb7, 0xb5
 };
 
+/** Link stat colours shown in legenda. */
+static uint8 _linkstat_colours_in_legenda[] = {0, 1, 3, 5, 7, 9, 11};
+
 /**
  * Fills an array for the industries legends.
  */
@@ -207,7 +208,7 @@ void BuildIndustriesLegend()
 		if (indsp->enabled) {
 			_legend_from_industries[j].legend = indsp->name;
 			_legend_from_industries[j].colour = indsp->map_colour;
-			_legend_from_industries[j].u.type = ind;
+			_legend_from_industries[j].type = ind;
 			_legend_from_industries[j].show_on_map = true;
 			_legend_from_industries[j].col_break = false;
 			_legend_from_industries[j].end = false;
@@ -225,7 +226,7 @@ void BuildIndustriesLegend()
 }
 
 /** Legend entries for the link stats view. */
-static LegendAndColour _legend_linkstats[NUM_CARGO + 1];
+static LegendAndColour _legend_linkstats[NUM_CARGO + lengthof(_linkstat_colours_in_legenda) + 1];
 
 /**
  * Populate legend table for the link stat view.
@@ -241,13 +242,23 @@ void BuildLinkStatsLegend()
 
 		_legend_linkstats[i].legend = cs->name;
 		_legend_linkstats[i].colour = cs->legend_colour;
-		_legend_linkstats[i].u.type = cs->Index();
+		_legend_linkstats[i].type = cs->Index();
 		_legend_linkstats[i].show_on_map = true;
 	}
 
-	_legend_linkstats[i].end = true;
-
+	_legend_linkstats[i].col_break = true;
 	_smallmap_cargo_count = i;
+
+	for (; i < _smallmap_cargo_count + lengthof(_linkstat_colours_in_legenda); ++i) {
+		_legend_linkstats[i].legend = STR_EMPTY;
+		_legend_linkstats[i].colour = _smallmap_link_colours[_linkstat_colours_in_legenda[i - _smallmap_cargo_count]];
+		_legend_linkstats[i].show_on_map = true;
+	}
+
+	_legend_linkstats[_smallmap_cargo_count].legend = STR_SMALLMAP_LEGENDA_LINK_UNUSED;
+	_legend_linkstats[i - 1].legend = STR_SMALLMAP_LEGENDA_LINK_OVERLOADED;
+	_legend_linkstats[(_smallmap_cargo_count + i - 1) / 2].legend = STR_SMALLMAP_LEGENDA_LINK_SATURATED;
+	_legend_linkstats[i].end = true;
 }
 
 static const LegendAndColour * const _legend_table[] = {
@@ -356,7 +367,7 @@ static const SmallMapColourScheme _heightmap_schemes[] = {
 void BuildLandLegend()
 {
 	for (LegendAndColour *lc = _legend_land_contours; lc->legend == STR_TINY_BLACK_HEIGHT; lc++) {
-		lc->colour = _heightmap_schemes[_settings_client.gui.smallmap_land_colour].height_colours[lc->u.height];
+		lc->colour = _heightmap_schemes[_settings_client.gui.smallmap_land_colour].height_colours[lc->height];
 	}
 }
 
@@ -371,7 +382,7 @@ void BuildOwnerLegend()
 	const Company *c;
 	FOR_ALL_COMPANIES(c) {
 		_legend_land_owners[i].colour = _colour_gradient[c->colour][5];
-		_legend_land_owners[i].u.company = c->index;
+		_legend_land_owners[i].company = c->index;
 		_legend_land_owners[i].show_on_map = true;
 		_legend_land_owners[i].col_break = false;
 		_legend_land_owners[i].end = false;
@@ -610,7 +621,7 @@ static inline uint32 GetSmallMapOwnerPixels(TileIndex tile, TileType t)
 		 */
 	}
 
-	if ((o <= MAX_COMPANIES && !_legend_land_owners[_company_to_list_pos[o]].show_on_map) || o == OWNER_NONE) {
+	if ((o < MAX_COMPANIES && !_legend_land_owners[_company_to_list_pos[o]].show_on_map) || o == OWNER_NONE) {
 		const SmallMapColourScheme *cs = &_heightmap_schemes[_settings_client.gui.smallmap_land_colour];
 		return _smallmap_show_heightmap ? cs->height_colours[TileHeight(tile)] : cs->default_colour;
 	} else if (o == OWNER_WATER) {
@@ -635,7 +646,7 @@ static const byte _vehicle_type_colours[6] = {
  * @param colour the colour with which the vertex will be filled
  * @param border_colour the colour for the border of the vertex
  */
-void DrawVertex(int x, int y, int size, int colour, int boder_colour)
+void DrawVertex(int x, int y, int size, int colour, int border_colour)
 {
 	size--;
 	int w1 = size / 2;
@@ -645,10 +656,10 @@ void DrawVertex(int x, int y, int size, int colour, int boder_colour)
 
 	w1++;
 	w2++;
-	GfxDrawLine(x - w1, y - w1, x + w2, y - w1, boder_colour);
-	GfxDrawLine(x - w1, y + w2, x + w2, y + w2, boder_colour);
-	GfxDrawLine(x - w1, y - w1, x - w1, y + w2, boder_colour);
-	GfxDrawLine(x + w2, y - w1, x + w2, y + w2, boder_colour);
+	GfxDrawLine(x - w1, y - w1, x + w2, y - w1, border_colour);
+	GfxDrawLine(x - w1, y + w2, x + w2, y + w2, border_colour);
+	GfxDrawLine(x - w1, y - w1, x - w1, y + w2, border_colour);
+	GfxDrawLine(x + w2, y - w1, x + w2, y + w2, border_colour);
 }
 
 /** Class managing the smallmap window. */
@@ -700,24 +711,24 @@ class SmallMapWindow : public Window {
 	uint min_number_of_fixed_rows; ///< Minimal number of rows in the legends for the fixed layouts only (all except #SMT_INDUSTRY).
 	uint column_width;             ///< Width of a column in the #SM_WIDGET_LEGEND widget.
 
-	struct BaseCargoDetail {
-		BaseCargoDetail()
-		{
-			this->Clear();
-		}
+	/**
+	 * Properties of a link between two stations.
+	 */
+	struct LinkProperties {
+		LinkProperties() { this->Clear(); }
 
-		void Clear()
-		{
-			this->capacity = this->usage = this->planned = 0;
-		}
+		void Clear() { this->capacity = this->usage = this->planned = 0; }
 
 		uint capacity;
 		uint usage;
 		uint planned;
 	};
 
-	struct CargoDetail : public BaseCargoDetail {
-		CargoDetail(const LegendAndColour *c, const LinkStat &ls, const FlowStat &fs) : legend(c)
+	/**
+	 * Properties of a link in connection with a legent entry.
+	 */
+	struct LinkLegendProperties : public LinkProperties {
+		LinkLegendProperties(const LegendAndColour *c, const LinkStat &ls, const FlowStat &fs) : legend(c)
 		{
 			this->AddLink(ls, fs);
 		}
@@ -732,10 +743,13 @@ class SmallMapWindow : public Window {
 		const LegendAndColour *legend;
 	};
 
-	typedef std::vector<CargoDetail> StatVector;
+	typedef std::vector<LinkLegendProperties> StatVector;
 
-	struct LinkDetails {
-		LinkDetails() {this->Clear();}
+	/**
+	 * Properties of multiple parallel links.
+	 */
+	struct MultiLinkProperties {
+		MultiLinkProperties() { this->Clear(); }
 
 		StationID sta;
 		StationID stb;
@@ -750,10 +764,7 @@ class SmallMapWindow : public Window {
 			this->b_to_a.clear();
 		}
 
-		bool Empty() const
-		{
-			return this->sta == INVALID_STATION;
-		}
+		bool Empty() const { return this->sta == INVALID_STATION; }
 	};
 
 	int32 scroll_x;  ///< Horizontal world coordinate of the base tile left of the top-left corner of the smallmap display.
@@ -1027,7 +1038,7 @@ class SmallMapWindow : public Window {
 			if (v == NULL) continue;
 
 			/* Remap into flat coordinates. */
-			Point pt = RemapTile(i->position.x / (int)TILE_SIZE, i->position.y / (int)TILE_SIZE);
+			Point pt = this->RemapTile(i->position.x / (int)TILE_SIZE, i->position.y / (int)TILE_SIZE);
 
 			int y = pt.y - dpi->top;
 			int x = pt.x - this->subscroll - 3 - dpi->left; // Offset X coordinate.
@@ -1059,7 +1070,7 @@ class SmallMapWindow : public Window {
 		int x = (st->rect.right + st->rect.left + 1) / 2;
 		int y = (st->rect.bottom + st->rect.top + 1) / 2;
 		Point ret = this->RemapTile(x, y);
-		ret.x -= 3 + this->subscroll;
+		ret.x -= 3 + this->subscroll; 
 		if (this->zoom < 0) {
 			/* add half a tile if width or height is odd */
 			if (((st->rect.bottom - st->rect.top) & 1) == 0) {
@@ -1082,8 +1093,7 @@ class SmallMapWindow : public Window {
 
 		const Station *st;
 		FOR_ALL_STATIONS(st) {
-			if ((st->owner != _local_company && Company::IsValidID(st->owner)) ||
-					st->rect.IsEmpty()) continue;
+			if ((st->owner != _local_company && Company::IsValidID(st->owner)) || st->rect.IsEmpty()) continue;
 
 			Point pt = GetStationMiddle(st);
 
@@ -1094,7 +1104,7 @@ class SmallMapWindow : public Window {
 			for (int i = 0; i < _smallmap_cargo_count; ++i) {
 				const LegendAndColour &tbl = _legend_table[this->map_type][i];
 				if (!tbl.show_on_map && supply_details != st) continue;
-				uint supply = st->goods[tbl.u.type].supply;
+				uint supply = st->goods[tbl.type].supply;
 				if (supply > 0) {
 					q += supply;
 					colour += tbl.colour;
@@ -1128,12 +1138,13 @@ class SmallMapWindow : public Window {
 
 			const Station *sta;
 			FOR_ALL_STATIONS(sta) {
+				/* Show links between own stations or "neutral" ones like oilrigs.*/
 				if (sta->owner != _local_company && Company::IsValidID(sta->owner)) continue;
 				for (int i = 0; i < _smallmap_cargo_count; ++i) {
 					const LegendAndColour &tbl = _legend_table[window->map_type][i];
 					if (!tbl.show_on_map) continue;
 
-					CargoID c = tbl.u.type;
+					CargoID c = tbl.type;
 					const LinkStatMap &links = sta->goods[c].link_stats;
 					for (LinkStatMap::const_iterator i = links.begin(); i != links.end(); ++i) {
 						StationID from = sta->index;
@@ -1162,7 +1173,7 @@ class SmallMapWindow : public Window {
 	protected:
 
 		Point pta, ptb;
-		BaseCargoDetail forward, backward;
+		LinkProperties forward, backward;
 		const SmallMapWindow *window;
 
 		FORCEINLINE bool IsLinkVisible()
@@ -1178,7 +1189,7 @@ class SmallMapWindow : public Window {
 		{
 			for (int i = 0; i < _smallmap_cargo_count; ++i) {
 				const LegendAndColour &cargo_entry = _legend_table[this->window->map_type][i];
-				CargoID cargo = cargo_entry.u.type;
+				CargoID cargo = cargo_entry.type;
 				if (cargo_entry.show_on_map) {
 					GoodsEntry &ge = Station::Get(sta)->goods[cargo];
 					FlowStat sum_flows = ge.GetSumFlowVia(stb);
@@ -1192,14 +1203,15 @@ class SmallMapWindow : public Window {
 			}
 		}
 
-		void AddLink(const LinkStat &orig_link, const FlowStat &orig_flow, BaseCargoDetail &cargo)
+		void AddLink(const LinkStat &orig_link, const FlowStat &orig_flow, LinkProperties &cargo)
 		{
 			uint new_cap = orig_link.Capacity();
 			uint new_usg = orig_link.Usage();
 			uint new_plan = orig_flow.Planned();
 
+			/* multiply the numbers by 32 in order to avoid comparing to 0 too often. */
 			if (cargo.capacity == 0 ||
-					max(cargo.usage, cargo.planned) * 8 / (cargo.capacity + 1) < max(new_usg, new_plan) * 8 / (new_cap + 1)) {
+					max(cargo.usage, cargo.planned) * 32 / (cargo.capacity + 1) < max(new_usg, new_plan) * 32 / (new_cap + 1)) {
 				cargo.capacity = new_cap;
 				cargo.usage = new_usg;
 				cargo.planned = new_plan;
@@ -1401,7 +1413,7 @@ class SmallMapWindow : public Window {
 			if (v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) continue;
 
 			/* Remap into flat coordinates. We have to do that again in DrawVehicles to account for scrolling. */
-			Point pos = RemapTile(v->x_pos / (int)TILE_SIZE, v->y_pos / (int)TILE_SIZE);
+			Point pos = this->RemapTile(v->x_pos / (int)TILE_SIZE, v->y_pos / (int)TILE_SIZE);
 
 			/* Check if rhombus is inside bounds */
 			if (IsInsideMM(pos.x, -2 * scale, wi->current_x + 2 * scale) &&
@@ -1523,7 +1535,7 @@ public:
 	{
 		uint min_width = 0;
 		this->min_number_of_columns = INDUSTRY_MIN_NUMBER_OF_COLUMNS;
-		this->min_number_of_fixed_rows = 0;
+		this->min_number_of_fixed_rows = lengthof(_smallmap_link_colours) / 2 + 1;
 		for (uint i = 0; i < lengthof(_legend_table); i++) {
 			uint height = 0;
 			uint num_columns = 1;
@@ -1537,15 +1549,15 @@ public:
 					SetDParam(0, tbl->legend);
 					str = STR_SMALLMAP_LINKSTATS;
 				} else if (i == SMT_OWNER) {
-					if (tbl->u.company != INVALID_COMPANY) {
-						if (!Company::IsValidID(tbl->u.company)) {
+					if (tbl->company != INVALID_COMPANY) {
+						if (!Company::IsValidID(tbl->company)) {
 							/* Rebuild the owner legend. */
 							BuildOwnerLegend();
 							this->OnInit();
 							return;
 						}
 						/* Non-fixed legend entries for the owner view. */
-						SetDParam(0, tbl->u.company);
+						SetDParam(0, tbl->company);
 						str = STR_SMALLMAP_COMPANY;
 					} else {
 						str = tbl->legend;
@@ -1573,7 +1585,7 @@ public:
 	{
 		if (this->map_type == SMT_OWNER) {
 			for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-				if (tbl->u.company != INVALID_COMPANY && !Company::IsValidID(tbl->u.company)) {
+				if (tbl->company != INVALID_COMPANY && !Company::IsValidID(tbl->company)) {
 					/* Rebuild the owner legend. */
 					BuildOwnerLegend();
 					this->InvalidateData(1);
@@ -1611,7 +1623,7 @@ public:
 				uint blob_right = rtl ? this->column_width - 1 : LEGEND_BLOB_WIDTH;
 
 				StringID string = STR_NULL;
-			       	switch (this->map_type) {
+				switch (this->map_type) {
 					case SMT_INDUSTRY:
 						string = STR_SMALLMAP_INDUSTRY;
 						break;
@@ -1626,7 +1638,7 @@ public:
 				}
 
 				for (const LegendAndColour *tbl = _legend_table[this->map_type]; !tbl->end; ++tbl) {
-					if (tbl->col_break || ((this->map_type == SMT_INDUSTRY || this->map_type == SMT_OWNER ||  this->map_type == SMT_LINKSTATS) && i++ >= number_of_rows)) {
+					if (tbl->col_break || ((this->map_type == SMT_INDUSTRY || this->map_type == SMT_OWNER || this->map_type == SMT_LINKSTATS) && i++ >= number_of_rows)) {
 						/* Column break needed, continue at top, COLUMN_WIDTH pixels
 						 * (one "row") to the right. */
 						x += rtl ? -(int)this->column_width : this->column_width;
@@ -1638,12 +1650,13 @@ public:
 						case SMT_INDUSTRY:
 							/* Industry name must be formatted, since it's not in tiny font in the specs.
 							 * So, draw with a parameter and use the STR_SMALLMAP_INDUSTRY string, which is tiny font */
-							SetDParam(1, Industry::GetIndustryTypeCount(tbl->u.type));
+							SetDParam(1, Industry::GetIndustryTypeCount(tbl->type));
 						case SMT_LINKSTATS:
 							SetDParam(0, tbl->legend);
+							/* FALL_THROUGH */
 						case SMT_OWNER:
-							if (this->map_type != SMT_OWNER || tbl->u.company != INVALID_COMPANY) {
-								if (this->map_type == SMT_OWNER) SetDParam(0, tbl->u.company);
+							if (this->map_type != SMT_OWNER || tbl->company != INVALID_COMPANY) {
+								if (this->map_type == SMT_OWNER) SetDParam(0, tbl->company);
 								if (!tbl->show_on_map) {
 									/* Simply draw the string, not the black border of the legend colour.
 									 * This will enforce the idea of the disabled item */
@@ -1653,13 +1666,15 @@ public:
 									GfxFillRect(x + blob_left, y + 1, x + blob_right, y + row_height - 1, 0); // Outer border of the legend colour
 								}
 								break;
-							} // else fall through
+							}
+							/* FALL_THROUGH */
 						default:
-							if (this->map_type == SMT_CONTOUR) SetDParam(0, tbl->u.height * TILE_HEIGHT_STEP);
+							if (this->map_type == SMT_CONTOUR) SetDParam(0, tbl->height * TILE_HEIGHT_STEP);
 
 							/* Anything that is not an industry or a company is using normal process */
 							GfxFillRect(x + blob_left, y + 1, x + blob_right, y + row_height - 1, 0);
 							DrawString(x + text_left, x + text_right, y, tbl->legend);
+							break;
 					}
 					GfxFillRect(x + blob_left + 1, y + 2, x + blob_right - 1, y + row_height - 2, tbl->colour); // Legend colour
 
@@ -1679,9 +1694,11 @@ public:
 	 */
 	uint GetNumberRowsLegend(uint columns) const
 	{
-		return max(this->min_number_of_fixed_rows, CeilDiv(
-				max(max(_smallmap_cargo_count, _smallmap_industry_count),
-				_smallmap_company_count), columns));
+		/* reserve one column for link colours */
+		uint num_rows_linkstats = CeilDiv(_smallmap_cargo_count, columns - 1);
+
+		uint num_rows_others = CeilDiv(max(_smallmap_industry_count,_smallmap_company_count), columns);
+		return max(this->min_number_of_fixed_rows, max(num_rows_linkstats, num_rows_others));
 	}
 
 	/**
@@ -1849,7 +1866,9 @@ public:
 					default:
 						NOT_REACHED();
 				}
-				for (;!tbl->end; ++tbl) tbl->show_on_map = (widget == SM_WIDGET_ENABLE_ALL);
+				for (;!tbl->end && tbl->legend != STR_SMALLMAP_LEGENDA_LINK_UNUSED; ++tbl) {
+					tbl->show_on_map = (widget == SM_WIDGET_ENABLE_ALL);
+				}
 				this->SetDirty();
 				break;
 			}
@@ -1880,7 +1899,7 @@ public:
 				if (this->map_type != SMT_INDUSTRY) this->SwitchMapType(SMT_INDUSTRY);
 
 				for (int i = 0; i != _smallmap_industry_count; i++) {
-					_legend_from_industries[i].show_on_map = HasBit(_displayed_industries, _legend_from_industries[i].u.type);
+					_legend_from_industries[i].show_on_map = HasBit(_displayed_industries, _legend_from_industries[i].type);
 				}
 				break;
 			}
@@ -2149,7 +2168,7 @@ static const NWidgetPart _nested_smallmap_widgets[] = {
 };
 
 static const WindowDesc _smallmap_desc(
-	WDP_AUTO, 446, 314,
+	WDP_AUTO, 484, 314,
 	WC_SMALLMAP, WC_NONE,
 	WDF_UNCLICK_BUTTONS,
 	_nested_smallmap_widgets, lengthof(_nested_smallmap_widgets)

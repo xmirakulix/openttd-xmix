@@ -10,10 +10,8 @@
 /** @file town_gui.cpp GUI for towns. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "town.h"
 #include "viewport_func.h"
-#include "gfx_func.h"
 #include "gui.h"
 #include "command_func.h"
 #include "company_func.h"
@@ -36,7 +34,6 @@
 #include "genworld.h"
 #include "sprite.h"
 
-#include "table/sprites.h"
 #include "table/strings.h"
 
 typedef GUIList<const Town*> GUITownList;
@@ -528,7 +525,7 @@ public:
 
 	virtual void OnInvalidateData(int data = 0)
 	{
-		/* Called when setting station noise have changed, in order to resize the window */
+		/* Called when setting station noise or required cargos have changed, in order to resize the window */
 		this->SetDirty(); // refresh display for current size. This will allow to avoid glitches when downgrading
 		this->ResizeWindowAsNeeded();
 	}

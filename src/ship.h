@@ -23,11 +23,10 @@ struct Ship: public SpecializedVehicle<Ship, VEH_SHIP> {
 	TrackBitsByte state;
 
 	/** We don't want GCC to zero our struct! It already is zeroed and has an index! */
-	Ship() : SpecializedVehicle<Ship, VEH_SHIP>() {}
+	Ship() : SpecializedVehicleBase() {}
 	/** We want to 'destruct' the right class. */
 	virtual ~Ship() { this->PreDestructor(); }
 
-	const char *GetTypeString() const { return "ship"; }
 	void MarkDirty();
 	void UpdateDeltaXY(Direction direction);
 	ExpensesType GetExpenseType(bool income) const { return income ? EXPENSES_SHIP_INC : EXPENSES_SHIP_RUN; }

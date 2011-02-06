@@ -29,7 +29,6 @@
 #include "viewport_func.h"
 #include "window_func.h"
 #include "date_func.h"
-#include "vehicle_func.h"
 #include "company_func.h"
 #include "gamelog.h"
 #include "ai/ai.hpp"
@@ -160,17 +159,6 @@ DEF_CONSOLE_CMD(ConResetTile)
 	}
 
 	return false;
-}
-
-DEF_CONSOLE_CMD(ConStopAllVehicles)
-{
-	if (argc == 0) {
-		IConsoleHelp("Stops all vehicles in the game. For debugging only! Use at your own risk... Usage: 'stopall'");
-		return true;
-	}
-
-	StopAllVehicles();
-	return true;
 }
 #endif /* _DEBUG */
 
@@ -1529,19 +1517,43 @@ DEF_CONSOLE_CMD(ConSayClient)
 DEF_CONSOLE_CMD(ConCompanyPassword)
 {
 	if (argc == 0) {
-		IConsoleHelp("Change the password of your company. Usage: 'company_pw \"<password>\"'");
+		const char *helpmsg;
+
+		if (_network_dedicated) {
+			helpmsg = "Change the password of a company. Usage: 'company_pw <company-no> \"<password>\"";
+		} else if (_network_server) {
+			helpmsg = "Change the password of your or any other company. Usage: 'company_pw [<company-no>] \"<password>\"'";
+		} else {
+			helpmsg = "Change the password of your company. Usage: 'company_pw \"<password>\"'";
+		}
+
+		IConsoleHelp(helpmsg);
 		IConsoleHelp("Use \"*\" to disable the password.");
 		return true;
 	}
 
-	if (argc != 2) return false;
+	CompanyID company_id;
+	const char *password;
+	const char *errormsg;
 
-	if (!Company::IsValidID(_local_company)) {
-		IConsoleError("You have to own a company to make use of this command.");
+	if (argc == 2) {
+		company_id = _local_company;
+		password = argv[1];
+		errormsg = "You have to own a company to make use of this command.";
+	} else if (argc == 3 && _network_server) {
+		company_id = (CompanyID)(atoi(argv[1]) - 1);
+		password = argv[2];
+		errormsg = "You have to specify the ID of a valid human controlled company.";
+	} else {
 		return false;
 	}
 
-	const char *password = NetworkChangeCompanyPassword(argv[1]);
+	if (!Company::IsValidHumanID(company_id)) {
+		IConsoleError(errormsg);
+		return false;
+	}
+
+	password = NetworkChangeCompanyPassword(company_id, password, false);
 
 	if (StrEmpty(password)) {
 		IConsolePrintF(CC_WARNING, "Company password cleared");
@@ -1742,7 +1754,6 @@ DEF_CONSOLE_CMD(ConNewGRFReload)
 static void IConsoleDebugLibRegister()
 {
 	IConsoleCmdRegister("resettile",        ConResetTile);
-	IConsoleCmdRegister("stopall",          ConStopAllVehicles);
 	IConsoleAliasRegister("dbg_echo",       "echo %A; echo %B");
 	IConsoleAliasRegister("dbg_echo2",      "echo %!");
 }

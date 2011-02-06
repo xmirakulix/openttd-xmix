@@ -45,7 +45,6 @@
 #include "date_func.h"
 #include "vehicle_func.h"
 #include "gamelog.h"
-#include "cheat_type.h"
 #include "animated_tile_func.h"
 #include "roadstop_base.h"
 #include "functions.h"
@@ -832,7 +831,7 @@ static void MakeNewGameDone()
 	/* We are the server, we start a new company (not dedicated),
 	 * so set the default password *if* needed. */
 	if (_network_server && !StrEmpty(_settings_client.network.default_company_pass)) {
-		NetworkChangeCompanyPassword(_settings_client.network.default_company_pass);
+		NetworkChangeCompanyPassword(_local_company, _settings_client.network.default_company_pass);
 	}
 #endif /* ENABLE_NETWORK */
 
@@ -866,10 +865,6 @@ static void MakeNewEditorWorld()
 	GenerateWorldSetCallback(&MakeNewEditorWorldDone);
 	GenerateWorld(GWM_EMPTY, 1 << _settings_game.game_creation.map_x, 1 << _settings_game.game_creation.map_y);
 }
-
-void StartupCompanies();
-void StartupDisasters();
-extern void StartupEconomy();
 
 /**
  * Load the specified savegame but on error do different things.
@@ -923,53 +918,6 @@ bool SafeLoad(const char *filename, int mode, GameMode newgm, Subdirectory subdi
 	}
 }
 
-/**
- * Start Scenario starts a new game based on a scenario.
- * Eg 'New Game' --> select a preset scenario
- * This starts a scenario based on your current difficulty settings
- */
-static void StartScenario()
-{
-	_game_mode = GM_NORMAL;
-
-	/* invalid type */
-	if (_file_to_saveload.mode == SL_INVALID) {
-		DEBUG(sl, 0, "Savegame is obsolete or invalid format: '%s'", _file_to_saveload.name);
-		SetDParamStr(0, GetSaveLoadErrorString());
-		ShowErrorMessage(STR_JUST_RAW_STRING, INVALID_STRING_ID, WL_ERROR);
-		_game_mode = GM_MENU;
-		return;
-	}
-
-	/* Reinitialize windows */
-	ResetWindowSystem();
-
-	SetupColoursAndInitialWindow();
-
-	ResetGRFConfig(true);
-
-	/* Load game */
-	if (!SafeLoad(_file_to_saveload.name, _file_to_saveload.mode, GM_NORMAL, SCENARIO_DIR)) {
-		SetDParamStr(0, GetSaveLoadErrorString());
-		ShowErrorMessage(STR_JUST_RAW_STRING, INVALID_STRING_ID, WL_ERROR);
-		return;
-	}
-
-	_settings_game.difficulty = _settings_newgame.difficulty;
-
-	/* Inititalize data */
-	StartupEconomy();
-	StartupCompanies();
-	StartupEngines();
-	StartupDisasters();
-
-	SetLocalCompany(COMPANY_FIRST);
-	Company *c = Company::Get(COMPANY_FIRST);
-	c->settings = _settings_client.company;
-
-	MarkWholeScreenDirty();
-}
-
 void SwitchToMode(SwitchMode new_mode)
 {
 #ifdef ENABLE_NETWORK
@@ -1018,15 +966,6 @@ void SwitchToMode(SwitchMode new_mode)
 			}
 #endif /* ENABLE_NETWORK */
 			MakeNewGame(false, new_mode == SM_NEWGAME);
-			break;
-
-		case SM_START_SCENARIO: // New Game --> Choose one of the preset scenarios
-#ifdef ENABLE_NETWORK
-			if (_network_server) {
-				snprintf(_network_game_info.map_name, lengthof(_network_game_info.map_name), "%s (Loaded scenario)", _file_to_saveload.title);
-			}
-#endif /* ENABLE_NETWORK */
-			StartScenario();
 			break;
 
 		case SM_LOAD: { // Load game, Play Scenario
@@ -1277,7 +1216,7 @@ void StateGameLoop()
 			/* Save the desync savegame if needed. */
 			char name[MAX_PATH];
 			snprintf(name, lengthof(name), "dmp_cmds_%08x_%08x.sav", _settings_game.game_creation.generation_seed, _date);
-			SaveOrLoad(name, SL_SAVE, AUTOSAVE_DIR);
+			SaveOrLoad(name, SL_SAVE, AUTOSAVE_DIR, false);
 		}
 
 		CheckCaches();

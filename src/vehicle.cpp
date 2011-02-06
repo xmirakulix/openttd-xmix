@@ -52,20 +52,18 @@
 #include "vehiclelist.h"
 #include "tunnel_map.h"
 #include "depot_map.h"
-#include "ground_vehicle.hpp"
 
 #include "table/strings.h"
 
 #define GEN_HASH(x, y) ((GB((y), 6, 6) << 6) + GB((x), 7, 6))
 
-VehicleID _vehicle_id_ctr_day;
 VehicleID _new_vehicle_id;
 uint16 _returned_refit_capacity;      ///< Stores the capacity after a refit operation.
 uint16 _returned_mail_refit_capacity; ///< Stores the mail capacity after a refit operation (Aircraft only).
 byte _age_cargo_skip_counter;         ///< Skip aging of cargo?
 
 
-/* Initialize the vehicle-pool */
+/** The pool with all our precious vehicles. */
 VehiclePool _vehicle_pool("Vehicle");
 INSTANTIATE_POOL_METHODS(Vehicle)
 
@@ -97,6 +95,12 @@ void VehicleServiceInDepot(Vehicle *v)
 	SetWindowDirty(WC_VEHICLE_DETAILS, v->index); // ensure that last service date and reliability are updated
 }
 
+/**
+ * Check if the vehicle needs to go to a depot in near future (if a opportunity presents itself) for service or replacement.
+ *
+ * @see NeedsAutomaticServicing()
+ * @return true if the vehicle should go to a depot if a opportunity presents itself.
+ */
 bool Vehicle::NeedsServicing() const
 {
 	/* Stopped or crashed vehicles will not move, as such making unmovable
@@ -157,9 +161,14 @@ bool Vehicle::NeedsServicing() const
 	return pending_replace;
 }
 
+/**
+ * Checks if the current order should be interupted for a service-in-depot-order.
+ * @see NeedsServicing()
+ * @return true if the current order should be interupted.
+ */
 bool Vehicle::NeedsAutomaticServicing() const
 {
-	if (_settings_game.order.gotodepot && this->HasDepotOrder()) return false;
+	if (this->HasDepotOrder()) return false;
 	if (this->current_order.IsType(OT_LOADING)) return false;
 	if (this->current_order.IsType(OT_GOTO_DEPOT) && this->current_order.GetDepotOrderType() != ODTFB_SERVICE) return false;
 	return NeedsServicing();
@@ -617,9 +626,9 @@ bool Vehicle::IsEngineCountable() const
 	switch (this->type) {
 		case VEH_AIRCRAFT: return Aircraft::From(this)->IsNormalAircraft(); // don't count plane shadows and helicopter rotors
 		case VEH_TRAIN:
-			return !Train::From(this)->IsArticulatedPart() && // tenders and other articulated parts
+			return !this->IsArticulatedPart() && // tenders and other articulated parts
 					!Train::From(this)->IsRearDualheaded(); // rear parts of multiheaded engines
-		case VEH_ROAD: return RoadVehicle::From(this)->IsRoadVehFront();
+		case VEH_ROAD: return RoadVehicle::From(this)->IsFrontEngine();
 		case VEH_SHIP: return true;
 		default: return false; // Only count company buildable vehicles
 	}
@@ -658,6 +667,7 @@ void Vehicle::HandlePathfindingResult(bool path_found)
 	}
 }
 
+/** Destroy all stuff that (still) needs the virtual functions to work properly */
 void Vehicle::PreDestructor()
 {
 	if (CleaningPool()) return;
@@ -820,7 +830,7 @@ void CallVehicleTicks()
 
 				if (v->type == VEH_TRAIN && Train::From(v)->IsWagon()) continue;
 				if (v->type == VEH_AIRCRAFT && v->subtype != AIR_HELICOPTER) continue;
-				if (v->type == VEH_ROAD && !RoadVehicle::From(v)->IsRoadVehFront()) continue;
+				if (v->type == VEH_ROAD && !RoadVehicle::From(v)->IsFrontEngine()) continue;
 
 				v->motion_counter += v->cur_speed;
 				/* Play a running sound if the motion counter passes 256 (Do we not skip sounds?) */
@@ -894,6 +904,10 @@ static void DoDrawVehicle(const Vehicle *v)
 		v->x_extent, v->y_extent, v->z_extent, v->z_pos, (v->vehstatus & VS_SHADOW) != 0);
 }
 
+/**
+ * Add the vehicle sprites that should be drawn at a part of the screen.
+ * @param dpi Rectangle being drawn.
+ */
 void ViewportAddVehicles(DrawPixelInfo *dpi)
 {
 	/* The bounding rectangle */
@@ -945,6 +959,13 @@ void ViewportAddVehicles(DrawPixelInfo *dpi)
 	}
 }
 
+/**
+ * Find the vehicle close to the clicked coordinates.
+ * @param vp Viewport clicked in.
+ * @param x  X coordinate in the viewport.
+ * @param y  Y coordinate in the viewport.
+ * @return Closest vehicle, or \c NULL if none found.
+ */
 Vehicle *CheckClickOnVehicle(const ViewPort *vp, int x, int y)
 {
 	Vehicle *found = NULL, *v;
@@ -975,6 +996,10 @@ Vehicle *CheckClickOnVehicle(const ViewPort *vp, int x, int y)
 	return found;
 }
 
+/**
+ * Decrease the value of a vehicle.
+ * @param v %Vehicle to devaluate.
+ */
 void DecreaseVehicleValue(Vehicle *v)
 {
 	v->value -= v->value >> 8;
@@ -1028,6 +1053,12 @@ void CheckVehicleBreakdown(Vehicle *v)
 	}
 }
 
+/**
+ * Handle all of the aspects of a vehicle breakdown
+ * This includes adding smoke and sounds, and ending the breakdown when appropriate.
+ * @return true iff the vehicle is stopped because of a breakdown
+ * @note This function always returns false for aircraft, since these never stop for breakdowns
+ */
 bool Vehicle::HandleBreakdown()
 {
 	/* Possible states for Vehicle::breakdown_ctr
@@ -1146,7 +1177,7 @@ uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour)
 
 	/* Count up max and used */
 	for (; v != NULL; v = v->Next()) {
-		count += v->cargo.Count();
+		count += v->cargo.OnboardCount();
 		max += v->cargo_cap;
 		if (v->cargo_cap != 0 && colour != NULL) {
 			unloading += HasBit(v->vehicle_flags, VF_CARGO_UNLOADING) ? 1 : 0;
@@ -1172,6 +1203,10 @@ uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour)
 	return (count * 100) / max;
 }
 
+/**
+ * Vehicle entirely entered the depot, update its status, orders, vehicle windows, service it, etc.
+ * @param v Vehicle that entered a depot.
+ */
 void VehicleEnterDepot(Vehicle *v)
 {
 	/* Always work with the front of the vehicle */
@@ -1232,7 +1267,7 @@ void VehicleEnterDepot(Vehicle *v)
 	if (v->current_order.IsType(OT_GOTO_DEPOT)) {
 		SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 
-		const Order *real_order = v->GetNextManualOrder(v->cur_order_index);
+		const Order *real_order = v->GetOrder(v->cur_real_order_index);
 		Order t = v->current_order;
 		v->current_order.MakeDummy();
 
@@ -1267,8 +1302,9 @@ void VehicleEnterDepot(Vehicle *v)
 
 		if (t.GetDepotOrderType() & ODTFB_PART_OF_ORDERS) {
 			/* Part of orders */
+			v->DeleteUnreachedAutoOrders();
 			UpdateVehicleTimetable(v, true);
-			v->IncrementOrderIndex();
+			v->IncrementAutoOrderIndex();
 		}
 		if (t.GetDepotActionType() & ODATFB_HALT) {
 			/* Vehicles are always stopped on entering depots. Do not restart this one. */
@@ -1394,6 +1430,13 @@ VehicleEnterTileStatus VehicleEnterTile(Vehicle *v, TileIndex tile, int x, int y
 	return _tile_type_procs[GetTileType(tile)]->vehicle_enter_tile_proc(v, tile, x, y);
 }
 
+/**
+ * Initializes the structure. Vehicle unit numbers are supposed not to change after
+ * struct initialization, except after each call to this->NextID() the returned value
+ * is assigned to a vehicle.
+ * @param type type of vehicle
+ * @param owner owner of vehicles
+ */
 FreeUnitIDGenerator::FreeUnitIDGenerator(VehicleType type, CompanyID owner) : cache(NULL), maxid(0), curid(0)
 {
 	/* Find maximum */
@@ -1419,6 +1462,7 @@ FreeUnitIDGenerator::FreeUnitIDGenerator(VehicleType type, CompanyID owner) : ca
 	}
 }
 
+/** Returns next free UnitID. Supposes the last returned value was assigned to a vehicle. */
 UnitID FreeUnitIDGenerator::NextID()
 {
 	if (this->maxid <= this->curid) return ++this->curid;
@@ -1469,7 +1513,7 @@ bool CanBuildVehicleInfrastructure(VehicleType type)
 	assert(IsCompanyBuildableVehicleType(type));
 
 	if (!Company::IsValidID(_local_company)) return false;
-	if (_settings_client.gui.always_build_infrastructure) return true;
+	if (!_settings_client.gui.disable_unsuitable_building) return true;
 
 	UnitID max;
 	switch (type) {
@@ -1514,7 +1558,7 @@ LiveryScheme GetEngineLiveryScheme(EngineID engine_type, EngineID parent_engine_
 	switch (e->type) {
 		default: NOT_REACHED();
 		case VEH_TRAIN:
-			if (v != NULL && parent_engine_type != INVALID_ENGINE && (UsesWagonOverride(v) || (Train::From(v)->IsArticulatedPart() && e->u.rail.railveh_type != RAILVEH_WAGON))) {
+			if (v != NULL && parent_engine_type != INVALID_ENGINE && (UsesWagonOverride(v) || (v->IsArticulatedPart() && e->u.rail.railveh_type != RAILVEH_WAGON))) {
 				/* Wagonoverrides use the colour scheme of the front engine.
 				 * Articulated parts use the colour scheme of the first part. (Not supported for articulated wagons) */
 				engine_type = parent_engine_type;
@@ -1659,11 +1703,22 @@ static PaletteID GetEngineColourMap(EngineID engine_type, CompanyID company, Eng
 	return map;
 }
 
+/**
+ * Get the colour map for an engine. This used for unbuilt engines in the user interface.
+ * @param engine_type ID of engine
+ * @param company ID of company
+ * @return A ready-to-use palette modifier
+ */
 PaletteID GetEnginePalette(EngineID engine_type, CompanyID company)
 {
 	return GetEngineColourMap(engine_type, company, INVALID_ENGINE, NULL);
 }
 
+/**
+ * Get the colour map for a vehicle.
+ * @param v Vehicle to get colour map for
+ * @return A ready-to-use palette modifier
+ */
 PaletteID GetVehiclePalette(const Vehicle *v)
 {
 	if (v->IsGroundVehicle()) {
@@ -1738,22 +1793,46 @@ uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity)
 	return capacity;
 }
 
+/**
+ * Delete all automatic orders which were not reached.
+ */
+void Vehicle::DeleteUnreachedAutoOrders()
+{
+	const Order *order = this->GetOrder(this->cur_auto_order_index);
+	while (order != NULL) {
+		if (this->cur_auto_order_index == this->cur_real_order_index) break;
 
+		if (order->IsType(OT_AUTOMATIC)) {
+			/* Delete order effectively deletes order, so get the next before deleting it. */
+			order = order->next;
+			DeleteOrder(this, this->cur_auto_order_index);
+		} else {
+			/* Skip non-automatic orders, e.g. service-orders */
+			order = order->next;
+			this->cur_auto_order_index++;
+		}
+
+		/* Wrap around */
+		if (order == NULL) {
+			order = this->GetOrder(0);
+			this->cur_auto_order_index = 0;
+		}
+	}
+}
+
+/**
+ * Prepare everything to begin the loading when arriving at a station.
+ * @pre IsTileType(this->tile, MP_STATION) || this->type == VEH_SHIP.
+ */
 void Vehicle::BeginLoading()
 {
-	assert(IsTileType(tile, MP_STATION) || type == VEH_SHIP);
+	assert(IsTileType(this->tile, MP_STATION) || this->type == VEH_SHIP);
 
 	if (this->current_order.IsType(OT_GOTO_STATION) &&
 			this->current_order.GetDestination() == this->last_station_visited) {
-		/* Delete all automatic orders which were not reached */
-		const Order *order = this->GetOrder(this->cur_order_index);
-		while (order != NULL && order->IsType(OT_AUTOMATIC)) {
-			/* Delete order effectively deletes order, so get the next before deleting it. */
-			order = order->next;
-			DeleteOrder(this, this->cur_order_index);
-		}
+		this->DeleteUnreachedAutoOrders();
 
-		/* Now cur_order_index points to the destination station, and we can start loading */
+		/* Now both order indices point to the destination station, and we can start loading */
 		this->current_order.MakeLoading(true);
 		UpdateVehicleTimetable(this, true);
 
@@ -1766,16 +1845,16 @@ void Vehicle::BeginLoading()
 
 	} else {
 		/* We weren't scheduled to stop here. Insert an automatic order
-		 * to show that we are stopping here. */
-		Order *in_list = this->GetOrder(this->cur_order_index);
-		if ((this->orders.list == NULL || this->orders.list->GetNumOrders() < MAX_VEH_ORDER_ID) &&
-				((in_list == NULL && this->cur_order_index == 0) ||
-				(in_list != NULL && (!in_list->IsType(OT_AUTOMATIC) ||
-				in_list->GetDestination() != this->last_station_visited)))) {
+		 * to show that we are stopping here, but only do that if the order
+		 * list isn't empty. */
+		Order *in_list = this->GetOrder(this->cur_auto_order_index);
+		if (in_list != NULL && this->orders.list->GetNumOrders() < MAX_VEH_ORDER_ID &&
+				(!in_list->IsType(OT_AUTOMATIC) ||
+				in_list->GetDestination() != this->last_station_visited)) {
 			Order *auto_order = new Order();
 			auto_order->MakeAutomatic(this->last_station_visited);
-			InsertOrder(this, auto_order, this->cur_order_index);
-			if (this->cur_order_index > 0) --this->cur_order_index;
+			InsertOrder(this, auto_order, this->cur_auto_order_index);
+			if (this->cur_auto_order_index > 0) --this->cur_auto_order_index;
 		}
 		this->current_order.MakeLoading(false);
 	}
@@ -1786,7 +1865,7 @@ void Vehicle::BeginLoading()
 	StationID next_station_id = INVALID_STATION;
 	OrderList *orders = this->orders.list;
 	if (orders != NULL) {
-		next_station_id = orders->GetNextStoppingStation(this->cur_order_index, this->last_station_visited);
+		next_station_id = orders->GetNextStoppingStation(this->cur_auto_order_index, this->last_station_visited);
 	}
 
 	if (this->last_loading_station != INVALID_STATION && this->last_loading_station != this->last_station_visited) {
@@ -1812,12 +1891,12 @@ void Vehicle::BeginLoading()
 }
 
 /**
- * return all reserved cargo packets to the station
+ * Return all reserved cargo packets to the station.
  * @param st the station where the reserved packets should go.
  */
 void Vehicle::CancelReservation(StationID next, Station *st)
 {
-	for(Vehicle *v = this; v != NULL; v = v->next) {
+	for (Vehicle *v = this; v != NULL; v = v->next) {
 		VehicleCargoList &cargo = v->cargo;
 		if (cargo.ReservedCount() > 0) {
 			DEBUG(misc, 1, "cancelling cargo reservation");
@@ -1841,21 +1920,26 @@ bool Vehicle::CanLeaveWithCargo()
 			this->last_loading_station != INVALID_STATION);
 }
 
+/**
+ * Perform all actions when leaving a station.
+ * @pre this->current_order.IsType(OT_LOADING)
+ */
 void Vehicle::LeaveStation()
 {
-	assert(current_order.IsType(OT_LOADING));
-	Station *st = Station::Get(this->last_station_visited);
+	assert(this->current_order.IsType(OT_LOADING));
+
 	delete this->cargo_payment;
 
 	/* Only update the timetable if the vehicle was supposed to stop here. */
-	if (current_order.GetNonStopType() != ONSF_STOP_EVERYWHERE) UpdateVehicleTimetable(this, false);
+	if (this->current_order.GetNonStopType() != ONSF_STOP_EVERYWHERE) UpdateVehicleTimetable(this, false);
 
-	current_order.MakeLeaveStation();
+	this->current_order.MakeLeaveStation();
+	Station *st = Station::Get(this->last_station_visited);
 	st->loading_vehicles.remove(this);
 
 	OrderList *orders = this->orders.list;
 	if (orders != NULL) {
-		StationID next_station_id = orders->GetNextStoppingStation(this->cur_order_index, this->last_station_visited);
+		StationID next_station_id = orders->GetNextStoppingStation(this->cur_auto_order_index, this->last_station_visited);
 		this->CancelReservation(next_station_id, st);
 		if (next_station_id != INVALID_STATION && next_station_id != this->last_station_visited) {
 			DecreaseFrozen(st, this, next_station_id);
@@ -1887,6 +1971,11 @@ void Vehicle::LeaveStation()
 }
 
 
+/**
+ * Handle the loading of the vehicle; when not it skips through dummy
+ * orders and does nothing in all other cases.
+ * @param mode is the non-first call for this vehicle in this tick?
+ */
 void Vehicle::HandleLoading(bool mode)
 {
 	switch (this->current_order.GetType()) {
@@ -1894,8 +1983,7 @@ void Vehicle::HandleLoading(bool mode)
 			uint wait_time = max(this->current_order.wait_time - this->lateness_counter, 0);
 
 			/* Not the first call for this tick, or still loading */
-			if (mode || !HasBit(this->vehicle_flags, VF_LOADING_FINISHED) ||
-					(_settings_game.order.timetabling && this->current_order_time < wait_time)) return;
+			if (mode || !HasBit(this->vehicle_flags, VF_LOADING_FINISHED) || this->current_order_time < wait_time) return;
 
 			this->PlayLeaveStationSound();
 
@@ -1909,9 +1997,15 @@ void Vehicle::HandleLoading(bool mode)
 		default: return;
 	}
 
-	this->IncrementOrderIndex();
+	this->IncrementAutoOrderIndex();
 }
 
+/**
+ * Send this vehicle to the depot using the given command(s).
+ * @param flags   the command flags (like execute and such).
+ * @param command the command to execute.
+ * @return the cost of the depot action.
+ */
 CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 {
 	CommandCost ret = CheckOwnership(this->owner);
@@ -1938,7 +2032,7 @@ CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 		if (flags & DC_EXEC) {
 			/* If the orders to 'goto depot' are in the orders list (forced servicing),
 			 * then skip to the next order; effectively cancelling this forced service */
-			if (this->current_order.GetDepotOrderType() & ODTFB_PART_OF_ORDERS) this->IncrementOrderIndex();
+			if (this->current_order.GetDepotOrderType() & ODTFB_PART_OF_ORDERS) this->IncrementRealOrderIndex();
 
 			this->current_order.MakeDummy();
 			SetWindowWidgetDirty(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
@@ -1977,6 +2071,10 @@ CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 
 }
 
+/**
+ * Update the cached visual effect.
+ * @param allow_power_change true if the wagon-is-powered-state may change.
+ */
 void Vehicle::UpdateVisualEffect(bool allow_power_change)
 {
 	bool powered_before = HasBit(this->vcache.cached_vis_effect, VE_DISABLE_WAGON_POWER);
@@ -2039,6 +2137,10 @@ static const int8 _vehicle_smoke_pos[8] = {
 	1, 1, 1, 0, -1, -1, -1, 0
 };
 
+/**
+ * Draw visual effects (smoke and/or sparks) for a vehicle chain.
+ * @pre this->IsPrimaryVehicle()
+ */
 void Vehicle::ShowVisualEffect() const
 {
 	assert(this->IsPrimaryVehicle());
@@ -2156,6 +2258,10 @@ void Vehicle::ShowVisualEffect() const
 	if (sound) PlayVehicleSound(this, VSE_VISUAL_EFFECT);
 }
 
+/**
+ * Set the next vehicle of this vehicle.
+ * @param next the next vehicle. NULL removes the next vehicle.
+ */
 void Vehicle::SetNext(Vehicle *next)
 {
 	assert(this != next);
@@ -2180,6 +2286,11 @@ void Vehicle::SetNext(Vehicle *next)
 	}
 }
 
+/**
+ * Adds this vehicle to a shared vehicle chain.
+ * @param shared_chain a vehicle of the chain with shared vehicles.
+ * @pre !this->IsOrderListShared()
+ */
 void Vehicle::AddToShared(Vehicle *shared_chain)
 {
 	assert(this->previous_shared == NULL && this->next_shared == NULL);
@@ -2200,6 +2311,9 @@ void Vehicle::AddToShared(Vehicle *shared_chain)
 	shared_chain->orders.list->AddVehicle(this);
 }
 
+/**
+ * Removes the vehicle from the shared order list.
+ */
 void Vehicle::RemoveFromShared()
 {
 	/* Remember if we were first and the old window number before RemoveVehicle()
@@ -2229,33 +2343,6 @@ void Vehicle::RemoveFromShared()
 
 	this->next_shared     = NULL;
 	this->previous_shared = NULL;
-}
-
-/**
- * Get the next manual (not OT_AUTOMATIC) order after the one at the given index.
- * @param index The index to start searching at.
- * @return The next manual order at or after index or NULL if there is none.
- */
-Order *Vehicle::GetNextManualOrder(int index) const
-{
-	Order *order = this->GetOrder(index);
-	while(order != NULL && order->IsType(OT_AUTOMATIC)) {
-		order = order->next;
-	}
-	return order;
-}
-
-void StopAllVehicles()
-{
-	Vehicle *v;
-	FOR_ALL_VEHICLES(v) {
-		/* Code ripped from CmdStartStopTrain. Can't call it, because of
-		 * ownership problems, so we'll duplicate some code, for now */
-		v->vehstatus |= VS_STOPPED;
-		v->MarkDirty();
-		SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
-		SetWindowDirty(WC_VEHICLE_DEPOT, v->tile);
-	}
 }
 
 void VehiclesYearlyLoop()
@@ -2367,37 +2454,30 @@ const GroundVehicleCache *Vehicle::GetGroundVehicleCache() const
 
 /**
  * Calculates the set of vehicles that will be affected by a given selection.
- * @param set Set of affected vehicles.
+ * @param set [inout] Set of affected vehicles.
  * @param v First vehicle of the selection.
- * @param num_vehicles Number of vehicles in the selection.
- * @pre \c set must be empty.
- * @post \c set will contain the vehicles that will be refitted.
+ * @param num_vehicles Number of vehicles in the selection (not counting articulated parts).
+ * @pre \a set must be empty.
+ * @post \a set will contain the vehicles that will be refitted.
  */
 void GetVehicleSet(VehicleSet &set, Vehicle *v, uint8 num_vehicles)
 {
 	if (v->type == VEH_TRAIN) {
 		Train *u = Train::From(v);
-		/* If the first vehicle in the selection is part of an articulated vehicle, add the previous parts of the vehicle. */
-		if (u->IsArticulatedPart()) {
-			u = u->GetFirstEnginePart();
-			while (u->index != v->index) {
+		/* Only include whole vehicles, so start with the first articulated part */
+		u = u->GetFirstEnginePart();
+
+		/* Include num_vehicles vehicles, not counting articulated parts */
+		for (; u != NULL && num_vehicles > 0; num_vehicles--) {
+			do {
+				/* Include current vehicle in the selection. */
 				set.Include(u->index);
-				u = u->GetNextArticPart();
-			}
-		}
 
-		for (;u != NULL && num_vehicles > 0; num_vehicles--, u = u->Next()) {
-			/* Include current vehicle in the selection. */
-			set.Include(u->index);
+				/* If the vehicle is multiheaded, add the other part too. */
+				if (u->IsMultiheaded()) set.Include(u->other_multiheaded_part->index);
 
-			/* If the vehicle is multiheaded, add the other part too. */
-			if (u->IsMultiheaded()) set.Include(u->other_multiheaded_part->index);
-		}
-
-		/* If the last vehicle is part of an articulated vehicle, add the following parts of the vehicle. */
-		while (u != NULL && u->IsArticulatedPart()) {
-			set.Include(u->index);
-			u = u->Next();
+				u = u->Next();
+			} while (u != NULL && u->IsArticulatedPart());
 		}
 	}
 }

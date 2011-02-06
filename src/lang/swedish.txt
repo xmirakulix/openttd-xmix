@@ -1090,12 +1090,10 @@ STR_CONFIG_SETTING_CAPTION                                      :{WHITE}Avancera
 STR_CONFIG_SETTING_OFF                                          :Av
 STR_CONFIG_SETTING_ON                                           :På
 STR_CONFIG_SETTING_DISABLED                                     :Avaktiverat
-STR_CONFIG_SETTING_VEHICLESPEED                                 :{LTBLUE}Visa fordonshastighet i statusfältet: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Tillåt konstruktion på sluttningar och kuster: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Tillåt landskapsarkitektur under byggnader, spår, etc. (autoslope): {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Tillåt mer realistiska uppsamlingsområden för stationer: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Tillåt borttagning av fler stadsägda vägar, broar och tunnlar: {ORANGE}{STRING}
-STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Tillåt väldigt långa tåg: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Mängden rök/gnistor från fordon: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Ingen
 STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Original
@@ -1109,21 +1107,17 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realistisk
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Slutnings lutning för tåg {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Lutningars lutningsgrad för vägfordon {ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Förbjud tåg och skepp att göra 90° svängar: {ORANGE}{STRING}
-STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Kombinera tågstationer som byggs bredvid varandra: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Tillåt att stationer som inte är byggda direkt brevid varandra slås ihop: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Använd förbättrad algoritm: {ORANGE}{STRING}
 STR_CONFIG_SETTING_GRADUAL_LOADING                              :{LTBLUE}Lasta fordon gradvis: {ORANGE}{STRING}
 STR_CONFIG_SETTING_INFLATION                                    :{LTBLUE}Inflation: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SELECTGOODS                                  :{LTBLUE}Leverera gods till en station enbart om någon frågar efter det: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LONGBRIDGES                                  :{LTBLUE}Tillåt väldigt långa broar: {ORANGE}{STRING}
-STR_CONFIG_SETTING_GOTODEPOT                                    :{LTBLUE}Tillåt order att gå till depå/bussgarage: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD             :{LTBLUE}Manuell prioritering för industrins konstruktionsmetod: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :Inget
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :Som andra industrier
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_PROSPECTING :Prospekterande
 STR_CONFIG_SETTING_INDUSTRY_PLATFORM                            :{LTBLUE}Platt område runt industrier: {ORANGE}{STRING} rut{P 0:1 a or}
 STR_CONFIG_SETTING_MULTIPINDTOWN                                :{LTBLUE}Tillåt flera industrier av samma typ per stad: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LONGDATE                                     :{LTBLUE}Visa alltid långt datum i statusfältet: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SIGNALSIDE                                   :{LTBLUE}Visa signaler på körsidan: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SHOWFINANCES                                 :{LTBLUE}Visa finansfönstret vid slutet av året: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NONSTOP_BY_DEFAULT                           :{LTBLUE}Nya orders är 'non-stop' om inte annat anges.{ORANGE}{STRING}
@@ -1136,7 +1130,6 @@ STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Scrolla
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Tillåt mutning av de lokala myndigheterna: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Tillåt köp av exklusiva transporträttigheter: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Tillåt skicka pengar till andra företag: {ORANGE}{STRING}
-STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Icke-rektangulära stationer: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Godsfaktor för att simulera tunga tåg: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Hastighetsfaktor för flygplan: {ORANGE}1 / {STRING}
 STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Antal flygplanskrascher: {ORANGE}{STRING}
@@ -1162,8 +1155,8 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Förnya
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Förnya automatiskt fordon {ORANGE}{STRING}{LTBLUE} månad{P 0:1 "" er} före/efter maximal ålder
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Minst mängd pengar för auto-förnyelse av fordon: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Hur länge felmeddelanden visas: {ORANGE}{STRING} sekund{P 0:1 "" er}
-STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Fördröjning av hover event: {ORANGE}{STRING} sekund{P 0:1 "" er}
-STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Fördröjning av hover event: {ORANGE}avstängd
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Visa tooltips: {ORANGE}Efter {STRING} sekund{P 0:1 "" er}
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Visa tooltips: {ORANGE}högerklicka
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Visa invånarantal i stadsnamnet: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Land generator: {ORANGE}{STRING}
@@ -1235,7 +1228,6 @@ STR_CONFIG_SETTING_LOADING_INDICATORS                           :{LTBLUE}Använd
 STR_CONFIG_SETTING_LOADING_INDICATORS_OFF                       :Av
 STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Eget företag
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Alla företag
-STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Aktivera Tidtabeller för fordon: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Visa tidtabeller räknat i ticks istället för dagar: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Visa inkommande och avgående i tidtabeller: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Snabbskapande av fordonsorder: {ORANGE}{STRING}
@@ -1247,7 +1239,7 @@ STR_CONFIG_SETTING_SHOW_TRACK_RESERVATION                       :{LTBLUE}Visa re
 STR_CONFIG_SETTING_PERSISTENT_BUILDINGTOOLS                     :{LTBLUE}Håll byggnadsverktyg aktiva efter att de använts: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXPENSES_LAYOUT                              :{LTBLUE}Gruppera utgifter i företagets finansfönster: {ORANGE}{STRING}
 
-STR_CONFIG_SETTING_ALWAYS_BUILD_INFRASTRUCTURE                  :{LTBLUE}Visa konstruktionsverktygen när det ej finns några passande fordon tillgängligt: {ORANGE}{STRING}
+STR_CONFIG_SETTING_DISABLE_UNSUITABLE_BUILDING                  :{LTBLUE}Inaktivera byggande av infrastruktur när inga passande fordon är tillgängliga: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_TRAINS                                   :{LTBLUE}Max antal tåg per spelare: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_ROAD_VEHICLES                            :{LTBLUE}Max antal vägfordon per företag: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_AIRCRAFT                                 :{LTBLUE}Max antal luftfarkoster per företag: {ORANGE}{STRING}
@@ -1599,9 +1591,6 @@ STR_NETWORK_START_SERVER_NEW_GAME_NAME                          :{BLACK}Namn:
 STR_NETWORK_START_SERVER_NEW_GAME_NAME_TOOLTIP                  :{BLACK}Namnet på nätverksspelet kommer att synas för andra spelare i multiplayer menyn
 STR_NETWORK_START_SERVER_SET_PASSWORD                           :{BLACK}Bestäm lösenord
 STR_NETWORK_START_SERVER_PASSWORD_TOOLTIP                       :{BLACK}Skydda spelet med ett lösenord så att inte andra än dom som har lösenordet kan gå med i spelet
-STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Välj karta:
-STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Vilken karta vill du spela?
-STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Skapa slumpmässigt nytt spel
 
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (publik)
@@ -1616,11 +1605,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Max obse
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Begränsa antalet observatörer på servern
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Språk som talas:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Andra spelare kommer vara medvetna vilket språk som talas på servern.
-
-STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Starta spelet
-STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Starta ett nytt nätverksspel med en slumpmässig karta eller från valt scenario
-STR_NETWORK_START_SERVER_LOAD_GAME                              :{BLACK}Ladda spel
-STR_NETWORK_START_SERVER_LOAD_GAME_TOOLTIP                      :{BLACK}Återuppta ett tidigare sparat spel för flera spelare (tänk på att ansluta till rätt företag vid start)
 
 STR_NETWORK_START_SERVER_NEW_GAME_NAME_OSKTITLE                 :{BLACK}Mata in ett namn för nätverksspelet
 
@@ -1790,7 +1774,7 @@ STR_NETWORK_ERROR_CLIENT_NOT_EXPECTED                           :mottog felaktig
 STR_NETWORK_ERROR_CLIENT_WRONG_REVISION                         :fel revision
 STR_NETWORK_ERROR_CLIENT_NAME_IN_USE                            :namnet används redan
 STR_NETWORK_ERROR_CLIENT_WRONG_PASSWORD                         :fel lösenord
-STR_NETWORK_ERROR_CLIENT_COMPANY_MISMATCH                       :fel företags-id i DoKommando
+STR_NETWORK_ERROR_CLIENT_COMPANY_MISMATCH                       :fel företags-id i DoCommand
 STR_NETWORK_ERROR_CLIENT_KICKED                                 :utkastad av servern
 STR_NETWORK_ERROR_CLIENT_CHEATER                                :försökte fuska
 STR_NETWORK_ERROR_CLIENT_SERVER_FULL                            :servern är full
@@ -2084,7 +2068,7 @@ STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Köp mar
 # Object construction window
 STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Val av objekt
 STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Välj objekt att bygga. Shift växlar mellan att bygga/visa beräknad kostnad
-STR_OBJECT_BUILD_CLASS_LABEL                                    :{BLACK}Objektklass
+STR_OBJECT_BUILD_CLASS_TOOLTIP                                  :{BLACK}Välj typ av objekt att bygga
 STR_OBJECT_BUILD_PREVIEW_TOOLTIP                                :{BLACK}Förhandsvisning av objektet
 STR_OBJECT_BUILD_SIZE                                           :{BLACK}Storlek: {GOLD}{NUM} x {NUM} rutor
 
@@ -2425,6 +2409,7 @@ STR_NEWGRF_SETTINGS_PARAMETER                                   :{BLACK}Paramera
 STR_NEWGRF_SETTINGS_NO_INFO                                     :{BLACK}Ingen information tillgänglig
 STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Matchande fil hittades ej
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Avstängd
+STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}Ej kompatibel med den här versionen av OpenTTD
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Skriv NewGRF parameterar
 
@@ -2469,7 +2454,7 @@ STR_NEWGRF_ERROR_MSG_INFO                                       :{SILVER}{STRING
 STR_NEWGRF_ERROR_MSG_WARNING                                    :{RED}Varning: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_ERROR                                      :{RED}Fel: {SILVER}{STRING}
 STR_NEWGRF_ERROR_MSG_FATAL                                      :{RED}Fatalt: {SILVER}{STRING}
-STR_NEWGRF_ERROR_FATAL_POPUP                                    :{WHITE}Ett fatalt NewGRF fel har uppkommit: {}{STRING}
+STR_NEWGRF_ERROR_FATAL_POPUP                                    :{WHITE}Ett fatalt NewGRF fel har uppstått: {}{STRING}
 STR_NEWGRF_ERROR_VERSION_NUMBER                                 :{1:STRING} kommer inte att fungera med den TTDPatchversion som rapporterades av OpenTTD
 STR_NEWGRF_ERROR_DOS_OR_WINDOWS                                 :{1:STRING} är för {STRING}versionen av TTD
 STR_NEWGRF_ERROR_UNSET_SWITCH                                   :{1:STRING} är designat för att användas med {STRING}
@@ -3046,23 +3031,14 @@ STR_VEHICLE_STATUS_LEAVING                                      :{LTBLUE}Lämnar
 STR_VEHICLE_STATUS_CRASHED                                      :{RED}Kraschad!
 STR_VEHICLE_STATUS_BROKEN_DOWN                                  :{RED}Motorstopp
 STR_VEHICLE_STATUS_STOPPED                                      :{RED}Stoppat
-STR_VEHICLE_STATUS_TRAIN_STOPPING                               :{RED}Stannar
 STR_VEHICLE_STATUS_TRAIN_STOPPING_VEL                           :{RED}Stannar, {VELOCITY}
 STR_VEHICLE_STATUS_TRAIN_NO_POWER                               :{RED}Ingen Kraft
 STR_VEHICLE_STATUS_TRAIN_STUCK                                  :{ORANGE}Väntar på ledig väg
 
-STR_VEHICLE_STATUS_HEADING_FOR_STATION                          :{LTBLUE}På väg mot {STATION}
 STR_VEHICLE_STATUS_HEADING_FOR_STATION_VEL                      :{LTBLUE}På väg mot {STATION}, {VELOCITY}
-STR_VEHICLE_STATUS_NO_ORDERS                                    :{LTBLUE}Inga order
 STR_VEHICLE_STATUS_NO_ORDERS_VEL                                :{LTBLUE}Inga order, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT                         :{LTBLUE}På väg mot {WAYPOINT}
 STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL                     :{LTBLUE}På väg mot {WAYPOINT} i {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT                            :{ORANGE}På väg mot {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_VEL                        :{ORANGE}På väg mot {DEPOT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE                    :{LTBLUE}Service vid {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL                :{LTBLUE}Service vid {DEPOT}, {VELOCITY}
 
 # Vehicle stopped/started animations
@@ -3430,7 +3406,7 @@ STR_ERROR_UNABLE_TO_DELETE_FILE                                 :{WHITE}Kan inte
 STR_ERROR_GAME_LOAD_FAILED                                      :{WHITE}Inläsningen av spelet misslyckades{}{STRING}
 STR_GAME_SAVELOAD_ERROR_BROKEN_INTERNAL_ERROR                   :Internt fel: {STRING}
 STR_GAME_SAVELOAD_ERROR_BROKEN_SAVEGAME                         :Trasig sparfil - {STRING}
-STR_GAME_SAVELOAD_ERROR_TOO_NEW_SAVEGAME                        :Sparfilen är gjord med en ny version
+STR_GAME_SAVELOAD_ERROR_TOO_NEW_SAVEGAME                        :Sparfilen är gjord med en nyare version
 STR_GAME_SAVELOAD_ERROR_FILE_NOT_READABLE                       :Filen är inte läsbar
 STR_GAME_SAVELOAD_ERROR_FILE_NOT_WRITEABLE                      :Filen är inte skrivbar
 STR_GAME_SAVELOAD_ERROR_DATA_INTEGRITY_CHECK_FAILED             :Integritetskontrollen på datan misslyckades
@@ -3456,8 +3432,8 @@ STR_WARNING_HEIGHTMAP_SCALE_MESSAGE                             :{YELLOW}För st
 STR_WARNING_FALLBACK_SOUNDSET                                   :{WHITE}Endast ett reservdata-ljudsett hittades. Om du vill ha ljud, installera ett ljudsett via nerladdnings-systemet
 
 # Screenshot related messages
-STR_MESSAGE_SCREENSHOT_SUCCESSFULLY                             :{WHITE}Screenshot sparades som '{STRING}'
-STR_ERROR_SCREENSHOT_FAILED                                     :{WHITE}Screenshot misslyckades!
+STR_MESSAGE_SCREENSHOT_SUCCESSFULLY                             :{WHITE}Skärmdump sparades som '{STRING}'
+STR_ERROR_SCREENSHOT_FAILED                                     :{WHITE}Skärmdump misslyckades!
 
 # Error message titles
 STR_ERROR_MESSAGE_CAPTION                                       :{YELLOW}Meddelande
@@ -3555,7 +3531,6 @@ STR_ERROR_CAN_T_BUILD_AIRPORT_HERE                              :{WHITE}Kan inte
 
 STR_ERROR_ADJOINS_MORE_THAN_ONE_EXISTING                        :{WHITE}Angränsar till mer än en station/hållplats
 STR_ERROR_STATION_TOO_SPREAD_OUT                                :{WHITE}... station för utspridd
-STR_ERROR_NONUNIFORM_STATIONS_DISALLOWED                        :{WHITE}... ej enhetliga stationer inaktiverade
 STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}För många stationer/hållplatser
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}För många delar på järnvägsstationen
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}För många busshållplatser
@@ -4258,7 +4233,6 @@ STR_COMPANY_MONEY                                               :{WHITE}{CURRENC
 STR_BLACK_DATE_LONG                                             :{BLACK}{DATE_LONG}
 STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
 STR_SILVER_CROSS                                                :{SILVER}{CROSS}
-STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
@@ -4270,6 +4244,7 @@ STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLAC
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_ORANGE_STRING                                               :{ORANGE}{STRING}
 STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_HEIGHT                                           :{TINYFONT}{BLACK}{HEIGHT}
