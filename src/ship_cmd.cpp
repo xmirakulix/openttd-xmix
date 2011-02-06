@@ -234,7 +234,7 @@ TileIndex Ship::GetOrderStationLocation(StationID station)
 	if (st->dock_tile != INVALID_TILE) {
 		return TILE_ADD(st->dock_tile, ToTileIndexDiff(GetDockOffset(st->dock_tile)));
 	} else {
-		this->IncrementOrderIndex();
+		this->IncrementRealOrderIndex();
 		return 0;
 	}
 }
@@ -307,9 +307,7 @@ static bool ShipAccelerate(Vehicle *v)
 	/* updates statusbar only if speed have changed to save CPU time */
 	if (spd != v->cur_speed) {
 		v->cur_speed = spd;
-		if (_settings_client.gui.vehicle_speed) {
-			SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
-		}
+		SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 	}
 
 	/* Convert direction-indepenent speed into direction-dependent speed. (old movement method) */
@@ -480,7 +478,7 @@ static void ShipController(Ship *v)
 						/* We got within 3 tiles of our target buoy, so let's skip to our
 						 * next order */
 						UpdateVehicleTimetable(v, true);
-						v->IncrementOrderIndex();
+						v->IncrementRealOrderIndex();
 						v->current_order.MakeDummy();
 					} else {
 						/* Non-buoy orders really need to reach the tile */
@@ -500,7 +498,7 @@ static void ShipController(Ship *v)
 									v->BeginLoading();
 								} else { // leave stations without docks right aways
 									v->current_order.MakeLeaveStation();
-									v->IncrementOrderIndex();
+									v->IncrementRealOrderIndex();
 								}
 							}
 						}

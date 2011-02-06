@@ -52,6 +52,8 @@ enum RoadVehicleStates {
 	RVSB_IN_DT_ROAD_STOP         = 1 << RVS_IN_DT_ROAD_STOP,  ///< The vehicle is in a drive-through road stop
 	RVSB_IN_DT_ROAD_STOP_END     = RVSB_IN_DT_ROAD_STOP + TRACKDIR_END,
 
+	RVSB_DRIVE_SIDE              = 1 << RVS_DRIVE_SIDE,       ///< The vehicle is at the opposite side of the road
+
 	RVSB_TRACKDIR_MASK           = 0x0F,                      ///< The mask used to extract track dirs
 	RVSB_ROAD_STOP_TRACKDIR_MASK = 0x09                       ///< Only bits 0 and 3 are used to encode the trackdir for road stops
 };
@@ -74,6 +76,9 @@ static const uint RVC_TURN_AROUND_START_FRAME_SHORT_TRAM = 16;
 static const uint RVC_DRIVE_THROUGH_STOP_FRAME           = 11;
 static const uint RVC_DEPOT_STOP_FRAME                   = 11;
 
+/** The number of ticks a vehicle has for overtaking. */
+static const byte RV_OVERTAKE_TIMEOUT = 35;
+
 void RoadVehUpdateCache(RoadVehicle *v);
 
 /**
@@ -83,9 +88,9 @@ struct RoadVehicle : public GroundVehicle<RoadVehicle, VEH_ROAD> {
 	byte state;             ///< @see RoadVehicleStates
 	byte frame;
 	uint16 blocked_ctr;
-	byte overtaking;
-	byte overtaking_ctr;
-	uint16 crashed_ctr;
+	byte overtaking;        ///< Set to #RVSB_DRIVE_SIDE when overtaking, otherwise 0.
+	byte overtaking_ctr;    ///< The length of the current overtake attempt.
+	uint16 crashed_ctr;     ///< Animation counter when the vehicle has crashed. @see RoadVehIsCrashed
 	byte reverse_ctr;
 
 	RoadType roadtype;
@@ -98,13 +103,12 @@ struct RoadVehicle : public GroundVehicle<RoadVehicle, VEH_ROAD> {
 
 	friend struct GroundVehicle<RoadVehicle, VEH_ROAD>; // GroundVehicle needs to use the acceleration functions defined at RoadVehicle.
 
-	const char *GetTypeString() const { return "road vehicle"; }
 	void MarkDirty();
 	void UpdateDeltaXY(Direction direction);
 	ExpensesType GetExpenseType(bool income) const { return income ? EXPENSES_ROADVEH_INC : EXPENSES_ROADVEH_RUN; }
 	bool IsPrimaryVehicle() const { return this->IsFrontEngine(); }
 	SpriteID GetImage(Direction direction) const;
-	int GetDisplaySpeed() const { return this->cur_speed / 2; }
+	int GetDisplaySpeed() const { return this->gcache.last_speed / 2; }
 	int GetDisplayMaxSpeed() const { return this->vcache.cached_max_speed / 2; }
 	Money GetRunningCost() const;
 	int GetDisplayImageWidth(Point *offset = NULL) const;
@@ -120,6 +124,7 @@ struct RoadVehicle : public GroundVehicle<RoadVehicle, VEH_ROAD> {
 	bool IsBus() const;
 
 	int GetCurrentMaxSpeed() const;
+	int UpdateSpeed();
 
 protected: // These functions should not be called outside acceleration code.
 

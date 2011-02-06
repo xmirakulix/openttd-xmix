@@ -155,6 +155,11 @@ void DrawRoadVehEngine(int left, int right, int preferred_x, int y, EngineID eng
 	DrawSprite(sprite, pal, preferred_x, y);
 }
 
+/**
+ * Get length of a road vehicle.
+ * @param v Road vehicle to query length.
+ * @return Length of the given road vehicle.
+ */
 static uint GetRoadVehLength(const RoadVehicle *v)
 {
 	uint length = 8;
@@ -167,6 +172,11 @@ static uint GetRoadVehLength(const RoadVehicle *v)
 	return length;
 }
 
+/**
+ * Update the cache of a road vehicle.
+ * @param v Road vehicle needing an update of its cache.
+ * @pre \a v must be first road vehicle.
+ */
 void RoadVehUpdateCache(RoadVehicle *v)
 {
 	assert(v->type == VEH_ROAD);
@@ -405,6 +415,10 @@ FORCEINLINE int RoadVehicle::GetCurrentMaxSpeed() const
 	return max_speed;
 }
 
+/**
+ * Delete last vehicle of a chain road vehicles.
+ * @param v First roadvehicle.
+ */
 static void DeleteLastRoadVeh(RoadVehicle *v)
 {
 	Vehicle *u = v;
@@ -427,10 +441,15 @@ static void RoadVehSetRandomDirection(RoadVehicle *v)
 		uint32 r = Random();
 
 		v->direction = ChangeDir(v->direction, delta[r & 3]);
-		v->UpdateInclination(false, true);
+		v->UpdateViewport(true, true);
 	} while ((v = v->Next()) != NULL);
 }
 
+/**
+ * Road vehicle chain has crashed.
+ * @param v First roadvehicle.
+ * @return whether the chain still exists.
+ */
 static bool RoadVehIsCrashed(RoadVehicle *v)
 {
 	v->crashed_ctr++;
@@ -447,6 +466,12 @@ static bool RoadVehIsCrashed(RoadVehicle *v)
 	return true;
 }
 
+/**
+ * Check routine whether a road and a train vehicle have collided.
+ * @param v    %Train vehicle to test.
+ * @param data Road vehicle to test.
+ * @return %Train vehicle if the vehicles collided, else \c NULL.
+ */
 static Vehicle *EnumCheckRoadVehCrashTrain(Vehicle *v, void *data)
 {
 	const Vehicle *u = (Vehicle*)data;
@@ -515,7 +540,7 @@ TileIndex RoadVehicle::GetOrderStationLocation(StationID station)
 	const Station *st = Station::Get(station);
 	if (!CanVehicleUseStation(this, st)) {
 		/* There is no stop left at the station, so don't even TRY to go there */
-		this->IncrementOrderIndex();
+		this->IncrementRealOrderIndex();
 		return 0;
 	}
 
@@ -649,42 +674,16 @@ static void RoadVehArrivesAt(const RoadVehicle *v, Station *st)
  * the distance to drive before moving a step on the map.
  * @return distance to drive.
  */
-static int RoadVehAccelerate(RoadVehicle *v)
+int RoadVehicle::UpdateSpeed()
 {
-	uint oldspeed = v->cur_speed;
-	uint accel = v->overtaking != 0 ? 256 : 0;
-	accel += (_settings_game.vehicle.roadveh_acceleration_model == AM_ORIGINAL) ? 256 : v->GetAcceleration();
-	uint spd = v->subspeed + accel;
+	switch (_settings_game.vehicle.roadveh_acceleration_model) {
+		default: NOT_REACHED();
+		case AM_ORIGINAL:
+			return this->DoUpdateSpeed(this->overtaking != 0 ? 512 : 256, 0, this->GetCurrentMaxSpeed());
 
-	v->subspeed = (uint8)spd;
-
-	int tempmax = v->GetCurrentMaxSpeed();
-	if (v->cur_speed > tempmax) {
-		tempmax = v->cur_speed - (v->cur_speed / 10) - 1;
+		case AM_REALISTIC:
+			return this->DoUpdateSpeed(this->GetAcceleration() + (this->overtaking != 0 ? 256 : 0), this->GetAccelerationStatus() == AS_BRAKE ? 0 : 4, this->GetCurrentMaxSpeed());
 	}
-
-	/* Force a minimum speed of 1 km/h when realistic acceleration is on. */
-	int min_speed = (_settings_game.vehicle.roadveh_acceleration_model == AM_ORIGINAL) ? 0 : 4;
-	v->cur_speed = spd = Clamp(v->cur_speed + ((int)spd >> 8), min_speed, tempmax);
-
-	/* Apply bridge speed limit */
-	if (v->state == RVSB_WORMHOLE && !(v->vehstatus & VS_HIDDEN)) {
-		RoadVehicle *first = v->First();
-		first->cur_speed = min(first->cur_speed, GetBridgeSpec(GetBridgeType(v->tile))->speed * 2);
-	}
-
-	/* Update statusbar only if speed has changed to save CPU time */
-	if (oldspeed != v->cur_speed) {
-		if (_settings_client.gui.vehicle_speed) {
-			SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
-		}
-	}
-
-	int scaled_spd = v->GetAdvanceSpeed(spd);
-
-	scaled_spd += v->progress;
-	v->progress = 0;
-	return scaled_spd;
 }
 
 static Direction RoadVehGetNewDirection(const RoadVehicle *v, int x, int y)
@@ -789,14 +788,10 @@ static void RoadVehCheckOvertake(RoadVehicle *v, RoadVehicle *u)
 	od.tile = v->tile + TileOffsByDiagDir(DirToDiagDir(v->direction));
 	if (CheckRoadBlockedForOvertaking(&od)) return;
 
-	if (od.u->cur_speed == 0 || (od.u->vehstatus & VS_STOPPED)) {
-		v->overtaking_ctr = 0x11;
-		v->overtaking = 0x10;
-	} else {
-//		if (CheckRoadBlockedForOvertaking(&od)) return;
-		v->overtaking_ctr = 0;
-		v->overtaking = 0x10;
-	}
+	/* When the vehicle in front of us is stopped we may only take
+	 * half the time to pass it than when the vehicle is moving. */
+	v->overtaking_ctr = (od.u->cur_speed == 0 || (od.u->vehstatus & VS_STOPPED)) ? RV_OVERTAKE_TIMEOUT / 2 : 0;
+	v->overtaking = RVSB_DRIVE_SIDE;
 }
 
 static void RoadZPosAffectSpeed(RoadVehicle *v, byte old_z)
@@ -1060,7 +1055,7 @@ static bool IndividualRoadVehicleController(RoadVehicle *v, const RoadVehicle *p
 		if (IsTileType(v->tile, MP_STATION)) {
 			/* Force us to be not overtaking! */
 			v->overtaking = 0;
-		} else if (++v->overtaking_ctr >= 35) {
+		} else if (++v->overtaking_ctr >= RV_OVERTAKE_TIMEOUT) {
 			/* If overtaking just aborts at a random moment, we can have a out-of-bound problem,
 			 *  if the vehicle started a corner. To protect that, only allow an abort of
 			 *  overtake if we are on straight roads */
@@ -1078,6 +1073,12 @@ static bool IndividualRoadVehicleController(RoadVehicle *v, const RoadVehicle *p
 	if (v->state == RVSB_WORMHOLE) {
 		/* Vehicle is entering a depot or is on a bridge or in a tunnel */
 		GetNewVehiclePosResult gp = GetNewVehiclePos(v);
+
+		/* Apply bridge speed limit */
+		if (!(v->vehstatus & VS_HIDDEN)) {
+			RoadVehicle *first = v->First();
+			first->cur_speed = min(first->cur_speed, GetBridgeSpec(GetBridgeType(v->tile))->speed * 2);
+		}
 
 		if (v->IsFrontEngine()) {
 			const Vehicle *u = RoadVehFindCloseTo(v, gp.x, gp.y, v->direction);
@@ -1128,6 +1129,9 @@ static bool IndividualRoadVehicleController(RoadVehicle *v, const RoadVehicle *p
 again:
 		uint start_frame = RVC_DEFAULT_START_FRAME;
 		if (IsReversingRoadTrackdir(dir)) {
+			/* When turning around we can't be overtaking. */
+			v->overtaking = 0;
+
 			/* Turning around */
 			if (v->roadtype == ROADTYPE_TRAM) {
 				/* Determine the road bits the tram needs to be able to turn around
@@ -1474,7 +1478,7 @@ static bool RoadVehController(RoadVehicle *v)
 	v->ShowVisualEffect();
 
 	/* Check how far the vehicle needs to proceed */
-	int j = RoadVehAccelerate(v);
+	int j = v->UpdateSpeed();
 
 	int adv_spd = v->GetAdvanceDistance();
 	bool blocked = false;
@@ -1496,6 +1500,8 @@ static bool RoadVehController(RoadVehicle *v)
 		/* Test for a collision, but only if another movement will occur. */
 		if (j >= adv_spd && RoadVehCheckTrainCrash(v)) break;
 	}
+
+	v->SetLastSpeed();
 
 	for (RoadVehicle *u = v; u != NULL; u = u->Next()) {
 		if ((u->vehstatus & VS_HIDDEN) != 0) continue;

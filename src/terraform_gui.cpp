@@ -31,6 +31,7 @@
 #include "newgrf_object.h"
 #include "object.h"
 #include "hotkeys.h"
+#include "engine_base.h"
 
 #include "table/strings.h"
 
@@ -59,6 +60,7 @@ static void GenerateDesertArea(TileIndex end, TileIndex start)
 		MarkTileDirtyByTile(tile);
 	}
 	_generating_world = false;
+	InvalidateWindowClassesData(WC_TOWN_VIEW, 0);
 }
 
 /** Scenario editor command that generates rocky areas */
@@ -558,6 +560,9 @@ static void ResetLandscapeConfirmationCallback(Window *w, bool confirmed)
 			if (IsBuoyTile(st->xy)) DoCommand(st->xy, 0, 0, DC_EXEC | DC_BANKRUPT, CMD_LANDSCAPE_CLEAR);
 			if (!st->IsInUse()) delete st;
 		}
+
+		/* Now that all vehicles are gone, we can reset the engine pool. Maybe it reduces some NewGRF changing-mess */
+		EngineOverrideManager::ResetToCurrentNewGRFConfig();
 
 		MarkWholeScreenDirty();
 	}

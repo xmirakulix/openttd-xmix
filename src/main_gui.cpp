@@ -314,8 +314,9 @@ struct MainWindow : Window
 			case GHK_CENTER_ZOOM: {
 				Point pt = GetTileBelowCursor();
 				if (pt.x != -1) {
+					bool instant = (num == GHK_CENTER_ZOOM && this->viewport->zoom != ZOOM_LVL_MIN);
 					if (num == GHK_CENTER_ZOOM) MaxZoomInOut(ZOOM_IN, this);
-					ScrollMainWindowTo(pt.x, pt.y);
+					ScrollMainWindowTo(pt.x, pt.y, -1, instant);
 				}
 				break;
 			}
@@ -421,7 +422,9 @@ struct MainWindow : Window
 
 	virtual void OnMouseWheel(int wheel)
 	{
-		ZoomInOrOutToCursorWindow(wheel < 0, this);
+		if (_settings_client.gui.scrollwheel_scrolling == 0) {
+			ZoomInOrOutToCursorWindow(wheel < 0, this);
+		}
 	}
 
 	virtual void OnResize()

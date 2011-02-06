@@ -23,19 +23,22 @@
  *  - bubbles (industry)
  */
 struct EffectVehicle : public SpecializedVehicle<EffectVehicle, VEH_EFFECT> {
-	uint16 animation_state;
-	byte animation_substate;
+	uint16 animation_state;  ///< State primarily used to change the graphics/behaviour.
+	byte animation_substate; ///< Sub state to time the change of the graphics/behaviour.
 
 	/** We don't want GCC to zero our struct! It already is zeroed and has an index! */
 	EffectVehicle() : SpecializedVehicleBase() {}
 	/** We want to 'destruct' the right class. */
 	virtual ~EffectVehicle() {}
 
-	const char *GetTypeString() const { return "special vehicle"; }
 	void UpdateDeltaXY(Direction direction);
 	bool Tick();
 };
 
+/**
+ * Iterate over disaster vehicles.
+ * @param var The variable used to iterate over.
+ */
 #define FOR_ALL_EFFECTVEHICLES(var) FOR_ALL_VEHICLES_OF_TYPE(EffectVehicle, var)
 
 #endif /* EFFECTVEHICLE_BASE_H */

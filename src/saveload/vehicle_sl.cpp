@@ -22,7 +22,7 @@
 
 #include <map>
 
-/*
+/**
  * Link front and rear multiheaded engines to each other
  * This is done when loading a savegame
  */
@@ -336,7 +336,7 @@ void AfterLoadVehicles(bool part_of_load)
 			case VEH_TRAIN: {
 				Train *t = Train::From(v);
 				if (t->IsFrontEngine() || t->IsFreeWagon()) {
-					t->tcache.last_speed = t->cur_speed; // update displayed train speed
+					t->gcache.last_speed = t->cur_speed; // update displayed train speed
 					t->ConsistChanged(false);
 				}
 				break;
@@ -345,6 +345,7 @@ void AfterLoadVehicles(bool part_of_load)
 			case VEH_ROAD: {
 				RoadVehicle *rv = RoadVehicle::From(v);
 				if (rv->IsFrontEngine()) {
+					rv->gcache.last_speed = rv->cur_speed; // update displayed road vehicle speed
 					RoadVehUpdateCache(rv);
 					if (_settings_game.vehicle.roadveh_acceleration_model != AM_ORIGINAL) {
 						rv->CargoChanged();
@@ -486,7 +487,8 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		     SLE_VAR(Vehicle, tick_counter,          SLE_UINT8),
 		 SLE_CONDVAR(Vehicle, running_ticks,         SLE_UINT8,                   88, SL_MAX_VERSION),
 
-		     SLE_VAR(Vehicle, cur_order_index,       SLE_UINT8),
+		     SLE_VAR(Vehicle, cur_auto_order_index,  SLE_UINT8),
+		 SLE_CONDVAR(Vehicle, cur_real_order_index,  SLE_UINT8,                  158, SL_MAX_VERSION),
 		/* num_orders is now part of OrderList and is not saved but counted */
 		SLE_CONDNULL(1,                                                            0, 104),
 

@@ -88,7 +88,7 @@ static const StringID _station_load_types[][5] = {
 		INVALID_STRING_ID,
 		STR_ORDER_NO_UNLOAD_FULL_LOAD,
 		STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY,
-		INVALID_STRING_ID,
+		STR_ORDER_NO_UNLOAD_NO_LOAD,
 	}
 };
 
@@ -195,8 +195,11 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 
 	SpriteID sprite = rtl ? SPR_ARROW_LEFT : SPR_ARROW_RIGHT;
 	Dimension sprite_size = GetSpriteSize(sprite);
-	if (v->cur_order_index == order_index) {
-		DrawSprite(sprite, PAL_NONE, rtl ? right - sprite_size.width : left, y + ((int)FONT_HEIGHT_NORMAL - (int)sprite_size.height) / 2);
+	if (v->cur_real_order_index == order_index) {
+		DrawSprite(sprite, PAL_NONE, rtl ? right -     sprite_size.width : left,                     y + ((int)FONT_HEIGHT_NORMAL - (int)sprite_size.height) / 2);
+		DrawSprite(sprite, PAL_NONE, rtl ? right - 2 * sprite_size.width : left + sprite_size.width, y + ((int)FONT_HEIGHT_NORMAL - (int)sprite_size.height) / 2);
+	} else if (v->cur_auto_order_index == order_index) {
+		DrawSprite(sprite, PAL_NONE, rtl ? right -     sprite_size.width : left,                     y + ((int)FONT_HEIGHT_NORMAL - (int)sprite_size.height) / 2);
 	}
 
 	TextColour colour = TC_BLACK;
@@ -207,7 +210,7 @@ void DrawOrderString(const Vehicle *v, const Order *order, int order_index, int 
 	}
 
 	SetDParam(0, order_index + 1);
-	DrawString(left, rtl ? right - sprite_size.width - 3 : middle, y, STR_ORDER_INDEX, colour, SA_RIGHT | SA_FORCE);
+	DrawString(left, rtl ? right - 2 * sprite_size.width - 3 : middle, y, STR_ORDER_INDEX, colour, SA_RIGHT | SA_FORCE);
 
 	SetDParam(5, STR_EMPTY);
 
@@ -322,49 +325,47 @@ static Order GetOrderCmdFromTile(const Vehicle *v, TileIndex tile)
 	order.index = 0;
 
 	/* check depot first */
-	if (_settings_game.order.gotodepot) {
-		switch (GetTileType(tile)) {
-			case MP_RAILWAY:
-				if (v->type == VEH_TRAIN && IsTileOwner(tile, _local_company)) {
-					if (IsRailDepot(tile)) {
-						order.MakeGoToDepot(GetDepotIndex(tile), ODTFB_PART_OF_ORDERS,
-								_settings_client.gui.new_nonstop ? ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS : ONSF_STOP_EVERYWHERE);
-						if (_ctrl_pressed) order.SetDepotOrderType((OrderDepotTypeFlags)(order.GetDepotOrderType() ^ ODTFB_SERVICE));
-						return order;
-					}
-				}
-				break;
-
-			case MP_ROAD:
-				if (IsRoadDepot(tile) && v->type == VEH_ROAD && IsTileOwner(tile, _local_company)) {
+	switch (GetTileType(tile)) {
+		case MP_RAILWAY:
+			if (v->type == VEH_TRAIN && IsTileOwner(tile, _local_company)) {
+				if (IsRailDepot(tile)) {
 					order.MakeGoToDepot(GetDepotIndex(tile), ODTFB_PART_OF_ORDERS,
 							_settings_client.gui.new_nonstop ? ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS : ONSF_STOP_EVERYWHERE);
 					if (_ctrl_pressed) order.SetDepotOrderType((OrderDepotTypeFlags)(order.GetDepotOrderType() ^ ODTFB_SERVICE));
 					return order;
 				}
-				break;
+			}
+			break;
 
-			case MP_STATION:
-				if (v->type != VEH_AIRCRAFT) break;
-				if (IsHangar(tile) && IsTileOwner(tile, _local_company)) {
-					order.MakeGoToDepot(GetStationIndex(tile), ODTFB_PART_OF_ORDERS, ONSF_STOP_EVERYWHERE);
-					if (_ctrl_pressed) order.SetDepotOrderType((OrderDepotTypeFlags)(order.GetDepotOrderType() ^ ODTFB_SERVICE));
-					return order;
-				}
-				break;
+		case MP_ROAD:
+			if (IsRoadDepot(tile) && v->type == VEH_ROAD && IsTileOwner(tile, _local_company)) {
+				order.MakeGoToDepot(GetDepotIndex(tile), ODTFB_PART_OF_ORDERS,
+						_settings_client.gui.new_nonstop ? ONSF_NO_STOP_AT_INTERMEDIATE_STATIONS : ONSF_STOP_EVERYWHERE);
+				if (_ctrl_pressed) order.SetDepotOrderType((OrderDepotTypeFlags)(order.GetDepotOrderType() ^ ODTFB_SERVICE));
+				return order;
+			}
+			break;
 
-			case MP_WATER:
-				if (v->type != VEH_SHIP) break;
-				if (IsShipDepot(tile) && IsTileOwner(tile, _local_company)) {
-					order.MakeGoToDepot(GetDepotIndex(tile), ODTFB_PART_OF_ORDERS, ONSF_STOP_EVERYWHERE);
-					if (_ctrl_pressed) order.SetDepotOrderType((OrderDepotTypeFlags)(order.GetDepotOrderType() ^ ODTFB_SERVICE));
-					return order;
-				}
-				break;
+		case MP_STATION:
+			if (v->type != VEH_AIRCRAFT) break;
+			if (IsHangar(tile) && IsTileOwner(tile, _local_company)) {
+				order.MakeGoToDepot(GetStationIndex(tile), ODTFB_PART_OF_ORDERS, ONSF_STOP_EVERYWHERE);
+				if (_ctrl_pressed) order.SetDepotOrderType((OrderDepotTypeFlags)(order.GetDepotOrderType() ^ ODTFB_SERVICE));
+				return order;
+			}
+			break;
 
-			default:
-				break;
-		}
+		case MP_WATER:
+			if (v->type != VEH_SHIP) break;
+			if (IsShipDepot(tile) && IsTileOwner(tile, _local_company)) {
+				order.MakeGoToDepot(GetDepotIndex(tile), ODTFB_PART_OF_ORDERS, ONSF_STOP_EVERYWHERE);
+				if (_ctrl_pressed) order.SetDepotOrderType((OrderDepotTypeFlags)(order.GetDepotOrderType() ^ ODTFB_SERVICE));
+				return order;
+			}
+			break;
+
+		default:
+			break;
 	}
 
 	/* check waypoint */
@@ -483,7 +484,7 @@ private:
 	};
 
 	int selected_order;
-	OrderID order_over;     ///< Order over which another order is dragged, \c INVALID_ORDER if none.
+	VehicleOrderID order_over;         ///< Order over which another order is dragged, \c INVALID_VEH_ORDER_ID if none.
 	OrderPlaceObjectState goto_type;
 	const Vehicle *vehicle; ///< Vehicle owning the orders being displayed and manipulated.
 	Scrollbar *vscroll;
@@ -493,7 +494,7 @@ private:
 	 * @return the memorised order if it is a vaild one
 	 *  else return the number of orders
 	 */
-	int OrderGetSel() const
+	VehicleOrderID OrderGetSel() const
 	{
 		int num = this->selected_order;
 		return (num >= 0 && num < vehicle->GetNumOrders()) ? num : vehicle->GetNumOrders();
@@ -505,18 +506,18 @@ private:
 	 *  the position of the scrollbar.
 	 *
 	 * @param y Y-value of the click relative to the window origin
-	 * @return The selected order if the order is valid, else return \c INVALID_ORDER.
+	 * @return The selected order if the order is valid, else return \c INVALID_VEH_ORDER_ID.
 	 */
-	int GetOrderFromPt(int y)
+	VehicleOrderID GetOrderFromPt(int y)
 	{
 		NWidgetBase *nwid = this->GetWidget<NWidgetBase>(ORDER_WIDGET_ORDER_LIST);
 		int sel = (y - nwid->pos_y - WD_FRAMERECT_TOP) / nwid->resize_y; // Selected line in the ORDER_WIDGET_ORDER_LIST panel.
 
-		if ((uint)sel >= this->vscroll->GetCapacity()) return INVALID_ORDER;
+		if ((uint)sel >= this->vscroll->GetCapacity()) return INVALID_VEH_ORDER_ID;
 
 		sel += this->vscroll->GetPosition();
 
-		return (sel <= vehicle->GetNumOrders() && sel >= 0) ? sel : INVALID_ORDER;
+		return (sel <= vehicle->GetNumOrders() && sel >= 0) ? sel : INVALID_VEH_ORDER_ID;
 	}
 
 	/**
@@ -684,10 +685,10 @@ private:
 	void OrderClick_Skip(int i)
 	{
 		/* Don't skip when there's nothing to skip */
-		if (_ctrl_pressed && this->vehicle->cur_order_index == this->OrderGetSel()) return;
+		if (_ctrl_pressed && this->vehicle->cur_auto_order_index == this->OrderGetSel()) return;
 		if (this->vehicle->GetNumOrders() <= 1) return;
 
-		DoCommandP(this->vehicle->tile, this->vehicle->index, _ctrl_pressed ? this->OrderGetSel() : ((this->vehicle->cur_order_index + 1) % this->vehicle->GetNumOrders()),
+		DoCommandP(this->vehicle->tile, this->vehicle->index, _ctrl_pressed ? this->OrderGetSel() : ((this->vehicle->cur_auto_order_index + 1) % this->vehicle->GetNumOrders()),
 				CMD_SKIP_TO_ORDER | CMD_MSG(_ctrl_pressed ? STR_ERROR_CAN_T_SKIP_TO_ORDER : STR_ERROR_CAN_T_SKIP_ORDER));
 	}
 
@@ -756,7 +757,7 @@ public:
 		this->FinishInitNested(desc, v->index);
 
 		this->selected_order = -1;
-		this->order_over = INVALID_ORDER;
+		this->order_over = INVALID_VEH_ORDER_ID;
 		this->owner = v->owner;
 
 		if (_settings_client.gui.quick_goto && v->owner == _local_company) {
@@ -775,10 +776,6 @@ public:
 	virtual void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize)
 	{
 		switch (widget) {
-			case ORDER_WIDGET_TIMETABLE_VIEW:
-				if (!_settings_game.order.timetabling) size->width = 0;
-				break;
-
 			case ORDER_WIDGET_ORDER_LIST:
 				resize->height = FONT_HEIGHT_NORMAL;
 				size->height = 6 * resize->height + WD_FRAMERECT_TOP + WD_FRAMERECT_BOTTOM;
@@ -875,7 +872,7 @@ public:
 		if (this->vehicle->owner != _local_company) return; // No buttons are displayed with competitor order windows.
 
 		bool shared_orders = this->vehicle->IsOrderListShared();
-		int sel = this->OrderGetSel();
+		VehicleOrderID sel = this->OrderGetSel();
 		const Order *order = this->vehicle->GetOrder(sel);
 
 		/* Second row. */
@@ -1026,7 +1023,7 @@ public:
 
 		bool rtl = _current_text_dir == TD_RTL;
 		SetDParam(0, 99);
-		int index_column_width = GetStringBoundingBox(STR_ORDER_INDEX).width + GetSpriteSize(rtl ? SPR_ARROW_RIGHT : SPR_ARROW_LEFT).width + 3;
+		int index_column_width = GetStringBoundingBox(STR_ORDER_INDEX).width + 2 * GetSpriteSize(rtl ? SPR_ARROW_RIGHT : SPR_ARROW_LEFT).width + 3;
 		int middle = rtl ? r.right - WD_FRAMETEXT_RIGHT - index_column_width : r.left + WD_FRAMETEXT_LEFT + index_column_width;
 
 		int y = r.top + WD_FRAMERECT_TOP;
@@ -1035,7 +1032,7 @@ public:
 		int i = this->vscroll->GetPosition();
 		const Order *order = this->vehicle->GetOrder(i);
 		/* First draw the highlighting underground if it exists. */
-		if (this->order_over != INVALID_ORDER) {
+		if (this->order_over != INVALID_VEH_ORDER_ID) {
 			while (order != NULL) {
 				/* Don't draw anything if it extends past the end of the window. */
 				if (!this->vscroll->IsVisible(i)) break;
@@ -1082,7 +1079,7 @@ public:
 	{
 		switch (widget) {
 			case ORDER_WIDGET_COND_VALUE: {
-				int sel = this->OrderGetSel();
+				VehicleOrderID sel = this->OrderGetSel();
 				const Order *order = this->vehicle->GetOrder(sel);
 
 				if (order != NULL && order->IsType(OT_CONDITIONAL)) {
@@ -1105,8 +1102,8 @@ public:
 			case ORDER_WIDGET_ORDER_LIST: {
 				if (this->goto_type == OPOS_CONDITIONAL) {
 					this->goto_type = OPOS_GOTO;
-					int order_id = this->GetOrderFromPt(_cursor.pos.y - this->top);
-					if (order_id != INVALID_ORDER) {
+					VehicleOrderID order_id = this->GetOrderFromPt(_cursor.pos.y - this->top);
+					if (order_id != INVALID_VEH_ORDER_ID) {
 						Order order;
 						order.next = NULL;
 						order.index = 0;
@@ -1118,7 +1115,7 @@ public:
 					break;
 				}
 
-				int sel = this->GetOrderFromPt(pt.y);
+				VehicleOrderID sel = this->GetOrderFromPt(pt.y);
 
 				if (_ctrl_pressed && sel < this->vehicle->GetNumOrders()) {
 					TileIndex xy = this->vehicle->GetOrder(sel)->GetLocation(this->vehicle);
@@ -1130,7 +1127,7 @@ public:
 				this->DeleteChildWindows();
 				HideDropDownMenu(this);
 
-				if (sel == INVALID_ORDER || this->vehicle->owner != _local_company) {
+				if (sel == INVALID_VEH_ORDER_ID || this->vehicle->owner != _local_company) {
 					/* Deselect clicked order */
 					this->selected_order = -1;
 				} else if (sel == this->selected_order) {
@@ -1305,10 +1302,10 @@ public:
 	{
 		switch (widget) {
 			case ORDER_WIDGET_ORDER_LIST: {
-				int from_order = this->OrderGetSel();
-				int to_order = this->GetOrderFromPt(pt.y);
+				VehicleOrderID from_order = this->OrderGetSel();
+				VehicleOrderID to_order = this->GetOrderFromPt(pt.y);
 
-				if (!(from_order == to_order || from_order == INVALID_ORDER || from_order > this->vehicle->GetNumOrders() || to_order == INVALID_ORDER || to_order > this->vehicle->GetNumOrders()) &&
+				if (!(from_order == to_order || from_order == INVALID_VEH_ORDER_ID || from_order > this->vehicle->GetNumOrders() || to_order == INVALID_VEH_ORDER_ID || to_order > this->vehicle->GetNumOrders()) &&
 						DoCommandP(this->vehicle->tile, this->vehicle->index, from_order | (to_order << 16), CMD_MOVE_ORDER | CMD_MSG(STR_ERROR_CAN_T_MOVE_THIS_ORDER))) {
 					this->selected_order = -1;
 					this->UpdateButtonState();
@@ -1327,16 +1324,15 @@ public:
 
 		ResetObjectToPlace();
 
-		if (this->order_over != INVALID_ORDER) {
+		if (this->order_over != INVALID_VEH_ORDER_ID) {
 			/* End of drag-and-drop, hide dragged order destination highlight. */
-			this->order_over = INVALID_ORDER;
+			this->order_over = INVALID_VEH_ORDER_ID;
 			this->SetWidgetDirty(ORDER_WIDGET_ORDER_LIST);
 		}
 	}
 
 	virtual EventState OnKeyPress(uint16 key, uint16 keycode)
 	{
-
 		if (this->vehicle->owner != _local_company) return ES_NOT_HANDLED;
 
 		return CheckHotkeyMatch<OrdersWindow>(order_hotkeys, keycode, this) != -1 ? ES_HANDLED : ES_NOT_HANDLED;
@@ -1378,8 +1374,8 @@ public:
 		this->SetWidgetDirty(ORDER_WIDGET_GOTO);
 
 		/* Remove drag highlighting if it exists. */
-		if (this->order_over != INVALID_ORDER) {
-			this->order_over = INVALID_ORDER;
+		if (this->order_over != INVALID_VEH_ORDER_ID) {
+			this->order_over = INVALID_VEH_ORDER_ID;
 			this->SetWidgetDirty(ORDER_WIDGET_ORDER_LIST);
 		}
 	}
@@ -1388,16 +1384,16 @@ public:
 	{
 		if (this->selected_order != -1 && widget == ORDER_WIDGET_ORDER_LIST) {
 			/* An order is dragged.. */
-			OrderID from_order = this->OrderGetSel();
-			OrderID to_order = this->GetOrderFromPt(pt.y);
+			VehicleOrderID from_order = this->OrderGetSel();
+			VehicleOrderID to_order = this->GetOrderFromPt(pt.y);
 			uint num_orders = this->vehicle->GetNumOrders();
 
-			if (from_order != INVALID_ORDER && from_order <= num_orders) {
-				if (to_order != INVALID_ORDER && to_order <= num_orders) { // ..over an existing order.
+			if (from_order != INVALID_VEH_ORDER_ID && from_order <= num_orders) {
+				if (to_order != INVALID_VEH_ORDER_ID && to_order <= num_orders) { // ..over an existing order.
 					this->order_over = to_order;
 					this->SetWidgetDirty(widget);
-				} else if (from_order != to_order && this->order_over != INVALID_ORDER) { // ..outside of the order list.
-					this->order_over = INVALID_ORDER;
+				} else if (from_order != to_order && this->order_over != INVALID_VEH_ORDER_ID) { // ..outside of the order list.
+					this->order_over = INVALID_VEH_ORDER_ID;
 					this->SetWidgetDirty(widget);
 				}
 			}
@@ -1428,7 +1424,7 @@ public:
 	static Hotkey<OrdersWindow> order_hotkeys[];
 };
 
-Hotkey<OrdersWindow> OrdersWindow::order_hotkeys[]= {
+Hotkey<OrdersWindow> OrdersWindow::order_hotkeys[] = {
 	Hotkey<OrdersWindow>('D', "skip", 0, &OrdersWindow::OrderClick_Skip),
 	Hotkey<OrdersWindow>('F', "delete", 0, &OrdersWindow::OrderClick_Delete),
 	Hotkey<OrdersWindow>('G', "goto", 0, &OrdersWindow::OrderClick_Goto),

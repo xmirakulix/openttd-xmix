@@ -29,6 +29,7 @@
 #include "engine_func.h"
 #include "engine_base.h"
 #include "company_base.h"
+#include "vehicle_func.h"
 
 #include "table/strings.h"
 #include "table/engines.h"
@@ -141,6 +142,15 @@ Engine::~Engine()
 {
 	UnloadWagonOverrides(this);
 	free(this->name);
+}
+
+/**
+ * Checks whether the engine spec is properly initialised.
+ * @return true if enabled
+ */
+bool Engine::IsEnabled() const
+{
+	return this->info.string_id != STR_NEWGRF_INVALID_ENGINE;
 }
 
 /**
@@ -430,6 +440,25 @@ EngineID EngineOverrideManager::GetID(VehicleType type, uint16 grf_local_id, uin
 }
 
 /**
+ * Tries to reset the engine mapping to match the current NewGRF configuration.
+ * This is only possible when there are currently no vehicles in the game.
+ * @return false if resetting failed due to present vehicles.
+ */
+bool EngineOverrideManager::ResetToCurrentNewGRFConfig()
+{
+	const Vehicle *v;
+	FOR_ALL_VEHICLES(v) {
+		if (IsCompanyBuildableVehicleType(v)) return false;
+	}
+
+	/* Reset the engines, they will get new EngineIDs */
+	_engine_mngr.ResetToDefaultMapping();
+	ReloadNewGRFData();
+
+	return true;
+}
+
+/**
  * Sets cached values in Company::num_vehicles and Group::num_vehicles
  */
 void SetCachedEngineCounts()
@@ -470,6 +499,7 @@ void SetCachedEngineCounts()
 
 void SetupEngines()
 {
+	DeleteWindowByClass(WC_ENGINE_PREVIEW);
 	_engine_pool.CleanPool();
 
 	assert(_engine_mngr.Length() >= _engine_mngr.NUM_DEFAULT_ENGINES);
@@ -830,6 +860,9 @@ void EnginesMonthlyLoop()
 				CalcEngineReliability(e);
 			}
 
+			/* Do not introduce invalid engines */
+			if (!e->IsEnabled()) continue;
+
 			if (!(e->flags & ENGINE_AVAILABLE) && _date >= (e->intro_date + DAYS_IN_YEAR)) {
 				/* Introduce it to all companies */
 				NewVehicleAvailable(e);
@@ -915,7 +948,7 @@ bool IsEngineBuildable(EngineID engine, VehicleType type, CompanyID company)
 	/* check if it's available */
 	if (!HasBit(e->company_avail, company)) return false;
 
-	if (e->info.string_id == STR_NEWGRF_INVALID_ENGINE) return false;
+	if (!e->IsEnabled()) return false;
 
 	if (type == VEH_TRAIN) {
 		/* Check if the rail type is available to this company */

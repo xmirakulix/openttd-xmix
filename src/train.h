@@ -21,26 +21,16 @@
 
 struct Train;
 
+/** Rail vehicle flags. */
 enum VehicleRailFlags {
-	VRF_REVERSING         = 0,
+	VRF_REVERSING                     = 0,
+	VRF_POWEREDWAGON                  = 3, ///< Wagon is powered.
+	VRF_REVERSE_DIRECTION             = 4, ///< Reverse the visible direction of the vehicle.
 
-	/* used to store if a wagon is powered or not */
-	VRF_POWEREDWAGON      = 3,
-
-	/* used to reverse the visible direction of the vehicle */
-	VRF_REVERSE_DIRECTION = 4,
-
-	/* used to mark that electric train engine is allowed to run on normal rail */
-	VRF_EL_ENGINE_ALLOWED_NORMAL_RAIL = 6,
-
-	/* used for vehicle var 0xFE bit 8 (toggled each time the train is reversed, accurate for first vehicle only) */
-	VRF_TOGGLE_REVERSE = 7,
-
-	/* used to mark a train that can't get a path reservation */
-	VRF_TRAIN_STUCK    = 8,
-
-	/* used to mark a train that is just leaving a station */
-	VRF_LEAVING_STATION = 9,
+	VRF_EL_ENGINE_ALLOWED_NORMAL_RAIL = 6, ///< Electric train engine is allowed to run on normal rail. */
+	VRF_TOGGLE_REVERSE                = 7, ///< Used for vehicle var 0xFE bit 8 (toggled each time the train is reversed, accurate for first vehicle only).
+	VRF_TRAIN_STUCK                   = 8, ///< Train can't get a path reservation.
+	VRF_LEAVING_STATION               = 9, ///< Train is just leaving a station.
 };
 
 /** Modes for ignoring signals. */
@@ -65,8 +55,6 @@ struct TrainCache {
 	/* Cached wagon override spritegroup */
 	const struct SpriteGroup *cached_override;
 
-	uint16 last_speed; // NOSAVE: only used in UI
-
 	/* cached values, recalculated on load and each time a vehicle is added to/removed from the consist. */
 	bool cached_tilt;           ///< train can tilt; feature provides a bonus in curves
 
@@ -85,7 +73,7 @@ struct Train : public GroundVehicle<Train, VEH_TRAIN> {
 	/* Link between the two ends of a multiheaded engine */
 	Train *other_multiheaded_part;
 
-	uint16 crash_anim_pos;
+	uint16 crash_anim_pos; ///< Crash animation counter.
 
 	uint16 flags;
 	TrackBitsByte track;
@@ -103,14 +91,13 @@ struct Train : public GroundVehicle<Train, VEH_TRAIN> {
 
 	friend struct GroundVehicle<Train, VEH_TRAIN>; // GroundVehicle needs to use the acceleration functions defined at Train.
 
-	const char *GetTypeString() const { return "train"; }
 	void MarkDirty();
 	void UpdateDeltaXY(Direction direction);
 	ExpensesType GetExpenseType(bool income) const { return income ? EXPENSES_TRAIN_INC : EXPENSES_TRAIN_RUN; }
 	void PlayLeaveStationSound() const;
 	bool IsPrimaryVehicle() const { return this->IsFrontEngine(); }
 	SpriteID GetImage(Direction direction) const;
-	int GetDisplaySpeed() const { return this->tcache.last_speed; }
+	int GetDisplaySpeed() const { return this->gcache.last_speed; }
 	int GetDisplayMaxSpeed() const { return this->vcache.cached_max_speed; }
 	Money GetRunningCost() const;
 	int GetDisplayImageWidth(Point *offset = NULL) const;
@@ -136,76 +123,6 @@ struct Train : public GroundVehicle<Train, VEH_TRAIN> {
 	void UpdateAcceleration();
 
 	int GetCurrentMaxSpeed() const;
-
-	/**
-	 * Get the next part of a multi-part engine.
-	 * Will only work on a multi-part engine (this->EngineHasArticPart() == true),
-	 * Result is undefined for normal engine.
-	 * @return next part of articulated engine
-	 */
-	FORCEINLINE Train *GetNextArticulatedPart() const
-	{
-		assert(this->HasArticulatedPart());
-		return this->Next();
-	}
-
-	/**
-	 * Get the first part of a multi-part engine.
-	 * @return First part of the engine.
-	 */
-	FORCEINLINE Train *GetFirstEnginePart()
-	{
-		Train *v = this;
-		while (v->IsArticulatedPart()) v = v->Previous();
-		return v;
-	}
-
-	/**
-	 * Get the first part of a multi-part engine.
-	 * @return First part of the engine.
-	 */
-	FORCEINLINE const Train *GetFirstEnginePart() const
-	{
-		const Train *v = this;
-		while (v->IsArticulatedPart()) v = v->Previous();
-		return v;
-	}
-
-	/**
-	 * Get the last part of a multi-part engine.
-	 * @return Last part of the engine.
-	 */
-	FORCEINLINE Train *GetLastEnginePart()
-	{
-		Train *v = this;
-		while (v->HasArticulatedPart()) v = v->GetNextArticulatedPart();
-		return v;
-	}
-
-	/**
-	 * Get the next real (non-articulated part) vehicle in the consist.
-	 * @return Next vehicle in the consist.
-	 */
-	FORCEINLINE Train *GetNextVehicle() const
-	{
-		const Train *v = this;
-		while (v->HasArticulatedPart()) v = v->GetNextArticulatedPart();
-
-		/* v now contains the last artic part in the engine */
-		return v->Next();
-	}
-
-	/**
-	 * Get the previous real (non-articulated part) vehicle in the consist.
-	 * @return Previous vehicle in the consist.
-	 */
-	FORCEINLINE Train *GetPrevVehicle() const
-	{
-		Train *v = this->Previous();
-		while (v != NULL && v->IsArticulatedPart()) v = v->Previous();
-
-		return v;
-	}
 
 	/**
 	 * Get the next real (non-articulated part and non rear part of dualheaded engine) vehicle in the consist.

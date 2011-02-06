@@ -1152,6 +1152,8 @@ STR_DIFFICULTY_LEVEL_SETTING_CITY_APPROVAL                      :{LTBLUE}Від�
 ############ range for difficulty settings ends
 
 STR_NONE                                                        :нема
+STR_FUNDING_ONLY                                                :Тільки фінансування
+STR_MINIMAL                                                     :мінімально
 STR_NUM_VERY_LOW                                                :дуже мало
 STR_NUM_LOW                                                     :мало
 STR_NUM_NORMAL                                                  :нормально
@@ -1215,12 +1217,11 @@ STR_CONFIG_SETTING_CAPTION                                      :{WHITE}Розш
 STR_CONFIG_SETTING_OFF                                          :Ні
 STR_CONFIG_SETTING_ON                                           :Так
 STR_CONFIG_SETTING_DISABLED                                     :вимкнено
-STR_CONFIG_SETTING_VEHICLESPEED                                 :{LTBLUE}Показувати швидкість у рядку стану: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Будувати на схилах та узбережжях: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Дозволити міняти схили під будівлями, дорогами тощо (автосхил): {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Великий район обслуговування: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Дозволити видаляти більше доріг, мостів та тунелів міста: {ORANGE}{STRING}
-STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Будувати дуже довгі поїзди: {ORANGE}{STRING}
+STR_CONFIG_SETTING_TRAIN_LENGTH                                 :{LTBLUE}Максимальна довжина поїзда: {ORANGE}{STRING} клітин{P 0:1 ка ки ок}
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Кількість диму/іскр від транспорту: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Немає
 STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Стандартно
@@ -1234,21 +1235,19 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Реаліст�
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Крутизна схилу для поїздів {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Крутизна схилу для автомобілів {ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Заборонити поїздам і кораблям повертати на 90°: {ORANGE}{STRING}
-STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Будувати суміжні залізничні станції: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Дозволити об'єднувати не безпосередньо суміжні станції: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Використовувати покращений алгоритм завантаження: {ORANGE}{STRING}
 STR_CONFIG_SETTING_GRADUAL_LOADING                              :{LTBLUE}Завантажувати поступово: {ORANGE}{STRING}
 STR_CONFIG_SETTING_INFLATION                                    :{LTBLUE}Інфляція: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SELECTGOODS                                  :{LTBLUE}Доставляти вантаж за умови, що там приймається: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LONGBRIDGES                                  :{LTBLUE}Будувати дуже довгі мости: {ORANGE}{STRING}
-STR_CONFIG_SETTING_GOTODEPOT                                    :{LTBLUE}Наказувати прямувати в депо: {ORANGE}{STRING}
+STR_CONFIG_SETTING_MAX_BRIDGE_LENGTH                            :{LTBLUE}Максимальна довжина моста: {ORANGE}{STRING} клітин{P 0:1 ка ки ок}
+STR_CONFIG_SETTING_MAX_TUNNEL_LENGTH                            :{LTBLUE}Максимальна довжина тунелю: {ORANGE}{STRING} клітин{P 0:1 ка ки ок}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD             :{LTBLUE}Ручний метод будівництва основного підприємства: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :немає
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :як інша промисловість
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_PROSPECTING :перспективний
 STR_CONFIG_SETTING_INDUSTRY_PLATFORM                            :{LTBLUE}Пласка поверхня навколо підприємств: {ORANGE}{STRING} клітин{P 0:1 ка ки ок}
 STR_CONFIG_SETTING_MULTIPINDTOWN                                :{LTBLUE}Подібна промисловість в одному місті: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LONGDATE                                     :{LTBLUE}Завжди показувати повну дату в рядку стану: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SIGNALSIDE                                   :{LTBLUE}Показувати сигнали за напрямом руху: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SHOWFINANCES                                 :{LTBLUE}Показувати вікно фінансів в кінці року: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NONSTOP_BY_DEFAULT                           :{LTBLUE}Нові накази - 'без зупинки': {ORANGE}{STRING}
@@ -1260,8 +1259,8 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_QUEUEING                        :{LTBLUE}Орг�
 STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Прокручувати вікно, коли курсор з краю: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Дозволити підкупляти місцеву владу: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Дозволити купувати ексклюзивні права на перевезення: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ALLOW_FUND_ROAD                              :{LTBLUE}Дозволити фінансувати реконструкцію місцевих доріг: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Дозволити передавати гроші іншим компаніям: {ORANGE}{STRING}
-STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Неоднорідні станції: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Множник ваги для імітації важких потягів: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Фактор швидкості літаків: {ORANGE}1 / {STRING}
 STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Кількість авіакатастроф: {ORANGE}{STRING}
@@ -1360,7 +1359,6 @@ STR_CONFIG_SETTING_LOADING_INDICATORS                           :{LTBLUE}Вик�
 STR_CONFIG_SETTING_LOADING_INDICATORS_OFF                       :відкл.
 STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Власна компанія
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Усі компанії
-STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Дозволити розклад руху для транспорту: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Показувати розклад в одиницях, а не в днях: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Показувати прибуття та відправлення у розкладах: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Швидке створення переліку наказів: {ORANGE}{STRING}
@@ -1486,6 +1484,7 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :{LTBLUE}Шук�
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_OPF                     :Оригінальний {BLUE}(рекомендовано)
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_NPF                     :NPF
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_YAPF                    :YAPF {RED}(не рекомендовано)
+STR_CONFIG_SETTING_REVERSE_AT_SIGNALS                           :{LTBLUE}Автоматично розвертатися біля сигналів: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Змініть значення
 
@@ -2278,10 +2277,10 @@ STR_INDUSTRY_CARGOES_CARGO_CAPTION                              :{WHITE}Ланц
 STR_INDUSTRY_CARGOES_PRODUCERS                                  :{WHITE}Виробники
 STR_INDUSTRY_CARGOES_CUSTOMERS                                  :{WHITE}Споживачі
 STR_INDUSTRY_CARGOES_HOUSES                                     :{WHITE}Будинки
-STR_INDUSTRY_CARGOES_INDUSTRY_TOOLTIP                           :{BLACK}Натисніть на підприємство аби побачити його постачальників та споживачів
-STR_INDUSTRY_CARGOES_CARGO_TOOLTIP                              :{BLACK}{STRING}{}Натисніть на вантаж аби побачити його постачальників та споживачів
+STR_INDUSTRY_CARGOES_INDUSTRY_TOOLTIP                           :{BLACK}Натисніть на підприємство аби побачити його постачальників та покупців
+STR_INDUSTRY_CARGOES_CARGO_TOOLTIP                              :{BLACK}{STRING}{}Натисніть на вантаж аби побачити його постачальників та покупців
 STR_INDUSTRY_DISPLAY_CHAIN                                      :{BLACK}Показати ланцюг
-STR_INDUSTRY_DISPLAY_CHAIN_TOOLTIP                              :{BLACK}Показати постачальників та виробників
+STR_INDUSTRY_DISPLAY_CHAIN_TOOLTIP                              :{BLACK}Показати виробників та споживачів
 STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP                            :{BLACK}Приєднати до мінікарти
 STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP_TOOLTIP                    :{BLACK}Ви також можете вибирати промисловість на мінікарті
 
@@ -3164,23 +3163,14 @@ STR_VEHICLE_STATUS_LEAVING                                      :{LTBLUE}Від�
 STR_VEHICLE_STATUS_CRASHED                                      :{RED}Аварія!
 STR_VEHICLE_STATUS_BROKEN_DOWN                                  :{RED}Зламався
 STR_VEHICLE_STATUS_STOPPED                                      :{RED}Зупинений
-STR_VEHICLE_STATUS_TRAIN_STOPPING                               :{RED}Зупиняється
 STR_VEHICLE_STATUS_TRAIN_STOPPING_VEL                           :{RED}Зупиняється, {VELOCITY}
 STR_VEHICLE_STATUS_TRAIN_NO_POWER                               :{RED}Не електрифіковано
 STR_VEHICLE_STATUS_TRAIN_STUCK                                  :{ORANGE}Чекає, поки звільниться шлях
 
-STR_VEHICLE_STATUS_HEADING_FOR_STATION                          :{LTBLUE}Прямує до {STATION}
 STR_VEHICLE_STATUS_HEADING_FOR_STATION_VEL                      :{LTBLUE}Прямує до {STATION}, {VELOCITY}
-STR_VEHICLE_STATUS_NO_ORDERS                                    :{LTBLUE}Без завдань
 STR_VEHICLE_STATUS_NO_ORDERS_VEL                                :{LTBLUE}Без завдань, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT                         :{LTBLUE}Прямує до {WAYPOINT}
 STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL                     :{LTBLUE}Прямує до {WAYPOINT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT                            :{ORANGE}Прямує до {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_VEL                        :{ORANGE}Прямує до {DEPOT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE                    :{LTBLUE}Техогляд у {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL                :{LTBLUE}Техогляд у {DEPOT}, {VELOCITY}
 
 # Vehicle stopped/started animations
@@ -3393,6 +3383,7 @@ STR_ORDER_TRANSFER_NO_LOAD                                      :(Передат
 STR_ORDER_NO_UNLOAD                                             :(Не розвантажуватись і взяти вантаж)
 STR_ORDER_NO_UNLOAD_FULL_LOAD                                   :(Не розвантажуватись і чекати повного завантаження)
 STR_ORDER_NO_UNLOAD_FULL_LOAD_ANY                               :(Не розвантажуватись і чекати повного завантаження будь-якого виду)
+STR_ORDER_NO_UNLOAD_NO_LOAD                                     :(Не розвантажуватись і не завантажуватись)
 
 STR_ORDER_STOP_LOCATION_NEAR_END                                :[ближній кінець]
 STR_ORDER_STOP_LOCATION_MIDDLE                                  :[середина]
@@ -3673,7 +3664,6 @@ STR_ERROR_CAN_T_BUILD_AIRPORT_HERE                              :{WHITE}Немо
 
 STR_ERROR_ADJOINS_MORE_THAN_ONE_EXISTING                        :{WHITE}Граничить з іншою станцією
 STR_ERROR_STATION_TOO_SPREAD_OUT                                :{WHITE}... станція занадто велика
-STR_ERROR_NONUNIFORM_STATIONS_DISALLOWED                        :{WHITE}... неоднорідні станції відключені
 STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Дуже багато станцій
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Забагато частин залізничної станції
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Дуже багато зупинок
@@ -3809,6 +3799,7 @@ STR_ERROR_MUST_DEMOLISH_TUNNEL_FIRST                            :{WHITE}Споч
 STR_ERROR_ANOTHER_TUNNEL_IN_THE_WAY                             :{WHITE}Інший тунель на шляху
 STR_ERROR_TUNNEL_THROUGH_MAP_BORDER                             :{WHITE}Тунель закінчиться поза картою
 STR_ERROR_UNABLE_TO_EXCAVATE_LAND                               :{WHITE}Неможливо виконати будівництво іншого кінця тунелю
+STR_ERROR_TUNNEL_TOO_LONG                                       :{WHITE}... занадто довгий тунель
 
 # Object related errors
 STR_ERROR_TOO_MANY_OBJECTS                                      :{WHITE}... забагато об'єктів
@@ -4413,7 +4404,6 @@ STR_COMPANY_MONEY                                               :{WHITE}{CURRENC
 STR_BLACK_DATE_LONG                                             :{BLACK}{DATE_LONG}
 STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
 STR_SILVER_CROSS                                                :{SILVER}{CROSS}
-STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}

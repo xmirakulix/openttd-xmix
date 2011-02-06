@@ -63,7 +63,7 @@ uint16 _returned_mail_refit_capacity; ///< Stores the mail capacity after a refi
 byte _age_cargo_skip_counter;         ///< Skip aging of cargo?
 
 
-/* Initialize the vehicle-pool */
+/** The pool with all our precious vehicles. */
 VehiclePool _vehicle_pool("Vehicle");
 INSTANTIATE_POOL_METHODS(Vehicle)
 
@@ -168,7 +168,7 @@ bool Vehicle::NeedsServicing() const
  */
 bool Vehicle::NeedsAutomaticServicing() const
 {
-	if (_settings_game.order.gotodepot && this->HasDepotOrder()) return false;
+	if (this->HasDepotOrder()) return false;
 	if (this->current_order.IsType(OT_LOADING)) return false;
 	if (this->current_order.IsType(OT_GOTO_DEPOT) && this->current_order.GetDepotOrderType() != ODTFB_SERVICE) return false;
 	return NeedsServicing();
@@ -626,7 +626,7 @@ bool Vehicle::IsEngineCountable() const
 	switch (this->type) {
 		case VEH_AIRCRAFT: return Aircraft::From(this)->IsNormalAircraft(); // don't count plane shadows and helicopter rotors
 		case VEH_TRAIN:
-			return !Train::From(this)->IsArticulatedPart() && // tenders and other articulated parts
+			return !this->IsArticulatedPart() && // tenders and other articulated parts
 					!Train::From(this)->IsRearDualheaded(); // rear parts of multiheaded engines
 		case VEH_ROAD: return RoadVehicle::From(this)->IsFrontEngine();
 		case VEH_SHIP: return true;
@@ -903,6 +903,10 @@ static void DoDrawVehicle(const Vehicle *v)
 		v->x_extent, v->y_extent, v->z_extent, v->z_pos, (v->vehstatus & VS_SHADOW) != 0);
 }
 
+/**
+ * Add the vehicle sprites that should be drawn at a part of the screen.
+ * @param dpi Rectangle being drawn.
+ */
 void ViewportAddVehicles(DrawPixelInfo *dpi)
 {
 	/* The bounding rectangle */
@@ -954,6 +958,13 @@ void ViewportAddVehicles(DrawPixelInfo *dpi)
 	}
 }
 
+/**
+ * Find the vehicle close to the clicked coordinates.
+ * @param vp Viewport clicked in.
+ * @param x  X coordinate in the viewport.
+ * @param y  Y coordinate in the viewport.
+ * @return Closest vehicle, or \c NULL if none found.
+ */
 Vehicle *CheckClickOnVehicle(const ViewPort *vp, int x, int y)
 {
 	Vehicle *found = NULL, *v;
@@ -984,6 +995,10 @@ Vehicle *CheckClickOnVehicle(const ViewPort *vp, int x, int y)
 	return found;
 }
 
+/**
+ * Decrease the value of a vehicle.
+ * @param v %Vehicle to devaluate.
+ */
 void DecreaseVehicleValue(Vehicle *v)
 {
 	v->value -= v->value >> 8;
@@ -1187,6 +1202,10 @@ uint8 CalcPercentVehicleFilled(const Vehicle *v, StringID *colour)
 	return (count * 100) / max;
 }
 
+/**
+ * Vehicle entirely entered the depot, update its status, orders, vehicle windows, service it, etc.
+ * @param v Vehicle that entered a depot.
+ */
 void VehicleEnterDepot(Vehicle *v)
 {
 	/* Always work with the front of the vehicle */
@@ -1247,7 +1266,7 @@ void VehicleEnterDepot(Vehicle *v)
 	if (v->current_order.IsType(OT_GOTO_DEPOT)) {
 		SetWindowDirty(WC_VEHICLE_VIEW, v->index);
 
-		const Order *real_order = v->GetNextManualOrder(v->cur_order_index);
+		const Order *real_order = v->GetOrder(v->cur_real_order_index);
 		Order t = v->current_order;
 		v->current_order.MakeDummy();
 
@@ -1284,7 +1303,7 @@ void VehicleEnterDepot(Vehicle *v)
 			/* Part of orders */
 			v->DeleteUnreachedAutoOrders();
 			UpdateVehicleTimetable(v, true);
-			v->IncrementOrderIndex();
+			v->IncrementAutoOrderIndex();
 		}
 		if (t.GetDepotActionType() & ODATFB_HALT) {
 			/* Vehicles are always stopped on entering depots. Do not restart this one. */
@@ -1538,7 +1557,7 @@ LiveryScheme GetEngineLiveryScheme(EngineID engine_type, EngineID parent_engine_
 	switch (e->type) {
 		default: NOT_REACHED();
 		case VEH_TRAIN:
-			if (v != NULL && parent_engine_type != INVALID_ENGINE && (UsesWagonOverride(v) || (Train::From(v)->IsArticulatedPart() && e->u.rail.railveh_type != RAILVEH_WAGON))) {
+			if (v != NULL && parent_engine_type != INVALID_ENGINE && (UsesWagonOverride(v) || (v->IsArticulatedPart() && e->u.rail.railveh_type != RAILVEH_WAGON))) {
 				/* Wagonoverrides use the colour scheme of the front engine.
 				 * Articulated parts use the colour scheme of the first part. (Not supported for articulated wagons) */
 				engine_type = parent_engine_type;
@@ -1778,23 +1797,41 @@ uint GetVehicleCapacity(const Vehicle *v, uint16 *mail_capacity)
  */
 void Vehicle::DeleteUnreachedAutoOrders()
 {
-	const Order *order = this->GetOrder(this->cur_order_index);
-	while (order != NULL && order->IsType(OT_AUTOMATIC)) {
-		/* Delete order effectively deletes order, so get the next before deleting it. */
-		order = order->next;
-		DeleteOrder(this, this->cur_order_index);
+	const Order *order = this->GetOrder(this->cur_auto_order_index);
+	while (order != NULL) {
+		if (this->cur_auto_order_index == this->cur_real_order_index) break;
+
+		if (order->IsType(OT_AUTOMATIC)) {
+			/* Delete order effectively deletes order, so get the next before deleting it. */
+			order = order->next;
+			DeleteOrder(this, this->cur_auto_order_index);
+		} else {
+			/* Skip non-automatic orders, e.g. service-orders */
+			order = order->next;
+			this->cur_auto_order_index++;
+		}
+
+		/* Wrap around */
+		if (order == NULL) {
+			order = this->GetOrder(0);
+			this->cur_auto_order_index = 0;
+		}
 	}
 }
 
+/**
+ * Prepare everything to begin the loading when arriving at a station.
+ * @pre IsTileType(this->tile, MP_STATION) || this->type == VEH_SHIP.
+ */
 void Vehicle::BeginLoading()
 {
-	assert(IsTileType(tile, MP_STATION) || type == VEH_SHIP);
+	assert(IsTileType(this->tile, MP_STATION) || this->type == VEH_SHIP);
 
 	if (this->current_order.IsType(OT_GOTO_STATION) &&
 			this->current_order.GetDestination() == this->last_station_visited) {
 		this->DeleteUnreachedAutoOrders();
 
-		/* Now cur_order_index points to the destination station, and we can start loading */
+		/* Now both order indices point to the destination station, and we can start loading */
 		this->current_order.MakeLoading(true);
 		UpdateVehicleTimetable(this, true);
 
@@ -1809,14 +1846,14 @@ void Vehicle::BeginLoading()
 		/* We weren't scheduled to stop here. Insert an automatic order
 		 * to show that we are stopping here, but only do that if the order
 		 * list isn't empty. */
-		Order *in_list = this->GetOrder(this->cur_order_index);
+		Order *in_list = this->GetOrder(this->cur_auto_order_index);
 		if (in_list != NULL && this->orders.list->GetNumOrders() < MAX_VEH_ORDER_ID &&
 				(!in_list->IsType(OT_AUTOMATIC) ||
 				in_list->GetDestination() != this->last_station_visited)) {
 			Order *auto_order = new Order();
 			auto_order->MakeAutomatic(this->last_station_visited);
-			InsertOrder(this, auto_order, this->cur_order_index);
-			if (this->cur_order_index > 0) --this->cur_order_index;
+			InsertOrder(this, auto_order, this->cur_auto_order_index);
+			if (this->cur_auto_order_index > 0) --this->cur_auto_order_index;
 		}
 		this->current_order.MakeLoading(false);
 	}
@@ -1835,16 +1872,20 @@ void Vehicle::BeginLoading()
 	this->MarkDirty();
 }
 
+/**
+ * Perform all actions when leaving a station.
+ * @pre this->current_order.IsType(OT_LOADING)
+ */
 void Vehicle::LeaveStation()
 {
-	assert(current_order.IsType(OT_LOADING));
+	assert(this->current_order.IsType(OT_LOADING));
 
 	delete this->cargo_payment;
 
 	/* Only update the timetable if the vehicle was supposed to stop here. */
-	if (current_order.GetNonStopType() != ONSF_STOP_EVERYWHERE) UpdateVehicleTimetable(this, false);
+	if (this->current_order.GetNonStopType() != ONSF_STOP_EVERYWHERE) UpdateVehicleTimetable(this, false);
 
-	current_order.MakeLeaveStation();
+	this->current_order.MakeLeaveStation();
 	Station *st = Station::Get(this->last_station_visited);
 	st->loading_vehicles.remove(this);
 
@@ -1871,8 +1912,7 @@ void Vehicle::HandleLoading(bool mode)
 			uint wait_time = max(this->current_order.wait_time - this->lateness_counter, 0);
 
 			/* Not the first call for this tick, or still loading */
-			if (mode || !HasBit(this->vehicle_flags, VF_LOADING_FINISHED) ||
-					(_settings_game.order.timetabling && this->current_order_time < wait_time)) return;
+			if (mode || !HasBit(this->vehicle_flags, VF_LOADING_FINISHED) || this->current_order_time < wait_time) return;
 
 			this->PlayLeaveStationSound();
 
@@ -1886,7 +1926,7 @@ void Vehicle::HandleLoading(bool mode)
 		default: return;
 	}
 
-	this->IncrementOrderIndex();
+	this->IncrementAutoOrderIndex();
 }
 
 /**
@@ -1921,7 +1961,7 @@ CommandCost Vehicle::SendToDepot(DoCommandFlag flags, DepotCommand command)
 		if (flags & DC_EXEC) {
 			/* If the orders to 'goto depot' are in the orders list (forced servicing),
 			 * then skip to the next order; effectively cancelling this forced service */
-			if (this->current_order.GetDepotOrderType() & ODTFB_PART_OF_ORDERS) this->IncrementOrderIndex();
+			if (this->current_order.GetDepotOrderType() & ODTFB_PART_OF_ORDERS) this->IncrementRealOrderIndex();
 
 			this->current_order.MakeDummy();
 			SetWindowWidgetDirty(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
@@ -2234,20 +2274,6 @@ void Vehicle::RemoveFromShared()
 	this->previous_shared = NULL;
 }
 
-/**
- * Get the next manual (not OT_AUTOMATIC) order after the one at the given index.
- * @param index The index to start searching at.
- * @return The next manual order at or after index or NULL if there is none.
- */
-Order *Vehicle::GetNextManualOrder(int index) const
-{
-	Order *order = this->GetOrder(index);
-	while(order != NULL && order->IsType(OT_AUTOMATIC)) {
-		order = order->next;
-	}
-	return order;
-}
-
 void VehiclesYearlyLoop()
 {
 	Vehicle *v;
@@ -2357,11 +2383,11 @@ const GroundVehicleCache *Vehicle::GetGroundVehicleCache() const
 
 /**
  * Calculates the set of vehicles that will be affected by a given selection.
- * @param set Set of affected vehicles.
+ * @param set [inout] Set of affected vehicles.
  * @param v First vehicle of the selection.
  * @param num_vehicles Number of vehicles in the selection (not counting articulated parts).
- * @pre \c set must be empty.
- * @post \c set will contain the vehicles that will be refitted.
+ * @pre \a set must be empty.
+ * @post \a set will contain the vehicles that will be refitted.
  */
 void GetVehicleSet(VehicleSet &set, Vehicle *v, uint8 num_vehicles)
 {

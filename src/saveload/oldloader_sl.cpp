@@ -108,7 +108,7 @@ static void FixTTDDepots()
 {
 	const Depot *d;
 	FOR_ALL_DEPOTS_FROM(d, 252) {
-		if (!IsRoadDepotTile(d->xy) && !IsRailDepotTile(d->xy) && !IsShipDepotTile(d->xy) && !IsHangarTile(d->xy)) {
+		if (!IsDepotTile(d->xy) || GetDepotIndex(d->xy) != d->index) {
 			/** Workaround for SVXConverter bug, depots 252-255 could be invalid */
 			delete d;
 		}
@@ -163,6 +163,11 @@ static void FixOldTowns()
 
 static StringID *_old_vehicle_names;
 
+/**
+ * Convert the old style vehicles into something that resembles
+ * the old new style savegames. Then #AfterLoadGame can handle
+ * the rest of the conversion.
+ */
 void FixOldVehicles()
 {
 	Vehicle *v;
@@ -665,7 +670,10 @@ static bool LoadOldDepot(LoadgameState *ls, int num)
 	if (!LoadChunk(ls, d, depot_chunk)) return false;
 
 	if (d->xy != 0) {
-		d->town = Town::Get(RemapTownIndex(_old_town_index));
+		/* In some cases, there could be depots referencing invalid town. */
+		Town *t = Town::GetIfValid(RemapTownIndex(_old_town_index));
+		if (t == NULL) t = Town::GetRandom();
+		d->town = t;
 	} else {
 		delete d;
 	}
@@ -1133,7 +1141,7 @@ static const OldChunks vehicle_chunk[] = {
 	OCL_VAR ( OC_UINT16,   1, &_old_order ),
 
 	OCL_NULL ( 1 ), ///< num_orders, now calculated
-	OCL_SVAR(  OC_UINT8, Vehicle, cur_order_index ),
+	OCL_SVAR(  OC_UINT8, Vehicle, cur_auto_order_index ),
 	OCL_SVAR(   OC_TILE, Vehicle, dest_tile ),
 	OCL_SVAR( OC_UINT16, Vehicle, load_unload_ticks ),
 	OCL_SVAR( OC_FILE_U16 | OC_VAR_U32, Vehicle, date_of_last_service ),
@@ -1212,6 +1220,12 @@ static const OldChunks vehicle_chunk[] = {
 	OCL_END()
 };
 
+/**
+ * Load the vehicles of an old style savegame.
+ * @param ls  State (buffer) of the currently loaded game.
+ * @param num The number of vehicles to load.
+ * @return True iff loading went without problems.
+ */
 bool LoadOldVehicle(LoadgameState *ls, int num)
 {
 	/* Read the TTDPatch flags, because we need some info from it */

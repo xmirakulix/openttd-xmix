@@ -664,6 +664,8 @@ STR_SMALLMAP_TOOLTIP_SHOW_INDUSTRIES_ON_MAP                     :{BLACK}Tampilka
 STR_SMALLMAP_TOOLTIP_SHOW_TRANSPORT_ROUTES_ON                   :{BLACK}Tampilkan rute kendaraan di peta
 STR_SMALLMAP_TOOLTIP_SHOW_VEGETATION_ON_MAP                     :{BLACK}Tampilkan pepohonan di peta
 STR_SMALLMAP_TOOLTIP_SHOW_LAND_OWNERS_ON_MAP                    :{BLACK}Tampilkan pemilik area di peta
+STR_SMALLMAP_TOOLTIP_INDUSTRY_SELECTION                         :{BLACK}Klik di tipe industri untuk menampilkannya. Ctrl+klik untuk mematikan semuanya, kecuali yang terpilih. Ctrl+klik lagi untuk menyalakannya kembali.
+STR_SMALLMAP_TOOLTIP_COMPANY_SELECTION                          :{BLACK}Klik pada nama perusajaan untuk menampilkan propertinya, Ctrl+klik untuk mematikan semuanya, kecuali yang terpilih. Ctrl+klik lagi untuk menyalakannya kembali
 
 STR_SMALLMAP_LEGENDA_ROADS                                      :{TINYFONT}{BLACK}Jalan raya
 STR_SMALLMAP_LEGENDA_RAILROADS                                  :{TINYFONT}{BLACK}Rel kereta
@@ -697,6 +699,7 @@ STR_SMALLMAP_LEGENDA_SNOW                                       :{TINYFONT}{BLAC
 STR_SMALLMAP_TOOLTIP_TOGGLE_TOWN_NAMES_ON_OFF                   :{BLACK}Hidup/matikan tampilan nama kota di peta
 STR_SMALLMAP_CENTER                                             :{BLACK}Tengahkan peta kecil pada posisi ini
 STR_SMALLMAP_INDUSTRY                                           :{TINYFONT}{STRING} ({NUM})
+STR_SMALLMAP_COMPANY                                            :{TINYFONT}{COMPANY}
 STR_SMALLMAP_TOWN                                               :{TINYFONT}{WHITE}{TOWN}
 STR_SMALLMAP_DISABLE_ALL                                        :{BLACK}Matikan semua
 STR_SMALLMAP_ENABLE_ALL                                         :{BLACK}Aktifkan semua
@@ -704,6 +707,8 @@ STR_SMALLMAP_SHOW_HEIGHT                                        :{BLACK}Tampilka
 STR_SMALLMAP_TOOLTIP_DISABLE_ALL_INDUSTRIES                     :{BLACK}Tidak menampilkan industri pada peta
 STR_SMALLMAP_TOOLTIP_ENABLE_ALL_INDUSTRIES                      :{BLACK}Tampilkan semua industri pada peta
 STR_SMALLMAP_TOOLTIP_SHOW_HEIGHT                                :{BLACK}tampilkan/sembunyikan heightmap
+STR_SMALLMAP_TOOLTIP_DISABLE_ALL_COMPANIES                      :{BLACK}Hilangkan semua properti perusahaan di peta
+STR_SMALLMAP_TOOLTIP_ENABLE_ALL_COMPANIES                       :{BLACK}Tampilkan semua properti perusahaan di peta
 
 # Status bar messages
 STR_STATUSBAR_TOOLTIP_SHOW_LAST_NEWS                            :{BLACK}Tampilkan pesan atau laporan berita terakhir
@@ -1085,12 +1090,10 @@ STR_CONFIG_SETTING_CAPTION                                      :{WHITE}Pengatur
 STR_CONFIG_SETTING_OFF                                          :Tidak
 STR_CONFIG_SETTING_ON                                           :Ya
 STR_CONFIG_SETTING_DISABLED                                     :Non-aktifkan
-STR_CONFIG_SETTING_VEHICLESPEED                                 :{LTBLUE}Tampilkan kecepatan di status bar: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Ijinkan pembangunan di lereng dan pantai: {ORANGE}{STRING}
-STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Ijinkan pembentukan slop dibawah bangunan, rel, dsb. : {ORANGE}{STRING}
+STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Ijinkan pembentukan slop dibawah bangunan, rel, dsb. (otomatiskan): {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Ijinkan ukuran jangkauan wilayah lebih realistik: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Ijinkan menggusur lebih banyak jalan, jembatan, terowongan milik kota, dsb: {ORANGE}{STRING}
-STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Ijinkan membuat rangkaian gerbong yang sangat panjang: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Banyaknya asap / percikan lokomotif: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :Tidak ada
 STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :Orisinil
@@ -1104,21 +1107,17 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :Realistis
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Tingkat dataran slope pada kereta {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Lereng kecuraman untuk kendaraan {ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Kereta dan kapal dilarang belok 90 derajat: {ORANGE}{STRING}
-STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Gabungkan pembangunan stasiun kereta: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Ijinkan menggabung stasiun meski tdk menempel: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Gunakan algoritma pengangkutan terbaru : {ORANGE}{STRING}
 STR_CONFIG_SETTING_GRADUAL_LOADING                              :{LTBLUE}Angkut secara bertahap: {ORANGE}{STRING}
 STR_CONFIG_SETTING_INFLATION                                    :{LTBLUE}Inflasi: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SELECTGOODS                                  :{LTBLUE}Menerima kargo di suatu stasiun hanya jika dibutuhkan: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LONGBRIDGES                                  :{LTBLUE}Ijinkan membangun jembatan yang sangat panjang: {ORANGE}{STRING}
-STR_CONFIG_SETTING_GOTODEPOT                                    :{LTBLUE}Ijinkan pemberhentian di depo: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD             :{LTBLUE}Metode pembangunan Industri primer : {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :tidak ada
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :seperti industri lainnya
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_PROSPECTING :lebih prospektif
 STR_CONFIG_SETTING_INDUSTRY_PLATFORM                            :{LTBLUE}Tanah datar di sekitar industri: {ORANGE}{STRING} kotak{P 0:1 ""}
 STR_CONFIG_SETTING_MULTIPINDTOWN                                :{LTBLUE}Ijinkan lebih dari satu industri sejenis dalam satu kota: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LONGDATE                                     :{LTBLUE}Selalu tampilkan tgl lengkap pada status bar: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SIGNALSIDE                                   :{LTBLUE}Tampilkan sinyal pada lajur kendara: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SHOWFINANCES                                 :{LTBLUE}Tampilkan laporan keuangan pada akhir tahun: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NONSTOP_BY_DEFAULT                           :{LTBLUE}Tujuan baru standarnya adalah 'non-stop': {ORANGE}{STRING}
@@ -1131,7 +1130,6 @@ STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Geser t
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Ijinkan kolusi pada penguasa setempat: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Ijinkan pembelian hak ekslusif pengelolaan transportasi: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Ijinkan pengiriman uang ke perusahaan lain: {ORANGE}{STRING}
-STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Stasiun tidak seragam: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Faktor kali muatan untuk simulasi kereta yang berat: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Faktor kecepatan pesawat: {ORANGE}1 / {STRING}
 STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Frekuensi kecelakaan pesawat: {ORANGE}{STRING}
@@ -1157,8 +1155,8 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Perbaru
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Perbarui otomatis kendaraan pada {ORANGE}{STRING}{LTBLUE} bulan sblm/sesudah usia maksimalnya
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Minimal dana tersedia untuk perbaruan otomatis: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Durasi pesan kesalahan: {ORANGE}{STRING} detik
-STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Waktu tunggu tips muncul: {ORANGE}{STRING} detik
-STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Waktu tunggu hover event: {ORANGE}dimatikan
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Waktu tunggu tips muncul: {ORANGE}Hover selama {STRING} detik
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Perlihatkan tips: {ORANGE}Klik kanan
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Tampilkan populasi kota di label nama kota: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Pembangkit dataran: {ORANGE}{STRING}
@@ -1179,7 +1177,7 @@ STR_CONFIG_SETTING_HEIGHTMAP_ROTATION                           :{LTBLUE}Perputa
 STR_CONFIG_SETTING_HEIGHTMAP_ROTATION_COUNTER_CLOCKWISE         :Melawan arah jam
 STR_CONFIG_SETTING_HEIGHTMAP_ROTATION_CLOCKWISE                 :Searah jam
 STR_CONFIG_SETTING_SE_FLAT_WORLD_HEIGHT                         :{LTBLUE}Tinggi dataran pada peta skenario datar : {ORANGE}{STRING}
-STR_CONFIG_SETTING_ENABLE_FREEFORM_EDGES                        :{LTBLUE}Ijinkan terraforming pada area perbatasan peta: {ORANGE}{STRING}
+STR_CONFIG_SETTING_ENABLE_FREEFORM_EDGES                        :{LTBLUE}Ijinkan pembentukan lansekap pada pinggir peta: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EDGES_NOT_EMPTY                              :{WHITE}Kotak pada ujung utara tidak kosong
 STR_CONFIG_SETTING_EDGES_NOT_WATER                              :{WHITE}Kotak pada salah satu ujung peta bukanlah perairan
 
@@ -1230,7 +1228,6 @@ STR_CONFIG_SETTING_LOADING_INDICATORS                           :{LTBLUE}Tampilk
 STR_CONFIG_SETTING_LOADING_INDICATORS_OFF                       :Non-aktif
 STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :Perusahaan sendiri
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :Semua perusahaan
-STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Aktifkan penjadwalan untuk kendaraan: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Penjadwalan menggunakan satuan titik , bukan satuan hari: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Tampilkan keberangkatan dan kedatangan pada jadwal: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Buat pemberhentian kendaraan secara cepat: {ORANGE}{STRING}
@@ -1242,6 +1239,7 @@ STR_CONFIG_SETTING_SHOW_TRACK_RESERVATION                       :{LTBLUE}Sorot r
 STR_CONFIG_SETTING_PERSISTENT_BUILDINGTOOLS                     :{LTBLUE}Toolbar tetap aktif setelah dipakai: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXPENSES_LAYOUT                              :{LTBLUE}Kelompokkan pengeluaran perusahaan dalam neraca: {ORANGE}{STRING}
 
+STR_CONFIG_SETTING_DISABLE_UNSUITABLE_BUILDING                  :{LTBLUE}Matikan infrastruktur bangunan saat tak ada kendaraan yang tersedia: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_TRAINS                                   :{LTBLUE}Maks. kereta tiap pemain: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_ROAD_VEHICLES                            :{LTBLUE}Maks. kendaraan jalan raya tiap pemain: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_AIRCRAFT                                 :{LTBLUE}Maks. pesawat tiap pemain: {ORANGE}{STRING}
@@ -1607,7 +1605,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Maksimum
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Batasi jumlah penonton pada server
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Bahasa pembicaraan:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Agar pemain lain mengetahui bahasa apa yang digunakan pada sever
-
 
 STR_NETWORK_START_SERVER_NEW_GAME_NAME_OSKTITLE                 :{BLACK}Masukkan nama dari permainan di jaringan
 
@@ -2071,6 +2068,7 @@ STR_LANDSCAPING_TOOLTIP_PURCHASE_LAND                           :{BLACK}Beli tan
 # Object construction window
 STR_OBJECT_BUILD_CAPTION                                        :{WHITE}Pemilihan obyek
 STR_OBJECT_BUILD_TOOLTIP                                        :{BLACK}Pilih obyek yg akan dibangun. Shift untuk menampilkan perkiraan biaya
+STR_OBJECT_BUILD_CLASS_TOOLTIP                                  :{BLACK}Pilih kelas dari objek yang dibangun
 STR_OBJECT_BUILD_PREVIEW_TOOLTIP                                :{BLACK}Pra-tayang obyek
 STR_OBJECT_BUILD_SIZE                                           :{BLACK}Ukuran: {GOLD}{NUM} x {NUM} kotak
 
@@ -2411,6 +2409,7 @@ STR_NEWGRF_SETTINGS_PARAMETER                                   :{BLACK}Paramete
 STR_NEWGRF_SETTINGS_NO_INFO                                     :{BLACK}Tidak ada informasi yang tersedia
 STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Berkas yang cocok tidak diketemukan
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Non-aktifkan
+STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{RED}Tidak kompatibel dengan versi OpenTTD ini
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Masukkan Parameter NewGRF
 
@@ -3032,23 +3031,14 @@ STR_VEHICLE_STATUS_LEAVING                                      :{LTBLUE}Berangk
 STR_VEHICLE_STATUS_CRASHED                                      :{RED}Kecelakaan!
 STR_VEHICLE_STATUS_BROKEN_DOWN                                  :{RED}Rusak
 STR_VEHICLE_STATUS_STOPPED                                      :{RED}Berhenti
-STR_VEHICLE_STATUS_TRAIN_STOPPING                               :{RED}Berhenti
 STR_VEHICLE_STATUS_TRAIN_STOPPING_VEL                           :{RED}Akan berhenti, {VELOCITY}
 STR_VEHICLE_STATUS_TRAIN_NO_POWER                               :{RED}Tidak ada daya
 STR_VEHICLE_STATUS_TRAIN_STUCK                                  :{ORANGE}Menunggu sampai jalur bebas
 
-STR_VEHICLE_STATUS_HEADING_FOR_STATION                          :{LTBLUE}Menuju ke {STATION}
 STR_VEHICLE_STATUS_HEADING_FOR_STATION_VEL                      :{LTBLUE}Menuju ke {STATION}, {VELOCITY}
-STR_VEHICLE_STATUS_NO_ORDERS                                    :{LTBLUE}Belum ada perintah
 STR_VEHICLE_STATUS_NO_ORDERS_VEL                                :{LTBLUE}Belum ada perintah, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT                         :{LTBLUE}Menuju ke {WAYPOINT}
 STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL                     :{LTBLUE}Menuju ke {WAYPOINT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT                            :{ORANGE}Menuju ke {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_VEL                        :{ORANGE}Menuju ke {DEPOT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE                    :{LTBLUE}Perbaikan pada {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL                :{LTBLUE}Perbaikan pada {DEPOT}, {VELOCITY}
 
 # Vehicle stopped/started animations
@@ -3462,6 +3452,8 @@ STR_ERROR_SITE_UNSUITABLE                                       :{WHITE}... loka
 STR_ERROR_ALREADY_BUILT                                         :{WHITE}... sudah dibangun
 STR_ERROR_OWNED_BY                                              :{WHITE}... dimiliki oleh {STRING}
 STR_ERROR_AREA_IS_OWNED_BY_ANOTHER                              :{WHITE}... area ini dimiliki oleh perusahaan lain
+STR_ERROR_TERRAFORM_LIMIT_REACHED                               :{WHITE}... batas pengubahan lansekap terlampaui
+STR_ERROR_CLEARING_LIMIT_REACHED                                :{WHITE}... batas penghapusan area terlampaui
 STR_ERROR_NAME_MUST_BE_UNIQUE                                   :{WHITE}Nama haruslah unik
 STR_ERROR_GENERIC_OBJECT_IN_THE_WAY                             :terhalang {WHITE}{1:STRING}
 STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}Tidak diijinkan saat berhenti
@@ -3539,7 +3531,6 @@ STR_ERROR_CAN_T_BUILD_AIRPORT_HERE                              :{WHITE}Tidak da
 
 STR_ERROR_ADJOINS_MORE_THAN_ONE_EXISTING                        :{WHITE}berdempetan dengan lebih dari satu stasiun yang telah ada
 STR_ERROR_STATION_TOO_SPREAD_OUT                                :{WHITE}... stasiun terlalu membentang/melebar
-STR_ERROR_NONUNIFORM_STATIONS_DISALLOWED                        :{WHITE}... Stasiun tidak seragam tidak aktif
 STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Terlalu banyak stasiun/area bongkar muat
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Terlalu banyak bag. stasiun
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Terlalu banyak pemberhentian Bus
@@ -4242,7 +4233,6 @@ STR_COMPANY_MONEY                                               :{WHITE}{CURRENC
 STR_BLACK_DATE_LONG                                             :{BLACK}{DATE_LONG}
 STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
 STR_SILVER_CROSS                                                :{SILVER}{CROSS}
-STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}
@@ -4254,6 +4244,7 @@ STR_TINY_BLACK_STATION                                          :{TINYFONT}{BLAC
 STR_BLACK_STRING                                                :{BLACK}{STRING}
 STR_BLACK_RAW_STRING                                            :{BLACK}{STRING}
 STR_GREEN_STRING                                                :{GREEN}{STRING}
+STR_ORANGE_STRING                                               :{ORANGE}{STRING}
 STR_RED_STRING                                                  :{RED}{STRING}
 STR_WHITE_STRING                                                :{WHITE}{STRING}
 STR_TINY_BLACK_HEIGHT                                           :{TINYFONT}{BLACK}{HEIGHT}

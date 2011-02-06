@@ -944,20 +944,21 @@ static CommandCost CheckTrainAttachment(Train *t)
 
 	/* The maximum length for a train. For each part we decrease this by one
 	 * and if the result is negative the train is simply too long. */
-	int allowed_len = _settings_game.vehicle.mammoth_trains ? 100 : 10;
+	int allowed_len = _settings_game.vehicle.max_train_length * TILE_SIZE - t->gcache.cached_veh_length;
 
 	Train *head = t;
 	Train *prev = t;
 
 	/* Break the prev -> t link so it always holds within the loop. */
 	t = t->Next();
-	allowed_len--;
 	prev->SetNext(NULL);
 
 	/* Make sure the cache is cleared. */
 	head->InvalidateNewGRFCache();
 
 	while (t != NULL) {
+		allowed_len -= t->gcache.cached_veh_length;
+
 		Train *next = t->Next();
 
 		/* Unlink the to-be-added piece; it is already unlinked from the previous
@@ -966,8 +967,6 @@ static CommandCost CheckTrainAttachment(Train *t)
 
 		/* Don't check callback for articulated or rear dual headed parts */
 		if (!t->IsArticulatedPart() && !t->IsRearDualheaded()) {
-			allowed_len--; // We do not count articulated parts and rear heads either.
-
 			/* Back up and clear the first_engine data to avoid using wagon override group */
 			EngineID first_engine = t->gcache.first_engine;
 			t->gcache.first_engine = INVALID_ENGINE;
@@ -1002,7 +1001,7 @@ static CommandCost CheckTrainAttachment(Train *t)
 		t = next;
 	}
 
-	if (allowed_len <= 0) return_cmd_error(STR_ERROR_TRAIN_TOO_LONG);
+	if (allowed_len < 0) return_cmd_error(STR_ERROR_TRAIN_TOO_LONG);
 	return CommandCost();
 }
 
@@ -1395,17 +1394,6 @@ void Train::UpdateDeltaXY(Direction direction)
 	this->z_extent      = 6;
 }
 
-static inline void SetLastSpeed(Train *v, int spd)
-{
-	int old = v->tcache.last_speed;
-	if (spd != old) {
-		v->tcache.last_speed = spd;
-		if (_settings_client.gui.vehicle_speed || (old == 0) != (spd == 0)) {
-			SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
-		}
-	}
-}
-
 /** Mark a train as stuck and stop it if it isn't stopped right now. */
 static void MarkTrainAsStuck(Train *v)
 {
@@ -1418,7 +1406,7 @@ static void MarkTrainAsStuck(Train *v)
 		/* Stop train */
 		v->cur_speed = 0;
 		v->subspeed = 0;
-		SetLastSpeed(v, 0);
+		v->SetLastSpeed();
 
 		SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 	}
@@ -1804,6 +1792,7 @@ CommandCost CmdReverseTrainDirection(TileIndex tile, DoCommandFlag flags, uint32
 		if (v->IsMultiheaded() || HasBit(EngInfo(v->engine_type)->callback_mask, CBM_VEHICLE_ARTIC_ENGINE)) {
 			return_cmd_error(STR_ERROR_CAN_T_REVERSE_DIRECTION_RAIL_VEHICLE_MULTIPLE_UNITS);
 		}
+		if (!HasBit(EngInfo(v->engine_type)->misc_flags, EF_RAIL_FLIPS)) return CMD_ERROR;
 
 		Train *front = v->First();
 		/* make sure the vehicle is stopped in the depot */
@@ -1843,7 +1832,7 @@ CommandCost CmdReverseTrainDirection(TileIndex tile, DoCommandFlag flags, uint32
 				ToggleBit(v->flags, VRF_REVERSING);
 			} else {
 				v->cur_speed = 0;
-				SetLastSpeed(v, 0);
+				v->SetLastSpeed();
 				HideFillingPercent(&v->fill_percent_te_id);
 				ReverseTrainDirection(v);
 			}
@@ -2302,7 +2291,7 @@ public:
 		old_order(_v->current_order),
 		old_dest_tile(_v->dest_tile),
 		old_last_station_visited(_v->last_station_visited),
-		index(_v->cur_order_index)
+		index(_v->cur_real_order_index)
 	{
 	}
 
@@ -2359,7 +2348,7 @@ public:
 			/* Don't increment inside the while because otherwise conditional
 			 * orders can lead to an infinite loop. */
 			++this->index;
-		} while (this->index != this->v->cur_order_index);
+		} while (this->index != this->v->cur_real_order_index);
 
 		return false;
 	}
@@ -2613,7 +2602,7 @@ TileIndex Train::GetOrderStationLocation(StationID station)
 	const Station *st = Station::Get(station);
 	if (!(st->facilities & FACIL_TRAIN)) {
 		/* The destination station has no trainstation tiles. */
-		this->IncrementOrderIndex();
+		this->IncrementRealOrderIndex();
 		return 0;
 	}
 
@@ -2641,38 +2630,14 @@ void Train::MarkDirty()
  */
 int Train::UpdateSpeed()
 {
-	uint accel;
-	uint16 max_speed;
-
 	switch (_settings_game.vehicle.train_acceleration_model) {
 		default: NOT_REACHED();
 		case AM_ORIGINAL:
-			max_speed = this->gcache.cached_max_track_speed;
-			accel = this->acceleration * (this->GetAccelerationStatus() == AS_BRAKE ? -4 : 2);
-			break;
+			return this->DoUpdateSpeed(this->acceleration * (this->GetAccelerationStatus() == AS_BRAKE ? -4 : 2), 0, this->gcache.cached_max_track_speed);
+
 		case AM_REALISTIC:
-			max_speed = this->GetCurrentMaxSpeed();
-			accel = this->GetAcceleration();
-			break;
+			return this->DoUpdateSpeed(this->GetAcceleration(), this->GetAccelerationStatus() == AS_BRAKE ? 0 : 2, this->GetCurrentMaxSpeed());
 	}
-
-	uint spd = this->subspeed + accel;
-	this->subspeed = (byte)spd;
-	{
-		int tempmax = max_speed;
-		if (this->cur_speed > max_speed) {
-			tempmax = max(this->cur_speed - (this->cur_speed / 10) - 1, tempmax);
-		}
-		/* Force a minimum speed of 1 km/h when realistic acceleration is on and the train is not braking. */
-		int min_speed = (_settings_game.vehicle.train_acceleration_model == AM_ORIGINAL || this->GetAccelerationStatus() == AS_BRAKE) ? 0 : 2;
-		this->cur_speed = spd = Clamp(this->cur_speed + ((int)spd >> 8), min_speed, tempmax);
-	}
-
-	int scaled_spd = this->GetAdvanceSpeed(spd);
-
-	scaled_spd += this->progress;
-	this->progress = 0; // set later in TrainLocoHandler or TrainController
-	return scaled_spd;
 }
 
 /**
@@ -3026,12 +2991,12 @@ static void TrainController(Train *v, Vehicle *nomove)
 							v->cur_speed = 0;
 							v->subspeed = 0;
 							v->progress = 255 - 100;
-							if (_settings_game.pf.wait_oneway_signal == 255 || ++v->wait_counter < _settings_game.pf.wait_oneway_signal * 20) return;
+							if (!_settings_game.pf.reverse_at_signals || ++v->wait_counter < _settings_game.pf.wait_oneway_signal * 20) return;
 						} else if (HasSignalOnTrackdir(gp.new_tile, i)) {
 							v->cur_speed = 0;
 							v->subspeed = 0;
 							v->progress = 255 - 10;
-							if (_settings_game.pf.wait_twoway_signal == 255 || ++v->wait_counter < _settings_game.pf.wait_twoway_signal * 73) {
+							if (!_settings_game.pf.reverse_at_signals || ++v->wait_counter < _settings_game.pf.wait_twoway_signal * 73) {
 								DiagDirection exitdir = TrackdirToExitdir(i);
 								TileIndex o_tile = TileAddByDiagDir(gp.new_tile, exitdir);
 
@@ -3046,7 +3011,7 @@ static void TrainController(Train *v, Vehicle *nomove)
 						 * reversing of stuck trains is disabled, don't reverse.
 						 * This does not apply if the reason for reversing is a one-way
 						 * signal blocking us, because a train would then be stuck forever. */
-						if (_settings_game.pf.wait_for_pbs_path == 255 && !HasOnewaySignalBlockingTrackdir(gp.new_tile, i) &&
+						if (!_settings_game.pf.reverse_at_signals && !HasOnewaySignalBlockingTrackdir(gp.new_tile, i) &&
 								UpdateSignalsOnSegment(v->tile, enterdir, v->owner) == SIGSEG_PBS) {
 							v->wait_counter = 0;
 							return;
@@ -3334,6 +3299,10 @@ static void DeleteLastWagon(Train *v)
 	}
 }
 
+/**
+ * Rotate all vehicles of a (crashed) train chain randomly to animate the crash.
+ * @param v First crashed vehicle.
+ */
 static void ChangeTrainDirRandomly(Train *v)
 {
 	static const DirDiff delta[] = {
@@ -3354,6 +3323,11 @@ static void ChangeTrainDirRandomly(Train *v)
 	} while ((v = v->Next()) != NULL);
 }
 
+/**
+ * Handle a crashed train.
+ * @param v First train vehicle.
+ * @return %Vehicle chain still exists.
+ */
 static bool HandleCrashedTrain(Train *v)
 {
 	int state = ++v->crash_anim_pos;
@@ -3614,7 +3588,7 @@ static bool TrainLocoHandler(Train *v, bool mode)
 		++v->wait_counter;
 
 		/* Should we try reversing this tick if still stuck? */
-		bool turn_around = v->wait_counter % (_settings_game.pf.wait_for_pbs_path * DAY_TICKS) == 0 && _settings_game.pf.wait_for_pbs_path < 255;
+		bool turn_around = v->wait_counter % (_settings_game.pf.wait_for_pbs_path * DAY_TICKS) == 0 && _settings_game.pf.reverse_at_signals;
 
 		if (!turn_around && v->wait_counter % _settings_game.pf.path_backoff_interval != 0 && v->force_proceed == TFP_NONE) return true;
 		if (!TryPathReserve(v)) {
@@ -3659,7 +3633,7 @@ static bool TrainLocoHandler(Train *v, bool mode)
 	int adv_spd = v->GetAdvanceDistance();
 	if (j < adv_spd) {
 		/* if the vehicle has speed 0, update the last_speed field. */
-		if (v->cur_speed == 0) SetLastSpeed(v, v->cur_speed);
+		if (v->cur_speed == 0) v->SetLastSpeed();
 	} else {
 		TrainCheckIfLineEnds(v);
 		/* Loop until the train has finished moving. */
@@ -3683,7 +3657,7 @@ static bool TrainLocoHandler(Train *v, bool mode)
 				ProcessOrders(v);
 			}
 		}
-		SetLastSpeed(v, v->cur_speed);
+		v->SetLastSpeed();
 	}
 
 	for (Train *u = v; u != NULL; u = u->Next()) {

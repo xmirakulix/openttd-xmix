@@ -33,7 +33,7 @@ static void ChangeTimetable(Vehicle *v, VehicleOrderID order_number, uint16 time
 	v->orders.list->UpdateOrderTimetable(delta);
 
 	for (v = v->FirstShared(); v != NULL; v = v->NextShared()) {
-		if (v->cur_order_index == order_number && v->current_order.Equals(*order)) {
+		if (v->cur_real_order_index == order_number && v->current_order.Equals(*order)) {
 			if (is_journey) {
 				v->current_order.travel_time = time;
 			} else {
@@ -60,8 +60,6 @@ static void ChangeTimetable(Vehicle *v, VehicleOrderID order_number, uint16 time
  */
 CommandCost CmdChangeTimetable(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	if (!_settings_game.order.timetabling) return CMD_ERROR;
-
 	VehicleID veh = GB(p1, 0, 20);
 
 	Vehicle *v = Vehicle::GetIfValid(veh);
@@ -119,8 +117,6 @@ CommandCost CmdChangeTimetable(TileIndex tile, DoCommandFlag flags, uint32 p1, u
  */
 CommandCost CmdSetVehicleOnTime(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	if (!_settings_game.order.timetabling) return CMD_ERROR;
-
 	VehicleID veh = GB(p1, 0, 20);
 
 	Vehicle *v = Vehicle::GetIfValid(veh);
@@ -148,8 +144,6 @@ CommandCost CmdSetVehicleOnTime(TileIndex tile, DoCommandFlag flags, uint32 p1, 
  */
 CommandCost CmdSetTimetableStart(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	if (!_settings_game.order.timetabling) return CMD_ERROR;
-
 	Vehicle *v = Vehicle::GetIfValid(GB(p1, 0, 20));
 	if (v == NULL || !v->IsPrimaryVehicle()) return CMD_ERROR;
 
@@ -189,8 +183,6 @@ CommandCost CmdSetTimetableStart(TileIndex tile, DoCommandFlag flags, uint32 p1,
  */
 CommandCost CmdAutofillTimetable(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 p2, const char *text)
 {
-	if (!_settings_game.order.timetabling) return CMD_ERROR;
-
 	VehicleID veh = GB(p1, 0, 20);
 
 	Vehicle *v = Vehicle::GetIfValid(veh);
@@ -237,7 +229,6 @@ void UpdateVehicleTimetable(Vehicle *v, bool travelling)
 
 	v->current_order_time = 0;
 
-	if (!_settings_game.order.timetabling) return;
 	if (v->current_order.IsType(OT_AUTOMATIC)) return; // no timetabling of auto orders
 
 	VehicleOrderID first_manual_order = 0;
@@ -248,7 +239,7 @@ void UpdateVehicleTimetable(Vehicle *v, bool travelling)
 	bool just_started = false;
 
 	/* This vehicle is arriving at the first destination in the timetable. */
-	if (v->cur_order_index == first_manual_order && travelling) {
+	if (v->cur_real_order_index == first_manual_order && travelling) {
 		/* If the start date hasn't been set, or it was set automatically when
 		 * the vehicle last arrived at the first destination, update it to the
 		 * current time. Otherwise set the late counter appropriately to when
@@ -288,10 +279,10 @@ void UpdateVehicleTimetable(Vehicle *v, bool travelling)
 			 * processing of different orders when filling the timetable. */
 			time_taken = CeilDiv(max(time_taken, 1U), DAY_TICKS) * DAY_TICKS;
 
-			ChangeTimetable(v, v->cur_order_index, time_taken, travelling);
+			ChangeTimetable(v, v->cur_real_order_index, time_taken, travelling);
 		}
 
-		if (v->cur_order_index == first_manual_order && travelling) {
+		if (v->cur_real_order_index == first_manual_order && travelling) {
 			/* If we just started we would have returned earlier and have not reached
 			 * this code. So obviously, we have completed our round: So turn autofill
 			 * off again. */

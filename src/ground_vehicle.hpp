@@ -13,7 +13,9 @@
 #define GROUND_VEHICLE_HPP
 
 #include "vehicle_base.h"
+#include "vehicle_gui.h"
 #include "landscape.h"
+#include "window_func.h"
 
 /** What is the status of our acceleration? */
 enum AccelStatus {
@@ -41,6 +43,9 @@ struct GroundVehicleCache {
 	uint16 cached_total_length;     ///< Length of the whole vehicle (valid only for the first engine).
 	EngineID first_engine;          ///< Cached EngineID of the front vehicle. INVALID_ENGINE for the front vehicle itself.
 	uint8 cached_veh_length;        ///< Length of this vehicle in units of 1/8 of normal length. It is cached because this can be set by a callback.
+
+	/* Cached UI information. */
+	uint16 last_speed;              ///< The last speed we did display, so we only have to redraw when this changes.
 };
 
 /** Ground vehicle flags. */
@@ -238,19 +243,6 @@ struct GroundVehicle : public SpecializedVehicle<T, Type> {
 	}
 
 	/**
-	 * Enum to handle ground vehicle subtypes.
-	 * Do not access it directly unless you have to. Use the subtype access functions.
-	 */
-	enum GroundVehicleSubtypeFlags {
-		GVSF_FRONT            = 0, ///< Leading engine of a consist.
-		GVSF_ARTICULATED_PART = 1, ///< Articulated part of an engine.
-		GVSF_WAGON            = 2, ///< Wagon (not used for road vehicles).
-		GVSF_ENGINE           = 3, ///< Engine that can be front engine, but might be placed behind another engine (not used for road vehicles).
-		GVSF_FREE_WAGON       = 4, ///< First in a wagon chain (in depot) (not used for road vehicles).
-		GVSF_MULTIHEADED      = 5, ///< Engine is multiheaded (not used for road vehicles).
-	};
-
-	/**
 	 * Set front engine state.
 	 */
 	FORCEINLINE void SetFrontEngine() { SetBit(this->subtype, GVSF_FRONT); }
@@ -311,12 +303,6 @@ struct GroundVehicle : public SpecializedVehicle<T, Type> {
 	FORCEINLINE void ClearMultiheaded() { ClrBit(this->subtype, GVSF_MULTIHEADED); }
 
 	/**
-	 * Check if the vehicle is a front engine.
-	 * @return Returns true if the vehicle is a front engine.
-	 */
-	FORCEINLINE bool IsFrontEngine() const { return HasBit(this->subtype, GVSF_FRONT); }
-
-	/**
 	 * Check if the vehicle is a free wagon (got no engine in front of it).
 	 * @return Returns true if the vehicle is a free wagon.
 	 */
@@ -347,16 +333,57 @@ struct GroundVehicle : public SpecializedVehicle<T, Type> {
 	FORCEINLINE bool IsRearDualheaded() const { return this->IsMultiheaded() && !this->IsEngine(); }
 
 	/**
-	 * Check if the vehicle is an articulated part of an engine.
-	 * @return Returns true if the vehicle is an articulated part.
+	 * Update the GUI variant of the current speed of the vehicle.
+	 * Also mark the widget dirty when that is needed, i.e. when
+	 * the speed of this vehicle has changed.
 	 */
-	FORCEINLINE bool IsArticulatedPart() const { return HasBit(this->subtype, GVSF_ARTICULATED_PART); }
+	FORCEINLINE void SetLastSpeed()
+	{
+		if (this->cur_speed != this->gcache.last_speed) {
+			SetWindowWidgetDirty(WC_VEHICLE_VIEW, this->index, VVW_WIDGET_START_STOP_VEH);
+			this->gcache.last_speed = this->cur_speed;
+		}
+	}
 
+protected:
 	/**
-	 * Check if an engine has an articulated part.
-	 * @return True if the engine has an articulated part.
+	 * Update the speed of the vehicle.
+	 *
+	 * It updates the cur_speed and subspeed variables depending on the state
+	 * of the vehicle; in this case the current acceleration, minimum and
+	 * maximum speeds of the vehicle. It returns the distance that that the
+	 * vehicle can drive this tick. #Vehicle::GetAdvanceDistance() determines
+	 * the distance to drive before moving a step on the map.
+	 * @param accel     The acceleration we would like to give this vehicle.
+	 * @param min_speed The minimum speed here, in vehicle specific units.
+	 * @param max_speed The maximum speed here, in vehicle specific units.
+	 * @return Distance to drive.
 	 */
-	FORCEINLINE bool HasArticulatedPart() const { return this->Next() != NULL && this->Next()->IsArticulatedPart(); }
+	FORCEINLINE uint DoUpdateSpeed(uint accel, int min_speed, int max_speed)
+	{
+		uint spd = this->subspeed + accel;
+		this->subspeed = (byte)spd;
+
+		/* When we are going faster than the maximum speed, reduce the speed
+		 * somewhat gradually. But never lower than the maximum speed. */
+		int tempmax = max_speed;
+		if (this->cur_speed > max_speed) {
+			tempmax = max(this->cur_speed - (this->cur_speed / 10) - 1, max_speed);
+		}
+
+		/* Enforce a maximum and minimum speed. Normally we would use something like
+		 * Clamp for this, but in this case min_speed might be below the maximum speed
+		 * threshold for some reason. That makes acceleration fail and assertions
+		 * happen in Clamp. So make it explicit that min_speed overrules the maximum
+		 * speed by explicit ordering of min and max. */
+		this->cur_speed = spd = max(min(this->cur_speed + ((int)spd >> 8), tempmax), min_speed);
+
+		int scaled_spd = this->GetAdvanceSpeed(spd);
+
+		scaled_spd += this->progress;
+		this->progress = 0; // set later in *Handler or *Controller
+		return scaled_spd;
+	}
 };
 
 #endif /* GROUND_VEHICLE_HPP */
