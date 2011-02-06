@@ -56,7 +56,8 @@ public:
 	 * @param sprite_type The type of sprite we're trying to load.
 	 * @return true iff loading went okay.
 	 */
-	virtual bool LoadSprite(SpriteLoader::Sprite *sprite, uint8 file_slot, size_t file_pos, SpriteType sprite_type) = 0;
+
+	virtual bool LoadSprite(SpriteLoader::Sprite *sprite, uint8 file_slot, size_t file_pos, SpriteType sprite_type, ZoomLevel zoom) = 0;
 
 	virtual ~SpriteLoader() { }
 };

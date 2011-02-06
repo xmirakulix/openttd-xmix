@@ -373,14 +373,14 @@ void RoadVehicle::UpdateDeltaXY(Direction direction)
 {
 #define MKIT(a, b, c, d) ((a & 0xFF) << 24) | ((b & 0xFF) << 16) | ((c & 0xFF) << 8) | ((d & 0xFF) << 0)
 	static const uint32 _delta_xy_table[8] = {
-		MKIT(3, 3, -1, -1),
-		MKIT(3, 7, -1, -3),
-		MKIT(3, 3, -1, -1),
-		MKIT(7, 3, -3, -1),
-		MKIT(3, 3, -1, -1),
-		MKIT(3, 7, -1, -3),
-		MKIT(3, 3, -1, -1),
-		MKIT(7, 3, -3, -1),
+		MKIT(3, 3, -1, -1),   // N
+		MKIT(3, 14, -1, -3),   // NE
+		MKIT(3, 3, -1, -1),   // E
+		MKIT(7, 3, -3, -1),   // SE
+		MKIT(3, 3, -1, -1),   // S
+		MKIT(3, 14, -1, -3),   // SW
+		MKIT(3, 3, -1, -1),   // W
+		MKIT(7, 3, -3, -1),   // NW
 	};
 #undef MKIT
 

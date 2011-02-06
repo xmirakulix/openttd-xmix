@@ -35,23 +35,30 @@ static void PNGAPI png_my_warning(png_structp png_ptr, png_const_charp message)
 	DEBUG(sprite, 0, "WARNING (libpng): %s - %s", message, (char *)png_get_error_ptr(png_ptr));
 }
 
-static bool OpenPNGFile(const char *filename, uint32 id, bool mask)
+static bool OpenPNGFile(const char *filename, uint32 id, bool mask, ZoomLevel zoom)
 {
 	char png_file[MAX_PATH];
 
 	/* Add path separator after 'sprites' if not present */
 	const char *sep = (filename[0] == PATHSEPCHAR) ? "" : PATHSEP;
-	snprintf(png_file, sizeof(png_file), "sprites%s%s" PATHSEP "%d%s.png", sep, filename, id, mask ? "m" : "");
+	snprintf(png_file, sizeof(png_file), "sprites%s%s" PATHSEP "%d_%s%d%s.png", sep, filename, id, "z",zoom,mask ? "m" : "");
 	if (FioCheckFileExists(png_file)) {
 		FioOpenFile(PNG_SLOT, png_file);
 		return true;
 	}
-
+	/* if failed, try to find it in the trunk tars, only for default zoom */
+	if ( zoom == ZOOM_LVL_NORMAL) {
+		snprintf(png_file, sizeof(png_file), "sprites%s%s" PATHSEP "%d%s.png", sep, filename, id, mask ? "m" : "");
+		if (FioCheckFileExists(png_file)) {
+			FioOpenFile(PNG_SLOT, png_file);
+			return true;
+		}
+	}
 	/* TODO -- Add TAR support */
 	return false;
 }
 
-static bool LoadPNG(SpriteLoader::Sprite *sprite, const char *filename, uint32 id, volatile bool mask)
+static bool LoadPNG(SpriteLoader::Sprite *sprite, const char *filename, uint32 id, volatile bool mask, ZoomLevel zoom)
 {
 	png_byte header[8];
 	png_structp png_ptr;
@@ -60,7 +67,7 @@ static bool LoadPNG(SpriteLoader::Sprite *sprite, const char *filename, uint32 i
 	uint i, pixelsize;
 	SpriteLoader::CommonPixel *dst;
 
-	if (!OpenPNGFile(filename, id, mask)) return mask; // If mask is true, and file not found, continue true anyway, as it isn't a show-stopper
+	if (!OpenPNGFile(filename, id, mask, zoom)) return mask; // If mask is true, and file not found, continue true anyway, as it isn't a show-stopper
 
 	/* Check the header */
 	FioReadBlock(header, 8);
@@ -114,9 +121,13 @@ static bool LoadPNG(SpriteLoader::Sprite *sprite, const char *filename, uint32 i
 	bit_depth  = png_get_bit_depth(png_ptr, info_ptr);
 	colour_type = png_get_color_type(png_ptr, info_ptr);
 
-	if (mask && (bit_depth != 8 || colour_type != PNG_COLOR_TYPE_PALETTE)) {
+	if (mask && colour_type != PNG_COLOR_TYPE_PALETTE) {
 		DEBUG(misc, 0, "Ignoring mask for SpriteID %d as it isn't a 8 bit palette image", id);
 		return true;
+	}
+	/* Convert mask file with bit depth of 1, 2 or 4 into 8 bits */
+	if (mask && bit_depth < 8 && colour_type == PNG_COLOR_TYPE_PALETTE) {
+		png_set_packing(png_ptr);
 	}
 
 	if (!mask) {
@@ -155,11 +166,14 @@ static bool LoadPNG(SpriteLoader::Sprite *sprite, const char *filename, uint32 i
 		for (uint x = 0; x < png_get_image_width(png_ptr, info_ptr); x++) {
 			if (mask) {
 				if (row_pointer[x * sizeof(uint8)] != 0) {
-					dst[x].r = 0;
-					dst[x].g = 0;
-					dst[x].b = 0;
+					/* GeekToo: dont overwrite sprite rgb data if mask is present */
 					/* Alpha channel is used from the original image (to allow transparency in remap colours) */
-					dst[x].m = row_pointer[x * sizeof(uint8)];
+					/* Force the value of the palette if it is not in the correct range */
+					if (bit_depth < 8 && (row_pointer[x * sizeof(uint8)] < 196 || row_pointer[x * sizeof(uint8)] > 203)) {
+						dst[x].m = 199;
+					} else {
+						dst[x].m = row_pointer[x * sizeof(uint8)];
+					}
 				}
 			} else {
 				dst[x].r = row_pointer[x * sizeof(uint32) + 0];
@@ -176,11 +190,13 @@ static bool LoadPNG(SpriteLoader::Sprite *sprite, const char *filename, uint32 i
 	return true;
 }
 
-bool SpriteLoaderPNG::LoadSprite(SpriteLoader::Sprite *sprite, uint8 file_slot, size_t file_pos, SpriteType sprite_type)
+bool SpriteLoaderPNG::LoadSprite(SpriteLoader::Sprite *sprite, uint8 file_slot, size_t file_pos, SpriteType sprite_type, ZoomLevel zoom)
 {
 	const char *filename = FioGetFilename(file_slot);
-	if (!LoadPNG(sprite, filename, (uint32)file_pos, false)) return false;
-	if (!LoadPNG(sprite, filename, (uint32)file_pos, true)) return false;
+
+	if (!LoadPNG(sprite, filename, (uint32)file_pos, false, zoom)) return false;
+	if (!LoadPNG(sprite, filename, (uint32)file_pos, true, zoom)) return false;
+
 	return true;
 }
 

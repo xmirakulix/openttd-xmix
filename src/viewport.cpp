@@ -126,7 +126,7 @@ typedef SmallVector<ChildScreenSpriteToDraw, 16> ChildScreenSpriteToDrawVector;
 /** Data structure storing rendering information */
 struct ViewportDrawer {
 	DrawPixelInfo dpi;
-
+	const ViewPort *vp;
 	StringSpriteToDrawVector string_sprites_to_draw;
 	TileSpriteToDrawVector tile_sprites_to_draw;
 	ParentSpriteToDrawVector parent_sprites_to_draw;
@@ -293,16 +293,16 @@ static void SetViewportPosition(Window *w, int x, int y)
 	int i;
 	int left, top, width, height;
 
-	vp->virtual_left = x;
-	vp->virtual_top = y;
 
 	/* Viewport is bound to its left top corner, so it must be rounded down (UnScaleByZoomLower)
 	 * else glitch described in FS#1412 will happen (offset by 1 pixel with zoom level > NORMAL)
 	 */
-	old_left = UnScaleByZoomLower(old_left, vp->zoom);
-	old_top = UnScaleByZoomLower(old_top, vp->zoom);
-	x = UnScaleByZoomLower(x, vp->zoom);
-	y = UnScaleByZoomLower(y, vp->zoom);
+
+	x = UnScaleByZoom(x, vp->zoom);
+	y = UnScaleByZoom(y, vp->zoom);
+
+	vp->virtual_left = x;
+	vp->virtual_top  = y;
 
 	old_left -= x;
 	old_top -= y;
@@ -377,9 +377,8 @@ static Point TranslateXYToTileCoord(const ViewPort *vp, int x, int y)
 				return pt;
 	}
 
-	x = (ScaleByZoom(x, vp->zoom) + vp->virtual_left) >> 2;
-	y = (ScaleByZoom(y, vp->zoom) + vp->virtual_top) >> 1;
-
+	x = (ScaleByZoom(x + vp->virtual_left, vp->zoom) ) >> 2;
+	y = (ScaleByZoom(y + vp->virtual_top, vp->zoom) ) >> 1;
 	a = y - x;
 	b = y + x;
 
@@ -604,10 +603,13 @@ static void AddCombinedSprite(SpriteID image, PaletteID pal, int x, int y, byte 
 	Point pt = RemapCoords(x, y, z);
 	const Sprite *spr = GetSprite(image & SPRITE_MASK, ST_NORMAL);
 
-	if (pt.x + spr->x_offs >= _vd.dpi.left + _vd.dpi.width ||
-			pt.x + spr->x_offs + spr->width <= _vd.dpi.left ||
-			pt.y + spr->y_offs >= _vd.dpi.top + _vd.dpi.height ||
-			pt.y + spr->y_offs + spr->height <= _vd.dpi.top)
+	int xu = UnScaleByZoom(pt.x, _vd.dpi.zoom);
+	int yu = UnScaleByZoom(pt.y, _vd.dpi.zoom);
+
+	if (xu + spr->x_offs >= _vd.vp->virtual_left + _vd.vp->width ||
+		 xu + spr->x_offs + spr->width <= _vd.vp->virtual_left ||
+		 yu + spr->y_offs >= _vd.vp->virtual_top + _vd.vp->height ||
+		 yu + spr->y_offs + spr->height <= _vd.vp->virtual_top)
 		return;
 
 	const ParentSpriteToDraw *pstd = _vd.parent_sprites_to_draw.End() - 1;
@@ -648,7 +650,6 @@ void AddSortableSpriteToDraw(SpriteID image, PaletteID pal, int x, int y, int w,
 	/* make the sprites transparent with the right palette */
 	if (transparent) {
 		SetBit(image, PALETTE_MODIFIER_TRANSPARENT);
-		pal = PALETTE_TO_TRANSPARENT;
 	}
 
 	if (_vd.combine_sprites == SPRITE_COMBINE_ACTIVE) {
@@ -669,10 +670,16 @@ void AddSortableSpriteToDraw(SpriteID image, PaletteID pal, int x, int y, int w,
 		bottom          = RemapCoords(x + w          , y + h          , z + bb_offset_z).y + 1;
 	} else {
 		const Sprite *spr = GetSprite(image & SPRITE_MASK, ST_NORMAL);
-		left = tmp_left = (pt.x += spr->x_offs);
-		right           = (pt.x +  spr->width );
-		top  = tmp_top  = (pt.y += spr->y_offs);
-		bottom          = (pt.y +  spr->height);
+		int x_offs, y_offs,swidth, sheight;
+
+		x_offs = ScaleByZoom(spr->x_offs, _vd.vp->zoom);
+		y_offs = ScaleByZoom(spr->y_offs, _vd.vp->zoom);
+		swidth = ScaleByZoom(spr->width, _vd.vp->zoom);
+		sheight = ScaleByZoom(spr->height, _vd.vp->zoom);
+		left = tmp_left = (pt.x += x_offs);
+		right = (pt.x +  swidth );
+		top  = tmp_top  = (pt.y += y_offs);
+		bottom = (pt.y +  sheight);
 	}
 
 	if (_draw_bounding_boxes && (image != SPR_EMPTY_BOUNDING_BOX)) {
@@ -684,10 +691,10 @@ void AddSortableSpriteToDraw(SpriteID image, PaletteID pal, int x, int y, int w,
 	}
 
 	/* Do not add the sprite to the viewport, if it is outside */
-	if (left   >= _vd.dpi.left + _vd.dpi.width ||
-	    right  <= _vd.dpi.left                 ||
-	    top    >= _vd.dpi.top + _vd.dpi.height ||
-	    bottom <= _vd.dpi.top) {
+	if (UnScaleByZoom(left, _vd.vp->zoom)    >= _vd.vp->virtual_left + _vd.vp->width ||
+		 UnScaleByZoom(right, _vd.vp->zoom)  <= _vd.vp->virtual_left ||
+		 UnScaleByZoom(top, _vd.vp->zoom)    >= _vd.vp->virtual_top + _vd.vp->height  ||
+		 UnScaleByZoom(bottom, _vd.vp->zoom) <= _vd.vp->virtual_top) {
 		return;
 	}
 
@@ -804,7 +811,6 @@ void AddChildSpriteScreen(SpriteID image, PaletteID pal, int x, int y, bool tran
 	/* make the sprites transparent with the right palette */
 	if (transparent) {
 		SetBit(image, PALETTE_MODIFIER_TRANSPARENT);
-		pal = PALETTE_TO_TRANSPARENT;
 	}
 
 	*_vd.last_child = _vd.child_screen_sprites_to_draw.Length();
@@ -813,8 +819,8 @@ void AddChildSpriteScreen(SpriteID image, PaletteID pal, int x, int y, bool tran
 	cs->image = image;
 	cs->pal = pal;
 	cs->sub = sub;
-	cs->x = x;
-	cs->y = y;
+	cs->x = UnScaleByZoom(x, _vd.dpi.zoom);
+	cs->y = UnScaleByZoom(y, _vd.dpi.zoom);
 	cs->next = -1;
 
 	/* Append the sprite to the active ChildSprite list.
@@ -1033,25 +1039,28 @@ draw_inner:
 
 static void ViewportAddLandscape()
 {
-	int x, y, width, height;
+	int x, y, x1, y1, width, nof_sprites_drawn;
+	int top, bottom;
 	TileInfo ti;
 	bool direction;
+	Point pt;
 
 	_cur_ti = &ti;
 
-	/* Transform into tile coordinates and round to closest full tile */
-	x = ((_vd.dpi.top >> 1) - (_vd.dpi.left >> 2)) & ~TILE_UNIT_MASK;
-	y = ((_vd.dpi.top >> 1) + (_vd.dpi.left >> 2) - TILE_SIZE) & ~TILE_UNIT_MASK;
+	x1 = ScaleByZoomLower(_vd.vp->virtual_left + _vd.dpi.left, _vd.vp->zoom)  ;
+	y1 = ScaleByZoomLower(_vd.vp->virtual_top + _vd.dpi.top, _vd.vp->zoom)  ;
 
-	/* determine size of area */
-	{
-		Point pt = RemapCoords(x, y, 241);
-		width = (_vd.dpi.left + _vd.dpi.width - pt.x + 95) >> 6;
-		height = (_vd.dpi.top + _vd.dpi.height - pt.y) >> 5 << 1;
-	}
+	x1 = x1 / 4;
+	y1 = y1 / 2;
 
+	x = ((y1 - x1) / TILE_SIZE) * TILE_SIZE ;
+	y = ((y1 + x1) / TILE_SIZE) * TILE_SIZE - (TILE_SIZE << 1);
+
+	width  = (_vd.dpi.width / UnScaleByZoom(64, _vd.vp->zoom)) + 4;
+
+	bottom = ScaleByZoom(_vd.vp->virtual_top + _vd.dpi.top + _vd.dpi.height, _vd.vp->zoom) + 128;
+	top = ScaleByZoom(_vd.vp->virtual_top + _vd.dpi.top, _vd.vp->zoom) ;
 	assert(width > 0);
-	assert(height > 0);
 
 	direction = false;
 
@@ -1059,7 +1068,7 @@ static void ViewportAddLandscape()
 		int width_cur = width;
 		uint x_cur = x;
 		uint y_cur = y;
-
+		nof_sprites_drawn = 0;
 		do {
 			TileType tt = MP_VOID;
 
@@ -1088,24 +1097,17 @@ static void ViewportAddLandscape()
 					tt = GetTileType(tile);
 				}
 			}
-
-			_vd.foundation_part = FOUNDATION_PART_NONE;
-			_vd.foundation[0] = -1;
-			_vd.foundation[1] = -1;
-			_vd.last_foundation_child[0] = NULL;
-			_vd.last_foundation_child[1] = NULL;
-
-			_tile_type_procs[tt]->draw_tile_proc(&ti);
-
-			if ((x_cur == (int)MapMaxX() * TILE_SIZE && IsInsideMM(y_cur, 0, MapMaxY() * TILE_SIZE + 1)) ||
-					(y_cur == (int)MapMaxY() * TILE_SIZE && IsInsideMM(x_cur, 0, MapMaxX() * TILE_SIZE + 1))) {
-				TileIndex tile = TileVirtXY(x_cur, y_cur);
-				ti.tile = tile;
-				ti.tileh = GetTileSlope(tile, &ti.z);
-				tt = GetTileType(tile);
+			pt = RemapCoords(ti.x,ti.y,ti.z);
+			if (pt.y < bottom) {
+				_vd.foundation_part = FOUNDATION_PART_NONE;
+				_vd.foundation[0] = -1;
+				_vd.foundation[1] = -1;
+				_vd.last_foundation_child[0] = NULL;
+				_vd.last_foundation_child[1] = NULL;
+				_tile_type_procs[tt]->draw_tile_proc(&ti);
+				if (ti.tile != INVALID_TILE) DrawTileSelection(&ti);
+				nof_sprites_drawn++;
 			}
-			if (ti.tile != INVALID_TILE) DrawTileSelection(&ti);
-
 			y_cur += 0x10;
 			x_cur -= 0x10;
 		} while (--width_cur);
@@ -1115,7 +1117,7 @@ static void ViewportAddLandscape()
 		} else {
 			x += 0x10;
 		}
-	} while (--height);
+	} while (nof_sprites_drawn || (pt.y < top));
 }
 
 /**
@@ -1139,6 +1141,13 @@ void ViewportAddString(const DrawPixelInfo *dpi, ZoomLevel small_from, const Vie
 
 	int sign_height     = ScaleByZoom(VPSM_TOP + FONT_HEIGHT_NORMAL + VPSM_BOTTOM, dpi->zoom);
 	int sign_half_width = ScaleByZoom((small ? sign->width_small : sign->width_normal) / 2, dpi->zoom);
+
+
+	left = ScaleByZoom(_vd.vp->virtual_left  + dpi->left, dpi->zoom);
+	top =  ScaleByZoom(_vd.vp->virtual_top  + dpi->top, dpi->zoom);
+	right = left + ScaleByZoom(dpi->width, dpi->zoom);
+	bottom = top + ScaleByZoom(dpi->height, dpi->zoom);
+
 
 	if (bottom < sign->top ||
 			top   > sign->top + sign_height ||
@@ -1254,7 +1263,14 @@ static void ViewportDrawTileSprites(const TileSpriteToDrawVector *tstdv)
 {
 	const TileSpriteToDraw *tsend = tstdv->End();
 	for (const TileSpriteToDraw *ts = tstdv->Begin(); ts != tsend; ++ts) {
-		DrawSprite(ts->image, ts->pal, ts->x, ts->y, ts->sub);
+		int left = UnScaleByZoom(ts->x,_vd.vp->zoom);
+		int top =  UnScaleByZoom(ts->y,_vd.vp->zoom);
+
+
+		left -= _vd.vp->virtual_left;
+		top  -= _vd.vp->virtual_top;
+
+		DrawSprite(ts->image, ts->pal, left, top, ts->sub);
 	}
 }
 
@@ -1318,16 +1334,22 @@ static void ViewportSortParentSprites(ParentSpriteToSortVector *psdv)
 
 static void ViewportDrawParentSprites(const ParentSpriteToSortVector *psd, const ChildScreenSpriteToDrawVector *csstdv)
 {
+	int  x,y, left, top;
 	const ParentSpriteToDraw * const *psd_end = psd->End();
 	for (const ParentSpriteToDraw * const *it = psd->Begin(); it != psd_end; it++) {
-		const ParentSpriteToDraw *ps = *it;
-		if (ps->image != SPR_EMPTY_BOUNDING_BOX) DrawSprite(ps->image, ps->pal, ps->x, ps->y, ps->sub);
+		const ParentSpriteToDraw* ps = *it;
+
+		x = UnScaleByZoom(ps->x, _cur_dpi->zoom) - _vd.vp->virtual_left;
+		y = UnScaleByZoom(ps->y, _cur_dpi->zoom) - _vd.vp->virtual_top;
+		left = UnScaleByZoom(ps->left, _cur_dpi->zoom) - _vd.vp->virtual_left;
+		top = UnScaleByZoom(ps->top, _cur_dpi->zoom) - _vd.vp->virtual_top;
+		if (ps->image != SPR_EMPTY_BOUNDING_BOX) DrawSprite(ps->image, ps->pal, x, y, ps->sub);
 
 		int child_idx = ps->first_child;
 		while (child_idx >= 0) {
 			const ChildScreenSpriteToDraw *cs = csstdv->Get(child_idx);
 			child_idx = cs->next;
-			DrawSprite(cs->image, cs->pal, ps->left + cs->x, ps->top + cs->y, cs->sub);
+			DrawSprite(cs->image, cs->pal, left + cs->x, top + cs->y, cs->sub);
 		}
 	}
 }
@@ -1338,13 +1360,27 @@ static void ViewportDrawParentSprites(const ParentSpriteToSortVector *psd, const
  */
 static void ViewportDrawBoundingBoxes(const ParentSpriteToSortVector *psd)
 {
+	ZoomLevel zoom = _cur_dpi->zoom;
+
 	const ParentSpriteToDraw * const *psd_end = psd->End();
 	for (const ParentSpriteToDraw * const *it = psd->Begin(); it != psd_end; it++) {
 		const ParentSpriteToDraw *ps = *it;
-		Point pt1 = RemapCoords(ps->xmax + 1, ps->ymax + 1, ps->zmax + 1); // top front corner
-		Point pt2 = RemapCoords(ps->xmin    , ps->ymax + 1, ps->zmax + 1); // top left corner
-		Point pt3 = RemapCoords(ps->xmax + 1, ps->ymin    , ps->zmax + 1); // top right corner
-		Point pt4 = RemapCoords(ps->xmax + 1, ps->ymax + 1, ps->zmin    ); // bottom front corner
+
+		Point pt1 = RemapCoords(ps->xmax, ps->ymax, ps->zmax); // top front corner
+		Point pt2 = RemapCoords(ps->xmin, ps->ymax, ps->zmax); // top left corner
+		Point pt3 = RemapCoords(ps->xmax, ps->ymin, ps->zmax); // top right corner
+		Point pt4 = RemapCoords(ps->xmax, ps->ymax, ps->zmin); // bottom front corner
+
+
+		pt1.x = UnScaleByZoom(pt1.x, zoom) - _vd.vp->virtual_left;
+		pt1.y = UnScaleByZoom(pt1.y, zoom) - _vd.vp->virtual_top;
+		pt2.x = UnScaleByZoom(pt2.x, zoom) - _vd.vp->virtual_left;
+		pt2.y = UnScaleByZoom(pt2.y, zoom) - _vd.vp->virtual_top;
+		pt3.x = UnScaleByZoom(pt3.x, zoom) - _vd.vp->virtual_left;
+		pt3.y = UnScaleByZoom(pt3.y, zoom) - _vd.vp->virtual_top;
+		pt4.x = UnScaleByZoom(pt4.x, zoom) - _vd.vp->virtual_left;
+		pt4.y = UnScaleByZoom(pt4.y, zoom) - _vd.vp->virtual_top;
+
 
 		DrawBox(        pt1.x,         pt1.y,
 		        pt2.x - pt1.x, pt2.y - pt1.y,
@@ -1362,20 +1398,17 @@ static void ViewportDrawStrings(DrawPixelInfo *dpi, const StringSpriteToDrawVect
 	dp = *dpi;
 
 	zoom = dp.zoom;
+	zoom = _vd.vp->zoom;
 	dp.zoom = ZOOM_LVL_NORMAL;
-
-	dp.left   = UnScaleByZoom(dp.left,   zoom);
-	dp.top    = UnScaleByZoom(dp.top,    zoom);
-	dp.width  = UnScaleByZoom(dp.width,  zoom);
-	dp.height = UnScaleByZoom(dp.height, zoom);
 
 	const StringSpriteToDraw *ssend = sstdv->End();
 	for (const StringSpriteToDraw *ss = sstdv->Begin(); ss != ssend; ++ss) {
 		TextColour colour = TC_BLACK;
 		bool small = HasBit(ss->width, 15);
 		int w = GB(ss->width, 0, 15);
-		int x = UnScaleByZoom(ss->x, zoom);
-		int y = UnScaleByZoom(ss->y, zoom);
+
+		int x = UnScaleByZoom(ss->x, zoom) - _vd.vp->virtual_left;
+		int y = UnScaleByZoom(ss->y, zoom) - _vd.vp->virtual_top;
 		int h = VPSM_TOP + (small ? FONT_HEIGHT_SMALL : FONT_HEIGHT_NORMAL) + VPSM_BOTTOM;
 
 		SetDParam(0, ss->params[0]);
@@ -1402,7 +1435,6 @@ static void ViewportDrawStrings(DrawPixelInfo *dpi, const StringSpriteToDrawVect
 				);
 			}
 		}
-
 		DrawString(x + VPSM_LEFT, x + w - 1 - VPSM_RIGHT, y + VPSM_TOP, ss->string, colour, SA_HOR_CENTER);
 	}
 }
@@ -1410,27 +1442,41 @@ static void ViewportDrawStrings(DrawPixelInfo *dpi, const StringSpriteToDrawVect
 void ViewportDoDraw(const ViewPort *vp, int left, int top, int right, int bottom)
 {
 	DrawPixelInfo *old_dpi = _cur_dpi;
+	DrawPixelInfo tmp_dpi;
+
 	_cur_dpi = &_vd.dpi;
+	_cur_dpi->zoom = vp->zoom;
+
+
+	int x = left;
+	int y = top;
+
+	left = left - vp->left;
+	top  = top - vp->top;
+	right = right - vp->left;
+	bottom = bottom - vp->top;
 
 	_vd.dpi.zoom = vp->zoom;
-	int mask = ScaleByZoom(-1, vp->zoom);
-
 	_vd.combine_sprites = SPRITE_COMBINE_NONE;
-
-	_vd.dpi.width = (right - left) & mask;
-	_vd.dpi.height = (bottom - top) & mask;
-	_vd.dpi.left = left & mask;
-	_vd.dpi.top = top & mask;
+	_vd.dpi.width = (right - left) ;
+	_vd.dpi.height = (bottom - top) ;
+	_vd.dpi.left = left ;
+	_vd.dpi.top = top ;
 	_vd.dpi.pitch = old_dpi->pitch;
 	_vd.last_child = NULL;
-
-	int x = UnScaleByZoom(_vd.dpi.left - (vp->virtual_left & mask), vp->zoom) + vp->left;
-	int y = UnScaleByZoom(_vd.dpi.top - (vp->virtual_top & mask), vp->zoom) + vp->top;
-
+	_vd.vp = vp;
 	_vd.dpi.dst_ptr = BlitterFactoryBase::GetCurrentBlitter()->MoveTo(old_dpi->dst_ptr, x - old_dpi->left, y - old_dpi->top);
 
 	ViewportAddLandscape();
-	ViewportAddVehicles(&_vd.dpi);
+
+	tmp_dpi = _vd.dpi;
+	tmp_dpi.left = ScaleByZoom(vp->virtual_left, vp->zoom);
+	tmp_dpi.top = ScaleByZoom(vp->virtual_top, vp->zoom);
+	tmp_dpi.width = ScaleByZoom(vp->width, vp->zoom);
+	tmp_dpi.height = ScaleByZoom(vp->height, vp->zoom);
+
+	ViewportAddVehicles(&tmp_dpi);
+	DrawTextEffects(&tmp_dpi);
 
 	ViewportAddTownNames(&_vd.dpi);
 	ViewportAddStationNames(&_vd.dpi);
@@ -1467,7 +1513,8 @@ void ViewportDoDraw(const ViewPort *vp, int left, int top, int right, int bottom
  */
 static void ViewportDrawChk(const ViewPort *vp, int left, int top, int right, int bottom)
 {
-	if (ScaleByZoom(bottom - top, vp->zoom) * ScaleByZoom(right - left, vp->zoom) > 180000) {
+	if (ScaleByZoom(bottom - top, vp->zoom) * ScaleByZoom(right - left, vp->zoom)
+	> 50000) {
 		if ((bottom - top) > (right - left)) {
 			int t = (top + bottom) >> 1;
 			ViewportDrawChk(vp, left, top, right, t);
@@ -1478,12 +1525,7 @@ static void ViewportDrawChk(const ViewPort *vp, int left, int top, int right, in
 			ViewportDrawChk(vp, t, top, right, bottom);
 		}
 	} else {
-		ViewportDoDraw(vp,
-			ScaleByZoom(left - vp->left, vp->zoom) + vp->virtual_left,
-			ScaleByZoom(top - vp->top, vp->zoom) + vp->virtual_top,
-			ScaleByZoom(right - vp->left, vp->zoom) + vp->virtual_left,
-			ScaleByZoom(bottom - vp->top, vp->zoom) + vp->virtual_top
-		);
+		ViewportDoDraw(vp, left, top, right, bottom);
 	}
 }
 
@@ -1595,26 +1637,29 @@ void UpdateViewportPosition(Window *w)
  */
 static void MarkViewportDirty(const ViewPort *vp, int left, int top, int right, int bottom)
 {
-	right -= vp->virtual_left;
+	left = UnScaleByZoom(left, vp->zoom);
+	top  = UnScaleByZoom(top, vp->zoom);
+	right = UnScaleByZoom(right, vp->zoom);
+	bottom = UnScaleByZoom(bottom, vp->zoom);
+
+	int vl = vp->virtual_left;
+	int vt = vp->virtual_top;
+	int w  = vp->width;
+	int h  = vp->height;
+
+	left = max(0, left - vl);
+	if (left >= w) return;
+
+	top = max(0, top - vt);
+	if (top >= h ) return;
+
+	right -= vl;
 	if (right <= 0) return;
 
-	bottom -= vp->virtual_top;
+	bottom -= vt;
 	if (bottom <= 0) return;
 
-	left = max(0, left - vp->virtual_left);
-
-	if (left >= vp->virtual_width) return;
-
-	top = max(0, top - vp->virtual_top);
-
-	if (top >= vp->virtual_height) return;
-
-	SetDirtyBlocks(
-		UnScaleByZoomLower(left, vp->zoom) + vp->left,
-		UnScaleByZoomLower(top, vp->zoom) + vp->top,
-		UnScaleByZoom(right, vp->zoom) + vp->left + 1,
-		UnScaleByZoom(bottom, vp->zoom) + vp->top + 1
-	);
+	SetDirtyBlocks(left + vp->left, top + vp->top, right + vp->left, bottom + vp->top);
 }
 
 /**
@@ -1786,8 +1831,8 @@ static bool CheckClickOnViewportSign(const ViewPort *vp, int x, int y, const Vie
 	int sign_half_width = ScaleByZoom((small ? sign->width_small : sign->width_normal) / 2, vp->zoom);
 	int sign_height = ScaleByZoom(VPSM_TOP + (small ? FONT_HEIGHT_SMALL : FONT_HEIGHT_NORMAL) + VPSM_BOTTOM, vp->zoom);
 
-	x = ScaleByZoom(x - vp->left, vp->zoom) + vp->virtual_left;
-	y = ScaleByZoom(y - vp->top, vp->zoom) + vp->virtual_top;
+	x = ScaleByZoom(x - vp->left + vp->virtual_left, vp->zoom);
+	y = ScaleByZoom(y - vp->top + vp->virtual_top, vp->zoom);
 
 	return y >= sign->top && y < sign->top + sign_height &&
 			x >= sign->center - sign_half_width && x < sign->center + sign_half_width;

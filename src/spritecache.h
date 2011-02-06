@@ -14,9 +14,8 @@
 
 #include "gfx_type.h"
 
-/** Data structure describing a sprite. */
 struct Sprite {
-	byte height;  ///< Height of the sprite.
+	uint16 height;  ///< Height of the sprite.
 	uint16 width; ///< Width of the sprite.
 	int16 x_offs; ///< Number of pixels to shift the sprite to the right.
 	int16 y_offs; ///< Number of pixels to shift the sprite downwards.

@@ -83,7 +83,7 @@ public:
 #if defined(DEDICATED)
 		const char *default_blitter = "null";
 #else
-		const char *default_blitter = "8bpp-optimized";
+		const char *default_blitter = "32bpp-optimized";
 
 #if defined(WITH_COCOA)
 		/* Some people reported lack of fullscreen support in 8 bpp mode.
@@ -91,7 +91,7 @@ public:
 		if (!QZ_CanDisplay8bpp()) {
 			/* The main display can't go to 8 bpp fullscreen mode.
 			 * We will have to switch to 32 bpp by default. */
-			default_blitter = "32bpp-anim";
+			default_blitter = "32bpp-optimized";
 		}
 #endif /* defined(WITH_COCOA) */
 #endif /* defined(DEDICATED) */

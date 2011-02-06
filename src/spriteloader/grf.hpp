@@ -17,7 +17,7 @@
 /** Sprite loader for graphics coming from a (New)GRF. */
 class SpriteLoaderGrf : public SpriteLoader {
 public:
-	bool LoadSprite(SpriteLoader::Sprite *sprite, uint8 file_slot, size_t file_pos, SpriteType sprite_type);
+	bool LoadSprite(SpriteLoader::Sprite *sprite, uint8 file_slot, size_t file_pos, SpriteType sprite_type, ZoomLevel zoom);
 };
 
 #endif /* SPRITELOADER_GRF_HPP */

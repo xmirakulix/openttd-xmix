@@ -17,7 +17,7 @@
 /** Sprite loader for graphics coming from a PNG image. */
 class SpriteLoaderPNG : public SpriteLoader {
 public:
-	bool LoadSprite(SpriteLoader::Sprite *sprite, uint8 file_slot, size_t file_pos, SpriteType sprite_type);
+	bool LoadSprite(SpriteLoader::Sprite *sprite, uint8 file_slot, size_t file_pos, SpriteType sprite_type, ZoomLevel zoom);
 };
 
 #endif /* SPRITELOADER_PNG_HPP */
