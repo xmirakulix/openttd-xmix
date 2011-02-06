@@ -1469,7 +1469,7 @@ enum SpriteSetup {
 	RECOLOUR_BIT = 30,          ///< toggles recolouring in the sprite
 	CUSTOM_BIT = 29,
 	OPAQUE_BIT = 28,
-	SHADOW_BIT = 27,
+
 	PALETTE_WIDTH = 24,         ///< number of bits of the sprite containing the recolour palette
 	SPRITE_WIDTH = 24,          ///< number of bits for the sprite number
 };
@@ -1491,7 +1491,6 @@ enum Modifiers {
 	PALETTE_MODIFIER_TRANSPARENT  = TRANSPARENT_BIT,
 	/** this bit is set when a recolouring process is in action */
 	PALETTE_MODIFIER_COLOUR       = RECOLOUR_BIT,
-	PALETTE_MODIFIER_SHADOW        = SHADOW_BIT,
 };
 
 /**

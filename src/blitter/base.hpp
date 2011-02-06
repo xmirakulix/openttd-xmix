@@ -19,8 +19,6 @@ enum BlitterMode {
 	BM_NORMAL,
 	BM_COLOUR_REMAP,
 	BM_TRANSPARENT,
-	BM_COLOUR_OPAQUE,
-	BM_SHADOW
 };
 
 /**
@@ -40,8 +38,6 @@ public:
 
 		void *dst;               ///< Destination buffer
 		int pitch;               ///< The pitch of the destination buffer
-		uint hue;
-		uint m;
 	};
 
 	enum PaletteAnimation {

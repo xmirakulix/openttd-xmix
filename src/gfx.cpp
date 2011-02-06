@@ -264,17 +264,16 @@ void DrawBox(int x, int y, int dx1, int dy1, int dx2, int dy2, int dx3, int dy3)
 
 	static const byte colour = 15;
 
+	GfxDrawLineUnscaled(x, y, x + dx1, y + dy1, colour);
+	GfxDrawLineUnscaled(x, y, x + dx2, y + dy2, colour);
+	GfxDrawLineUnscaled(x, y, x + dx3, y + dy3, colour);
 
-	GfxDrawLine(x, y, x + dx1, y + dy1, colour);
-	GfxDrawLine(x, y, x + dx2, y + dy2, colour);
-	GfxDrawLine(x, y, x + dx3, y + dy3, colour);
-
-	GfxDrawLine(x + dx1, y + dy1, x + dx1 + dx2, y + dy1 + dy2, colour);
-	GfxDrawLine(x + dx1, y + dy1, x + dx1 + dx3, y + dy1 + dy3, colour);
-	GfxDrawLine(x + dx2, y + dy2, x + dx2 + dx1, y + dy2 + dy1, colour);
-	GfxDrawLine(x + dx2, y + dy2, x + dx2 + dx3, y + dy2 + dy3, colour);
-	GfxDrawLine(x + dx3, y + dy3, x + dx3 + dx1, y + dy3 + dy1, colour);
-	GfxDrawLine(x + dx3, y + dy3, x + dx3 + dx2, y + dy3 + dy2, colour);
+	GfxDrawLineUnscaled(x + dx1, y + dy1, x + dx1 + dx2, y + dy1 + dy2, colour);
+	GfxDrawLineUnscaled(x + dx1, y + dy1, x + dx1 + dx3, y + dy1 + dy3, colour);
+	GfxDrawLineUnscaled(x + dx2, y + dy2, x + dx2 + dx1, y + dy2 + dy1, colour);
+	GfxDrawLineUnscaled(x + dx2, y + dy2, x + dx2 + dx3, y + dy2 + dy3, colour);
+	GfxDrawLineUnscaled(x + dx3, y + dy3, x + dx3 + dx1, y + dy3 + dy1, colour);
+	GfxDrawLineUnscaled(x + dx3, y + dy3, x + dx3 + dx2, y + dy3 + dy2, colour);
 }
 
 /**
@@ -1086,7 +1085,7 @@ skip_cont:;
 		if (IsPrintable(c) && !IsTextDirectionChar(c)) {
 			if (x >= dpi->left + dpi->width) goto skip_char;
 			if (x + _max_char_width >= dpi->left) {
-				GfxMainBlitter(GetGlyph(params.fontsize, c), x, y, BM_COLOUR_OPAQUE);
+				GfxMainBlitter(GetGlyph(params.fontsize, c), x, y, BM_COLOUR_REMAP);
 			}
 			x += GetCharacterWidth(params.fontsize, c);
 		} else if (c == '\n') { // newline = {}
@@ -1140,22 +1139,11 @@ void DrawSprite(SpriteID img, PaletteID pal, int x, int y, const SubSprite *sub)
 {
 	SpriteID real_sprite = GB(img, 0, SPRITE_WIDTH);
 	if (HasBit(img, PALETTE_MODIFIER_TRANSPARENT)) {
-		if (pal != PAL_NONE) {
-			_colour_remap_ptr = GetNonSprite(GB(pal, 0, PALETTE_WIDTH), ST_RECOLOUR) + 1;
-		}
-		else {
-			_colour_remap_ptr = NULL;
-		}
+		_colour_remap_ptr = GetNonSprite(GB(pal, 0, PALETTE_WIDTH), ST_RECOLOUR) + 1;
 		GfxMainBlitter(GetSprite(real_sprite, ST_NORMAL), x, y, BM_TRANSPARENT, sub, real_sprite);
-	} else if (HasBit(img, PALETTE_MODIFIER_SHADOW)){
-		GfxMainBlitter(GetSprite(real_sprite, ST_NORMAL), x, y, BM_SHADOW, sub, real_sprite);
 	} else if (pal != PAL_NONE) {
 		_colour_remap_ptr = GetNonSprite(GB(pal, 0, PALETTE_WIDTH), ST_RECOLOUR) + 1;
-		if(pal >= PALETTE_RECOLOUR_START) {
-			GfxMainBlitter(GetSprite(real_sprite, ST_NORMAL), x, y, BM_COLOUR_REMAP, sub, real_sprite);
-		} else {
-			GfxMainBlitter(GetSprite(real_sprite, ST_NORMAL), x, y, BM_COLOUR_OPAQUE, sub, real_sprite);
-		}
+		GfxMainBlitter(GetSprite(real_sprite, ST_NORMAL), x, y, BM_COLOUR_REMAP, sub, real_sprite);
 	} else {
 		GfxMainBlitter(GetSprite(real_sprite, ST_NORMAL), x, y, BM_NORMAL, sub, real_sprite);
 	}
@@ -1183,16 +1171,15 @@ static void GfxMainBlitter(const Sprite *sprite, int x, int y, BlitterMode mode,
 	bp.sprite = sprite->data;
 	bp.sprite_width = sprite->width;
 	bp.sprite_height = sprite->height;
-
-	bp.width = (sprite->width - clip_left - clip_right) ;
-	bp.height = (sprite->height - clip_top - clip_bottom) ;
+	bp.width = UnScaleByZoom(sprite->width - clip_left - clip_right, dpi->zoom);
+	bp.height = UnScaleByZoom(sprite->height - clip_top - clip_bottom, dpi->zoom);
 	bp.top = 0;
 	bp.left = 0;
-	bp.skip_left = clip_left ;
-	bp.skip_top = clip_top ;
+	bp.skip_left = UnScaleByZoomLower(clip_left, dpi->zoom);
+	bp.skip_top = UnScaleByZoomLower(clip_top, dpi->zoom);
 
-	x += bp.skip_left;
-	y += bp.skip_top;
+	x += ScaleByZoom(bp.skip_left, dpi->zoom);
+	y += ScaleByZoom(bp.skip_top, dpi->zoom);
 
 	bp.dst = dpi->dst_ptr;
 	bp.pitch = dpi->pitch;
@@ -1206,42 +1193,42 @@ static void GfxMainBlitter(const Sprite *sprite, int x, int y, BlitterMode mode,
 
 	y -= dpi->top;
 	/* Check for top overflow */
-
 	if (y < 0) {
-		bp.height -= -y;
+		bp.height -= -UnScaleByZoom(y, dpi->zoom);
 		if (bp.height <= 0) return;
-		bp.skip_top += -y;
+		bp.skip_top += -UnScaleByZoom(y, dpi->zoom);
 		y = 0;
 	} else {
-		bp.top = y;
+		bp.top = UnScaleByZoom(y, dpi->zoom);
 	}
 
 	/* Check for bottom overflow */
-
-	y += bp.height - dpi->height;
-
+	y += ScaleByZoom(bp.height, dpi->zoom) - dpi->height;
 	if (y > 0) {
-		bp.height -= y; //UnScaleByZoom(y, dpi->zoom);
+		bp.height -= UnScaleByZoom(y, dpi->zoom);
 		if (bp.height <= 0) return;
 	}
 
 	x -= dpi->left;
 	/* Check for left overflow */
 	if (x < 0) {
-		bp.width -= -x;
+		bp.width -= -UnScaleByZoom(x, dpi->zoom);
 		if (bp.width <= 0) return;
-		bp.skip_left += -x ;
+		bp.skip_left += -UnScaleByZoom(x, dpi->zoom);
 		x = 0;
 	} else {
-		bp.left = x;
+		bp.left = UnScaleByZoom(x, dpi->zoom);
 	}
 
 	/* Check for right overflow */
-	x += bp.width - dpi->width;
+	x += ScaleByZoom(bp.width, dpi->zoom) - dpi->width;
 	if (x > 0) {
-		bp.width -= x;
+		bp.width -= UnScaleByZoom(x, dpi->zoom);
 		if (bp.width <= 0) return;
 	}
+
+	assert(bp.skip_left + bp.width <= UnScaleByZoom(sprite->width, dpi->zoom));
+	assert(bp.skip_top + bp.height <= UnScaleByZoom(sprite->height, dpi->zoom));
 
 	/* We do not want to catch the mouse. However we also use that spritenumber for unknown (text) sprites. */
 	if (_newgrf_debug_sprite_picker.mode == SPM_REDRAW && sprite_id != SPR_CURSOR_MOUSE) {
@@ -1686,10 +1673,7 @@ void SetDirtyBlocks(int left, int top, int right, int bottom)
 	byte *b;
 	int width;
 	int height;
-	left -=7;
-	right += 7;
-	top -= 7;
-	bottom += 7;
+
 	if (left < 0) left = 0;
 	if (top < 0) top = 0;
 	if (right > _screen.width) right = _screen.width;

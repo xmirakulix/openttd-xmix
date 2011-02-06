@@ -1218,32 +1218,25 @@ static void DrawTile_Road(TileInfo *ti)
 		case ROAD_TILE_CROSSING: {
 			if (ti->tileh != SLOPE_FLAT) DrawFoundation(ti, FOUNDATION_LEVELED);
 
-			const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(ti->tile));
 			PaletteID pal = PAL_NONE;
-
-			Roadside roadside = GetRoadside(ti->tile);
+			const RailtypeInfo *rti = GetRailTypeInfo(GetRailType(ti->tile));
 
 			if (rti->UsesOverlay()) {
 				Axis axis = GetCrossingRailAxis(ti->tile);
+				SpriteID road = SPR_ROAD_Y + axis;
 
-				SpriteID road = GetRailTypeInfo(GetRailType(ti->tile))->base_sprites.crossing;
-				if (GetCrossingRoadAxis(ti->tile) == AXIS_X) road++;
-
+				Roadside roadside = GetRoadside(ti->tile);
 
 				if (AlwaysDrawUnpavedRoads(ti->tile, roadside)) {
-					road += 8;
+					road += 19;
 				} else {
 					switch (roadside) {
-						case ROADSIDE_BARREN:
-							pal = PALETTE_TO_BARE_LAND;
-							break;
-						case ROADSIDE_GRASS:
-							break;
-						default:
-							road += 4;
-							break; // Paved
+						case ROADSIDE_BARREN: pal = PALETTE_TO_BARE_LAND; break;
+						case ROADSIDE_GRASS:  break;
+						default:              road -= 19; break; // Paved
 					}
 				}
+
 				DrawGroundSprite(road, pal);
 
 				SpriteID rail = GetCustomRailSprite(rti, ti->tile, RTSG_CROSSING) + axis;
@@ -1254,6 +1247,8 @@ static void DrawTile_Road(TileInfo *ti)
 
 				if (GetCrossingRoadAxis(ti->tile) == AXIS_X) image++;
 				if (IsCrossingBarred(ti->tile)) image += 2;
+
+				Roadside roadside = GetRoadside(ti->tile);
 
 				if (AlwaysDrawUnpavedRoads(ti->tile, roadside)) {
 					image += 8;

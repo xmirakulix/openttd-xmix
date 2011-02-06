@@ -418,7 +418,7 @@ static void DrawCatenaryRailway(const TileInfo *ti)
 						continue; // No neighbour, go looking for a better position
 					}
 
-					AddSortableSpriteToDraw(pylon_base + pylon_sprites[temp], PAL_NONE, x, y, 1, 1, BB_HEIGHT_UNDER_BRIDGE + 5,
+					AddSortableSpriteToDraw(pylon_base + pylon_sprites[temp], PAL_NONE, x, y, 1, 1, BB_HEIGHT_UNDER_BRIDGE,
 						elevation, IsTransparencySet(TO_CATENARY), -1, -1);
 
 					break; // We already have drawn a pylon, bail out

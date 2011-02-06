@@ -10,8 +10,6 @@
 /** @file spritecache.cpp Caching of sprites. */
 
 #include "stdafx.h"
-#include "gfx_func.h"
-#include "table/sprites.h"
 #include "fileio_func.h"
 #include "spriteloader/grf.hpp"
 #include "gfx_func.h"
@@ -19,19 +17,17 @@
 #include "spriteloader/png.hpp"
 #endif /* WITH_PNG */
 #include "blitter/factory.hpp"
-#include "blitter/32bpp_optimized.hpp"
-
 #include "core/math_func.hpp"
 
 #include "table/sprites.h"
 
 /* Default of 4MB spritecache */
-uint _sprite_cache_size = 64;
+uint _sprite_cache_size = 4;
 
 typedef SimpleTinyEnumT<SpriteType, byte> SpriteTypeByte;
 
 struct SpriteCache {
-	void *ptr[ZOOM_LVL_END];
+	void *ptr;
 	size_t file_pos;
 	uint32 id;
 	uint16 file_slot;
@@ -64,10 +60,6 @@ static SpriteCache *AllocateSpriteCache(uint index)
 		DEBUG(sprite, 4, "Increasing sprite cache to %u items (" PRINTF_SIZE " bytes)", items, items * sizeof(*_spritecache));
 
 		_spritecache = ReallocT(_spritecache, items);
-
-		if (_spritecache == NULL) {
-			error("Unable to allocate sprite cache of %u items (" PRINTF_SIZE " bytes)", items, items * sizeof(*_spritecache));
-		}
 
 		/* Reset the new items and update the count */
 		memset(_spritecache + _spritecache_items, 0, (items - _spritecache_items) * sizeof(*_spritecache));
@@ -190,13 +182,6 @@ static void *ReadSprite(SpriteCache *sc, SpriteID id, SpriteType sprite_type)
 	uint8 file_slot = sc->file_slot;
 	size_t file_pos = sc->file_pos;
 
-	ZoomLevel zoom = ZOOM_LVL_NORMAL;
-
-	if (_cur_dpi) {
-		zoom = ZoomLevel(_cur_dpi->zoom);
-	}
-
-
 	assert(IsMapgenSpriteID(id) == (sprite_type == ST_MAPGEN));
 	assert(sc->type == sprite_type);
 
@@ -206,28 +191,12 @@ static void *ReadSprite(SpriteCache *sc, SpriteID id, SpriteType sprite_type)
 #ifdef WITH_PNG
 		/* Try loading 32bpp graphics in case we are 32bpp output */
 		SpriteLoaderPNG sprite_loader;
-		SpriteLoader::Sprite sprite, dst_sprite;
+		SpriteLoader::Sprite sprite;
 
-		ZoomLevel zoom_idx = (zoom > ZOOM_LVL_NORMAL ? ZOOM_LVL_NORMAL : zoom);
-		bool found = false;
-		do {
-			found = sprite_loader.LoadSprite(&sprite, sc->file_slot,
-														 sc->id, sprite_type, zoom_idx);
-			zoom_idx--;
-		} while ( !found && (zoom_idx >= ZOOM_LVL_MIN ) );
-		if (found) {
-			zoom_idx++;
-			if (zoom > zoom_idx) {
-				Blitter_32bppOptimized *blitter = (Blitter_32bppOptimized *)BlitterFactoryBase::GetCurrentBlitter();
-				do {
-					blitter->RescaleSpriteHalfSize(&sprite, &dst_sprite, true);
-					sprite = dst_sprite;
-					zoom_idx++;
-				} while (zoom_idx < zoom);
-			}
-			sc->ptr[zoom] = BlitterFactoryBase::GetCurrentBlitter()->Encode(&sprite, &AllocSprite);
+		if (sprite_loader.LoadSprite(&sprite, file_slot, sc->id, sprite_type)) {
+			sc->ptr = BlitterFactoryBase::GetCurrentBlitter()->Encode(&sprite, &AllocSprite);
 
-			return sc->ptr[zoom];
+			return sc->ptr;
 		}
 		/* If the PNG couldn't be loaded, fall back to 8bpp grfs */
 #else
@@ -255,7 +224,7 @@ static void *ReadSprite(SpriteCache *sc, SpriteID id, SpriteType sprite_type)
 		static const int RECOLOUR_SPRITE_SIZE = 257;
 		byte *dest = (byte *)AllocSprite(max(RECOLOUR_SPRITE_SIZE, num));
 
-		sc->ptr[zoom] = dest;
+		sc->ptr = dest;
 
 		if (_palette_remap_grf[sc->file_slot]) {
 			byte *dest_tmp = AllocaM(byte, max(RECOLOUR_SPRITE_SIZE, num));
@@ -272,7 +241,7 @@ static void *ReadSprite(SpriteCache *sc, SpriteID id, SpriteType sprite_type)
 			FioReadBlock(dest, num);
 		}
 
-		return sc->ptr[zoom];
+		return sc->ptr;
 	}
 
 	/* Ugly hack to work around the problem that the old landscape
@@ -292,7 +261,7 @@ static void *ReadSprite(SpriteCache *sc, SpriteID id, SpriteType sprite_type)
 
 		num = width * height;
 		sprite = (Sprite *)AllocSprite(sizeof(*sprite) + num);
-		sc->ptr[zoom] = sprite;
+		sc->ptr = sprite;
 		sprite->height = height;
 		sprite->width  = width;
 		sprite->x_offs = FioReadWord();
@@ -314,44 +283,21 @@ static void *ReadSprite(SpriteCache *sc, SpriteID id, SpriteType sprite_type)
 
 		sc->type = sprite_type;
 
-		return sc->ptr[zoom];
+		return sc->ptr;
 	}
 
 	assert(sprite_type == ST_NORMAL || sprite_type == ST_FONT);
 
 	SpriteLoaderGrf sprite_loader;
-	SpriteLoader::Sprite sprite, dst_sprite;
+	SpriteLoader::Sprite sprite;
 
-
-	sc->type = sprite_type;
-	if (!sprite_loader.LoadSprite(&sprite, file_slot, file_pos, sprite_type, ZOOM_LVL_NORMAL)) {
-		return NULL;
+	if (!sprite_loader.LoadSprite(&sprite, file_slot, file_pos, sprite_type)) {
+		if (id == SPR_IMG_QUERY) usererror("Okay... something went horribly wrong. I couldn't load the fallback sprite. What should I do?");
+		return (void*)GetRawSprite(SPR_IMG_QUERY, ST_NORMAL);
 	}
+	sc->ptr = BlitterFactoryBase::GetCurrentBlitter()->Encode(&sprite, &AllocSprite);
 
-	Blitter_32bppOptimized *blitter = (Blitter_32bppOptimized *)BlitterFactoryBase::GetCurrentBlitter();
-	if (BlitterFactoryBase::GetCurrentBlitter()->GetScreenDepth() == 32) {
-		blitter->FillRGBFromPalette(&sprite);
-	}
-	if (zoom < ZOOM_LVL_NORMAL) {
-		ZoomLevel zoom_idx = zoom;
-		do {
-			blitter->RescaleSpriteDoubleSize(&sprite, &dst_sprite);
-			sprite = dst_sprite;
-			zoom_idx++;
-		} while (zoom_idx < ZOOM_LVL_NORMAL);
-	}
-	if (zoom > ZOOM_LVL_NORMAL) {
-		ZoomLevel zoom_idx = ZOOM_LVL_NORMAL;
-		do {
-			blitter->RescaleSpriteHalfSize(&sprite, &dst_sprite, true);
-			sprite = dst_sprite;
-			zoom_idx++;
-		} while (zoom_idx < zoom);
-	}
-
-	sc->ptr[zoom] = BlitterFactoryBase::GetCurrentBlitter()->Encode(&sprite, &AllocSprite);
-
-	return sc->ptr[zoom];
+	return sc->ptr;
 }
 
 
@@ -377,12 +323,7 @@ bool LoadNextSprite(int load_index, byte file_slot, uint file_sprite_id)
 	SpriteCache *sc = AllocateSpriteCache(load_index);
 	sc->file_slot = file_slot;
 	sc->file_pos = file_pos;
-	sc->ptr[ZOOM_LVL_IN_4X] = NULL;
-	sc->ptr[ZOOM_LVL_IN_2X] = NULL;
-	sc->ptr[ZOOM_LVL_NORMAL] = NULL;
-	sc->ptr[ZOOM_LVL_OUT_2X] = NULL;
-	sc->ptr[ZOOM_LVL_OUT_4X] = NULL;
-	sc->ptr[ZOOM_LVL_OUT_8X] = NULL;
+	sc->ptr = NULL;
 	sc->lru = 0;
 	sc->id = file_sprite_id;
 	sc->type = type;
@@ -396,12 +337,10 @@ void DupSprite(SpriteID old_spr, SpriteID new_spr)
 {
 	SpriteCache *scnew = AllocateSpriteCache(new_spr); // may reallocate: so put it first
 	SpriteCache *scold = GetSpriteCache(old_spr);
-	ZoomLevel zoom;
 
 	scnew->file_slot = scold->file_slot;
 	scnew->file_pos = scold->file_pos;
-	zoom = ZoomLevel(_cur_dpi->zoom);
-	scnew->ptr[zoom] = NULL;
+	scnew->ptr = NULL;
 	scnew->id = scold->id;
 	scnew->type = scold->type;
 	scnew->warned = false;
@@ -440,7 +379,6 @@ static size_t GetSpriteCacheUsage()
 
 void IncreaseSpriteLRU()
 {
-	ZoomLevel zoom;
 	/* Increase all LRU values */
 	if (_sprite_lru_counter > 16384) {
 		SpriteID i;
@@ -449,8 +387,7 @@ void IncreaseSpriteLRU()
 
 		for (i = 0; i != _spritecache_items; i++) {
 			SpriteCache *sc = GetSpriteCache(i);
-			zoom = ZoomLevel(_cur_dpi->zoom);
-			if (sc->ptr[zoom] != NULL) {
+			if (sc->ptr != NULL) {
 				if (sc->lru >= 0) {
 					sc->lru = -1;
 				} else if (sc->lru != -32768) {
@@ -475,7 +412,6 @@ void IncreaseSpriteLRU()
 static void CompactSpriteCache()
 {
 	MemBlock *s;
-	ZoomLevel zoom;
 
 	DEBUG(sprite, 3, "Compacting sprite cache, inuse=" PRINTF_SIZE, GetSpriteCacheUsage());
 
@@ -492,16 +428,11 @@ static void CompactSpriteCache()
 			if (next->size == 0) break;
 
 			/* Locate the sprite belonging to the next pointer. */
-			bool found = false;
-			for (zoom = ZOOM_LVL_MIN;
-				  (zoom < ZOOM_LVL_END) && (!found);
-				  zoom = ZoomLevel(zoom + 1)) {
-				for (i = 0; i < _spritecache_items && !found; i++) {
-					found = (GetSpriteCache(i)->ptr[zoom] == next->data);
-				}
+			for (i = 0; GetSpriteCache(i)->ptr != next->data; i++) {
+				assert(i != _spritecache_items);
 			}
-			assert(found);
-			GetSpriteCache(i - 1)->ptr[zoom - 1] = s->data; // Adjust sprite array entry
+
+			GetSpriteCache(i)->ptr = s->data; // Adjust sprite array entry
 			/* Swap this and the next block */
 			temp = *s;
 			memmove(s, next, next->size);
@@ -523,21 +454,16 @@ static void DeleteEntryFromSpriteCache()
 	SpriteID i;
 	uint best = UINT_MAX;
 	MemBlock *s;
-	int16 cur_lru;
-	ZoomLevel zoom;
+	int cur_lru;
 
 	DEBUG(sprite, 3, "DeleteEntryFromSpriteCache, inuse=" PRINTF_SIZE, GetSpriteCacheUsage());
 
-	cur_lru = -1;
+	cur_lru = 0xffff;
 	for (i = 0; i != _spritecache_items; i++) {
 		SpriteCache *sc = GetSpriteCache(i);
-		if (sc->lru < cur_lru) {
-			for (zoom = ZOOM_LVL_MIN; zoom < ZOOM_LVL_END; zoom ++) {
-				if (sc->ptr[zoom]) {
-					cur_lru = sc->lru;
-					best = i;
-				}
-			}
+		if (sc->ptr != NULL && sc->lru < cur_lru) {
+			cur_lru = sc->lru;
+			best = i;
 		}
 	}
 
@@ -545,22 +471,17 @@ static void DeleteEntryFromSpriteCache()
 	 * This shouldn't really happen, unless all sprites are locked. */
 	if (best == UINT_MAX) error("Out of sprite memory");
 
-	SpriteCache *sc = GetSpriteCache(best);
 	/* Mark the block as free (the block must be in use) */
-	for (zoom = ZOOM_LVL_MIN ; zoom < ZOOM_LVL_END ; zoom = ZoomLevel(zoom + 1)) {
-		if (sc->ptr[zoom]) {
-			s = (MemBlock*)sc->ptr[zoom] - 1;
-			assert(!(s->size & S_FREE_MASK));
-			s->size |= S_FREE_MASK;
-			sc->ptr[zoom] = NULL;
+	s = (MemBlock*)GetSpriteCache(best)->ptr - 1;
+	assert(!(s->size & S_FREE_MASK));
+	s->size |= S_FREE_MASK;
+	GetSpriteCache(best)->ptr = NULL;
 
-			/* And coalesce adjacent free blocks */
-			for (s = _spritecache_ptr; s->size != 0; s = NextBlock(s)) {
-				if (s->size & S_FREE_MASK) {
-					while (NextBlock(s)->size & S_FREE_MASK) {
-						s->size += NextBlock(s)->size & ~S_FREE_MASK;
-					}
-				}
+	/* And coalesce adjacent free blocks */
+	for (s = _spritecache_ptr; s->size != 0; s = NextBlock(s)) {
+		if (s->size & S_FREE_MASK) {
+			while (NextBlock(s)->size & S_FREE_MASK) {
+				s->size += NextBlock(s)->size & ~S_FREE_MASK;
 			}
 		}
 	}
@@ -573,7 +494,7 @@ static void *AllocSprite(size_t mem_req)
 	/* Align this to correct boundary. This also makes sure at least one
 	 * bit is not used, so we can use it for other things. */
 	mem_req = Align(mem_req, S_FREE_MASK + 1);
-	DEBUG(sprite, 3, "AllocSprite, memreq=" PRINTF_SIZE, mem_req);
+
 	for (;;) {
 		MemBlock *s;
 
@@ -652,7 +573,6 @@ void *GetRawSprite(SpriteID sprite, SpriteType type)
 {
 	assert(IsMapgenSpriteID(sprite) == (type == ST_MAPGEN));
 	assert(type < ST_INVALID);
-	ZoomLevel zoom;
 
 	if (!SpriteExists(sprite)) {
 		DEBUG(sprite, 1, "Tried to load non-existing sprite #%d. Probable cause: Wrong/missing NewGRFs", sprite);
@@ -668,8 +588,7 @@ void *GetRawSprite(SpriteID sprite, SpriteType type)
 	/* Update LRU */
 	sc->lru = ++_sprite_lru_counter;
 
-	zoom = ZoomLevel(_cur_dpi->zoom);
-	void *p = sc->ptr[zoom];
+	void *p = sc->ptr;
 
 	/* Load the sprite, if it is not loaded, yet */
 	if (p == NULL) p = ReadSprite(sc, sprite, type);
@@ -692,6 +611,7 @@ void GfxInitSpriteMem()
 	free(_spritecache);
 	_spritecache_items = 0;
 	_spritecache = NULL;
+
 	_compact_cache_counter = 0;
 }
 

@@ -2480,7 +2480,7 @@ public:
 			case VVW_WIDGET_CENTER_MAIN_VIEH: {// center main view
 				const Window *mainwindow = FindWindowById(WC_MAIN_WINDOW, 0);
 				/* code to allow the main window to 'follow' the vehicle if the ctrl key is pressed */
-				if (_ctrl_pressed && mainwindow->viewport->zoom <= ZOOM_LVL_NORMAL) {
+				if (_ctrl_pressed && mainwindow->viewport->zoom == ZOOM_LVL_NORMAL) {
 					mainwindow->viewport->follow_vehicle = v->index;
 				} else {
 					ScrollMainWindowTo(v->x_pos, v->y_pos, v->z_pos);

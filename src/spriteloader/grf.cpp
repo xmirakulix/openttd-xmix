@@ -38,7 +38,7 @@ static bool WarnCorruptSprite(uint8 file_slot, size_t file_pos, int line)
 	return false;
 }
 
-bool SpriteLoaderGrf::LoadSprite(SpriteLoader::Sprite *sprite, uint8 file_slot, size_t file_pos, SpriteType sprite_type, ZoomLevel zoom)
+bool SpriteLoaderGrf::LoadSprite(SpriteLoader::Sprite *sprite, uint8 file_slot, size_t file_pos, SpriteType sprite_type)
 {
 	/* Open the right file and go to the correct position */
 	FioSeekToFile(file_slot, file_pos);

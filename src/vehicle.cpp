@@ -889,12 +889,9 @@ static void DoDrawVehicle(const Vehicle *v)
 	PaletteID pal = PAL_NONE;
 
 	if (v->vehstatus & VS_DEFPAL) pal = (v->vehstatus & VS_CRASHED) ? PALETTE_CRASH : GetVehiclePalette(v);
-	if ((v->vehstatus & VS_SHADOW) != 0)
-	{
-		SetBit(image, PALETTE_MODIFIER_SHADOW);
-	}
+
 	AddSortableSpriteToDraw(image, pal, v->x_pos + v->x_offs, v->y_pos + v->y_offs,
-		v->x_extent, v->y_extent, v->z_extent, v->z_pos, false);
+		v->x_extent, v->y_extent, v->z_extent, v->z_pos, (v->vehstatus & VS_SHADOW) != 0);
 }
 
 void ViewportAddVehicles(DrawPixelInfo *dpi)
@@ -931,7 +928,11 @@ void ViewportAddVehicles(DrawPixelInfo *dpi)
 			const Vehicle *v = _vehicle_position_hash[x + y]; // already masked & 0xFFF
 
 			while (v != NULL) {
-				if (!(v->vehstatus & VS_HIDDEN) ) {
+				if (!(v->vehstatus & VS_HIDDEN) &&
+						l <= v->coord.right &&
+						t <= v->coord.bottom &&
+						r >= v->coord.left &&
+						b >= v->coord.top) {
 					DoDrawVehicle(v);
 				}
 				v = v->next_hash;
@@ -951,8 +952,8 @@ Vehicle *CheckClickOnVehicle(const ViewPort *vp, int x, int y)
 
 	if ((uint)(x -= vp->left) >= (uint)vp->width || (uint)(y -= vp->top) >= (uint)vp->height) return NULL;
 
-	x = ScaleByZoom(x + vp->virtual_left, vp->zoom);
-	y = ScaleByZoom(y + vp->virtual_top, vp->zoom) ;
+	x = ScaleByZoom(x, vp->zoom) + vp->virtual_left;
+	y = ScaleByZoom(y, vp->zoom) + vp->virtual_top;
 
 	FOR_ALL_VEHICLES(v) {
 		if ((v->vehstatus & (VS_HIDDEN | VS_UNCLICKABLE)) == 0 &&

@@ -53,13 +53,14 @@ void ResetViewportAfterLoadGame()
 	w->viewport->dest_scrollpos_y = _saved_scrollpos_y;
 
 	ViewPort *vp = w->viewport;
-	vp->zoom = ZOOM_LVL_NORMAL;
+	vp->zoom = (ZoomLevel)min(_saved_scrollpos_zoom, ZOOM_LVL_MAX);
 	vp->virtual_width = ScaleByZoom(vp->width, vp->zoom);
 	vp->virtual_height = ScaleByZoom(vp->height, vp->zoom);
 
 	DoZoomInOutWindow(ZOOM_NONE, w); // update button status
 	MarkWholeScreenDirty();
 }
+
 
 static const SaveLoadGlobVarList _date_desc[] = {
 	SLEG_CONDVAR(_date,                   SLE_FILE_U16 | SLE_VAR_I32,  0,  30),

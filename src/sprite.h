@@ -128,7 +128,7 @@ static inline void DrawNewGRFTileSeqInGUI(int x, int y, const DrawTileSprites *d
  */
 static inline PaletteID SpriteLayoutPaletteTransform(SpriteID image, PaletteID pal, PaletteID default_pal)
 {
-	if (HasBit(image, PALETTE_MODIFIER_COLOUR)) {
+	if (HasBit(image, PALETTE_MODIFIER_TRANSPARENT) || HasBit(image, PALETTE_MODIFIER_COLOUR)) {
 		return (pal != 0 ? pal : default_pal);
 	} else {
 		return PAL_NONE;

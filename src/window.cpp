@@ -534,9 +534,7 @@ static void DrawOverlappedWindow(Window *w, int left, int top, int right, int bo
 void DrawOverlappedWindowForAll(int left, int top, int right, int bottom)
 {
 	Window *w;
-	DrawPixelInfo bk, *old_dpi;
-	old_dpi = _cur_dpi;
-	/* GT TODO: find out why the game signals 11 if we don't backup _cur_dpi here */
+	DrawPixelInfo bk;
 	_cur_dpi = &bk;
 
 	FOR_ALL_WINDOWS_FROM_BACK(w) {
@@ -548,7 +546,6 @@ void DrawOverlappedWindowForAll(int left, int top, int right, int bottom)
 			DrawOverlappedWindow(w, left, top, right, bottom);
 		}
 	}
-	_cur_dpi = old_dpi;
 }
 
 /**
