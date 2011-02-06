@@ -10,7 +10,6 @@
 /** @file genworld.cpp Functions to generate a map. */
 
 #include "stdafx.h"
-#include "openttd.h"
 #include "landscape.h"
 #include "company_func.h"
 #include "thread/thread.h"
@@ -188,7 +187,7 @@ static void _GenerateWorld(void *)
 		if (_debug_desync_level > 0) {
 			char name[MAX_PATH];
 			snprintf(name, lengthof(name), "dmp_cmds_%08x_%08x.sav", _settings_game.game_creation.generation_seed, _date);
-			SaveOrLoad(name, SL_SAVE, AUTOSAVE_DIR);
+			SaveOrLoad(name, SL_SAVE, AUTOSAVE_DIR, false);
 		}
 	} catch (...) {
 		if (_cur_company.IsValid()) _cur_company.Restore();

@@ -534,6 +534,11 @@ static void PlayAircraftSound(const Vehicle *v)
 }
 
 
+/**
+ * Update cached values of an aircraft.
+ * Currently caches callback 36 max speed.
+ * @param v Vehicle
+ */
 void UpdateAircraftCache(Aircraft *v)
 {
 	uint max_speed = GetVehicleProperty(v, PROP_AIRCRAFT_SPEED, 0);
@@ -601,9 +606,7 @@ static int UpdateAircraftSpeed(Aircraft *v, uint speed_limit = SPEED_LIMIT_NONE,
 	/* updates statusbar only if speed have changed to save CPU time */
 	if (spd != v->cur_speed) {
 		v->cur_speed = spd;
-		if (_settings_client.gui.vehicle_speed) {
-			SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
-		}
+		SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
 	}
 
 	/* Adjust distance moved by plane speed setting */

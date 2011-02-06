@@ -17,7 +17,6 @@
 #include "cargotype.h"
 #include "track_func.h"
 #include "road_type.h"
-#include "newgrf_properties.h"
 #include "newgrf_engine.h"
 
 struct RoadVehicle;
@@ -53,6 +52,8 @@ enum RoadVehicleStates {
 	RVSB_IN_DT_ROAD_STOP         = 1 << RVS_IN_DT_ROAD_STOP,  ///< The vehicle is in a drive-through road stop
 	RVSB_IN_DT_ROAD_STOP_END     = RVSB_IN_DT_ROAD_STOP + TRACKDIR_END,
 
+	RVSB_DRIVE_SIDE              = 1 << RVS_DRIVE_SIDE,       ///< The vehicle is at the opposite side of the road
+
 	RVSB_TRACKDIR_MASK           = 0x0F,                      ///< The mask used to extract track dirs
 	RVSB_ROAD_STOP_TRACKDIR_MASK = 0x09                       ///< Only bits 0 and 3 are used to encode the trackdir for road stops
 };
@@ -75,11 +76,8 @@ static const uint RVC_TURN_AROUND_START_FRAME_SHORT_TRAM = 16;
 static const uint RVC_DRIVE_THROUGH_STOP_FRAME           = 11;
 static const uint RVC_DEPOT_STOP_FRAME                   = 11;
 
-enum RoadVehicleSubType {
-	RVST_FRONT,
-	RVST_ARTIC_PART,
-};
-
+/** The number of ticks a vehicle has for overtaking. */
+static const byte RV_OVERTAKE_TIMEOUT = 35;
 
 void RoadVehUpdateCache(RoadVehicle *v);
 
@@ -90,8 +88,8 @@ struct RoadVehicle : public GroundVehicle<RoadVehicle, VEH_ROAD> {
 	byte state;             ///< @see RoadVehicleStates
 	byte frame;
 	uint16 blocked_ctr;
-	byte overtaking;
-	byte overtaking_ctr;
+	byte overtaking;        ///< Set to #RVSB_DRIVE_SIDE when overtaking, otherwise 0.
+	byte overtaking_ctr;    ///< The length of the current overtake attempt.
 	uint16 crashed_ctr;
 	byte reverse_ctr;
 
@@ -99,19 +97,18 @@ struct RoadVehicle : public GroundVehicle<RoadVehicle, VEH_ROAD> {
 	RoadTypes compatible_roadtypes;
 
 	/** We don't want GCC to zero our struct! It already is zeroed and has an index! */
-	RoadVehicle() : GroundVehicle<RoadVehicle, VEH_ROAD>() {}
+	RoadVehicle() : GroundVehicleBase() {}
 	/** We want to 'destruct' the right class. */
 	virtual ~RoadVehicle() { this->PreDestructor(); }
 
 	friend struct GroundVehicle<RoadVehicle, VEH_ROAD>; // GroundVehicle needs to use the acceleration functions defined at RoadVehicle.
 
-	const char *GetTypeString() const { return "road vehicle"; }
 	void MarkDirty();
 	void UpdateDeltaXY(Direction direction);
 	ExpensesType GetExpenseType(bool income) const { return income ? EXPENSES_ROADVEH_INC : EXPENSES_ROADVEH_RUN; }
-	bool IsPrimaryVehicle() const { return this->IsRoadVehFront(); }
+	bool IsPrimaryVehicle() const { return this->IsFrontEngine(); }
 	SpriteID GetImage(Direction direction) const;
-	int GetDisplaySpeed() const { return this->cur_speed / 2; }
+	int GetDisplaySpeed() const { return this->gcache.last_speed / 2; }
 	int GetDisplayMaxSpeed() const { return this->vcache.cached_max_speed / 2; }
 	Money GetRunningCost() const;
 	int GetDisplayImageWidth(Point *offset = NULL) const;
@@ -127,34 +124,7 @@ struct RoadVehicle : public GroundVehicle<RoadVehicle, VEH_ROAD> {
 	bool IsBus() const;
 
 	int GetCurrentMaxSpeed() const;
-
-	/**
-	 * Check if vehicle is a front engine
-	 * @return Returns true if vehicle is a front engine
-	 */
-	FORCEINLINE bool IsRoadVehFront() const { return this->subtype == RVST_FRONT; }
-
-	/**
-	 * Set front engine state
-	 */
-	FORCEINLINE void SetRoadVehFront() { this->subtype = RVST_FRONT; }
-
-	/**
-	 * Check if vehicl is an articulated part of an engine
-	 * @return Returns true if vehicle is an articulated part
-	 */
-	FORCEINLINE bool IsArticulatedPart() const { return this->subtype == RVST_ARTIC_PART; }
-
-	/**
-	 * Set a vehicle to be an articulated part
-	 */
-	FORCEINLINE void SetArticulatedPart() { this->subtype = RVST_ARTIC_PART; }
-
-	/**
-	 * Check if an engine has an articulated part.
-	 * @return True if the engine has an articulated part.
-	 */
-	FORCEINLINE bool HasArticulatedPart() const { return this->Next() != NULL && this->Next()->IsArticulatedPart(); }
+	int UpdateSpeed();
 
 protected: // These functions should not be called outside acceleration code.
 
@@ -295,6 +265,36 @@ protected: // These functions should not be called outside acceleration code.
 		TrackBits trackbits = TrackStatusToTrackBits(ts);
 
 		return trackbits == TRACK_BIT_X || trackbits == TRACK_BIT_Y;
+	}
+
+	/**
+	 * Road vehicles have to use GetSlopeZ() to compute their height
+	 * if they are reversing because in that case, their direction
+	 * is not parallel with the road. It is safe to return \c true
+	 * even if it is not reversing.
+	 * @return are we (possibly) reversing?
+	 */
+	FORCEINLINE bool HasToUseGetSlopeZ()
+	{
+		const RoadVehicle *rv = this->First();
+
+		/* Check if this vehicle is in the same direction as the road under.
+		 * We already know it has either GVF_GOINGUP_BIT or GVF_GOINGDOWN_BIT set. */
+
+		if (rv->state <= RVSB_TRACKDIR_MASK && IsReversingRoadTrackdir((Trackdir)rv->state)) {
+			/* If the first vehicle is reversing, this vehicle may be reversing too
+			 * (especially if this is the first, and maybe the only, vehicle).*/
+			return true;
+		}
+
+		while (rv != this) {
+			/* If any previous vehicle has different direction,
+			 * we may be in the middle of reversing. */
+			if (this->direction != rv->direction) return true;
+			rv = rv->Next();
+		}
+
+		return false;
 	}
 };
 

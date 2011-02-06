@@ -32,7 +32,6 @@
 #include "string_func.h"
 #include "widgets/dropdown_func.h"
 #include "timetable.h"
-#include "vehiclelist.h"
 #include "articulated_vehicles.h"
 #include "spritecache.h"
 #include "core/geometry_func.hpp"
@@ -588,7 +587,7 @@ struct RefitWindow : public Window {
 	{
 		Vehicle *v = Vehicle::Get(this->window_number);
 		CommandCost cost = DoCommand(v->tile, this->selected_vehicle, option->cargo | option->subtype << 8 |
-				this->num_vehicles << 17, DC_QUERY_COST, GetCmdRefitVeh(v->type));
+				this->num_vehicles << 16, DC_QUERY_COST, GetCmdRefitVeh(v->type));
 
 		if (cost.Failed()) return INVALID_STRING_ID;
 
@@ -615,6 +614,7 @@ struct RefitWindow : public Window {
 					r.top + WD_FRAMERECT_TOP, INVALID_VEHICLE, this->hscroll != NULL ? this->hscroll->GetPosition() : 0);
 
 				/* Highlight selected vehicles. */
+				if (this->order != INVALID_VEH_ORDER_ID) break;
 				int x = 0;
 				switch (v->type) {
 					case VEH_TRAIN: {
@@ -758,9 +758,14 @@ struct RefitWindow : public Window {
 						if (left_x < 0 && !start_counting) {
 							this->selected_vehicle = u->index;
 							start_counting = true;
+
+							/* Count the first vehicle, even if articulated part */
+							this->num_vehicles++;
+						} else if (start_counting && !u->IsArticulatedPart()) {
+							/* Do not count articulated parts */
+							this->num_vehicles++;
 						}
 
-						if (start_counting) this->num_vehicles++;
 						if (right_x < 0) break;
 					}
 				}
@@ -810,7 +815,7 @@ struct RefitWindow : public Window {
 
 					if (this->order == INVALID_VEH_ORDER_ID) {
 						bool delete_window = this->selected_vehicle == v->index && this->num_vehicles == UINT8_MAX;
-						if (DoCommandP(v->tile, this->selected_vehicle, this->cargo->cargo | this->cargo->subtype << 8 | this->num_vehicles << 17, GetCmdRefitVeh(v)) && delete_window) delete this;
+						if (DoCommandP(v->tile, this->selected_vehicle, this->cargo->cargo | this->cargo->subtype << 8 | this->num_vehicles << 16, GetCmdRefitVeh(v)) && delete_window) delete this;
 					} else {
 						if (DoCommandP(v->tile, v->index, this->cargo->cargo | this->cargo->subtype << 8 | this->order << 16, CMD_ORDER_REFIT)) delete this;
 					}
@@ -1182,7 +1187,7 @@ static void DrawSmallOrderList(const Vehicle *v, int left, int right, int y, Veh
 	VehicleOrderID oid = start;
 
 	do {
-		if (oid == v->cur_order_index) DrawString(left, right, y, STR_TINY_RIGHT_ARROW, TC_BLACK);
+		if (oid == v->cur_real_order_index) DrawString(left, right, y, STR_TINY_RIGHT_ARROW, TC_BLACK);
 
 		if (order->IsType(OT_GOTO_STATION)) {
 			SetDParam(0, order->GetDestination());
@@ -1289,7 +1294,7 @@ void BaseVehicleListWindow::DrawVehicleListItems(VehicleID selected_vehicle, int
 			DrawString(text_left, text_right, y, STR_TINY_GROUP, TC_BLACK);
 		}
 
-		if (show_orderlist) DrawSmallOrderList(v, orderlist_left, orderlist_right, y, v->cur_order_index);
+		if (show_orderlist) DrawSmallOrderList(v, orderlist_left, orderlist_right, y, v->cur_real_order_index);
 
 		if (v->IsInDepot()) {
 			str = STR_BLUE_COMMA;
@@ -1416,7 +1421,7 @@ public:
 					case VL_SHARED_ORDERS: // Shared Orders
 						if (this->vehicles.Length() == 0) {
 							/* We can't open this window without vehicles using this order
-							* and we should close the window when deleting the order      */
+							 * and we should close the window when deleting the order. */
 							NOT_REACHED();
 						}
 						SetDParam(0, this->vscroll->GetCount());
@@ -1780,7 +1785,7 @@ struct VehicleDetailsWindow : Window {
 	uint GetRoadVehDetailsHeight(const Vehicle *v)
 	{
 		uint desired_height;
-		if (RoadVehicle::From(v)->HasArticulatedPart()) {
+		if (v->HasArticulatedPart()) {
 			/* An articulated RV has its text drawn under the sprite instead of after it, hence 15 pixels extra. */
 			desired_height = WD_FRAMERECT_TOP + 15 + 3 * FONT_HEIGHT_NORMAL + 2 + WD_FRAMERECT_BOTTOM;
 			/* Add space for the cargo amount for each part. */
@@ -1957,7 +1962,7 @@ struct VehicleDetailsWindow : Window {
 				uint text_right = r.right - (rtl ? sprite_width : 0);
 
 				/* Articulated road vehicles use a complete line. */
-				if (v->type == VEH_ROAD && RoadVehicle::From(v)->HasArticulatedPart()) {
+				if (v->type == VEH_ROAD && v->HasArticulatedPart()) {
 					DrawVehicleImage(v, r.left + WD_FRAMERECT_LEFT, r.right - WD_FRAMERECT_RIGHT, r.top + WD_FRAMERECT_TOP, INVALID_VEHICLE, 0);
 				} else {
 					uint sprite_left  = rtl ? text_right : r.left;
@@ -2399,7 +2404,7 @@ public:
 					}
 				} else {
 					SetDParam(0, v->GetDisplaySpeed());
-					str = STR_VEHICLE_STATUS_TRAIN_STOPPING + _settings_client.gui.vehicle_speed;
+					str = STR_VEHICLE_STATUS_TRAIN_STOPPING_VEL;
 				}
 			} else { // no train
 				str = STR_VEHICLE_STATUS_STOPPED;
@@ -2411,7 +2416,7 @@ public:
 				case OT_GOTO_STATION: {
 					SetDParam(0, v->current_order.GetDestination());
 					SetDParam(1, v->GetDisplaySpeed());
-					str = STR_VEHICLE_STATUS_HEADING_FOR_STATION + _settings_client.gui.vehicle_speed;
+					str = STR_VEHICLE_STATUS_HEADING_FOR_STATION_VEL;
 					break;
 				}
 
@@ -2420,9 +2425,9 @@ public:
 					SetDParam(1, v->current_order.GetDestination());
 					SetDParam(2, v->GetDisplaySpeed());
 					if (v->current_order.GetDepotActionType() & ODATFB_HALT) {
-						str = STR_VEHICLE_STATUS_HEADING_FOR_DEPOT + _settings_client.gui.vehicle_speed;
+						str = STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_VEL;
 					} else {
-						str = STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE + _settings_client.gui.vehicle_speed;
+						str = STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL;
 					}
 					break;
 				}
@@ -2434,7 +2439,7 @@ public:
 				case OT_GOTO_WAYPOINT: {
 					assert(v->type == VEH_TRAIN || v->type == VEH_SHIP);
 					SetDParam(0, v->current_order.GetDestination());
-					str = STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT + _settings_client.gui.vehicle_speed;
+					str = STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL;
 					SetDParam(1, v->GetDisplaySpeed());
 					break;
 				}
@@ -2448,7 +2453,7 @@ public:
 
 				default:
 					if (v->GetNumManualOrders() == 0) {
-						str = STR_VEHICLE_STATUS_NO_ORDERS + _settings_client.gui.vehicle_speed;
+						str = STR_VEHICLE_STATUS_NO_ORDERS_VEL;
 						SetDParam(0, v->GetDisplaySpeed());
 					} else {
 						str = STR_EMPTY;

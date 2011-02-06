@@ -22,7 +22,7 @@
 
 #include <map>
 
-/*
+/**
  * Link front and rear multiheaded engines to each other
  * This is done when loading a savegame
  */
@@ -296,14 +296,33 @@ void AfterLoadVehicles(bool part_of_load)
 		}
 	}
 
-	if (IsSavegameVersionBefore(105)) {
-		/* Before 105 there was no order for shared orders, thus it messed up horribly */
-		FOR_ALL_VEHICLES(v) {
-			if (v->First() != v || v->orders.list != NULL || v->previous_shared != NULL || v->next_shared == NULL) continue;
+	if (part_of_load) {
+		if (IsSavegameVersionBefore(105)) {
+			/* Before 105 there was no order for shared orders, thus it messed up horribly */
+			FOR_ALL_VEHICLES(v) {
+				if (v->First() != v || v->orders.list != NULL || v->previous_shared != NULL || v->next_shared == NULL) continue;
 
-			v->orders.list = new OrderList(NULL, v);
-			for (Vehicle *u = v; u != NULL; u = u->next_shared) {
-				u->orders.list = v->orders.list;
+				v->orders.list = new OrderList(NULL, v);
+				for (Vehicle *u = v; u != NULL; u = u->next_shared) {
+					u->orders.list = v->orders.list;
+				}
+			}
+		}
+
+		if (IsSavegameVersionBefore(157)) {
+			/* The road vehicle subtype was converted to a flag. */
+			RoadVehicle *rv;
+			FOR_ALL_ROADVEHICLES(rv) {
+				if (rv->subtype == 0) {
+					/* The road vehicle is at the front. */
+					rv->SetFrontEngine();
+				} else if (rv->subtype == 1) {
+					/* The road vehicle is an articulated part. */
+					rv->subtype = 0;
+					rv->SetArticulatedPart();
+				} else {
+					NOT_REACHED();
+				}
 			}
 		}
 	}
@@ -317,7 +336,7 @@ void AfterLoadVehicles(bool part_of_load)
 			case VEH_TRAIN: {
 				Train *t = Train::From(v);
 				if (t->IsFrontEngine() || t->IsFreeWagon()) {
-					t->tcache.last_speed = t->cur_speed; // update displayed train speed
+					t->gcache.last_speed = t->cur_speed; // update displayed train speed
 					t->ConsistChanged(false);
 				}
 				break;
@@ -325,7 +344,8 @@ void AfterLoadVehicles(bool part_of_load)
 
 			case VEH_ROAD: {
 				RoadVehicle *rv = RoadVehicle::From(v);
-				if (rv->IsRoadVehFront()) {
+				if (rv->IsFrontEngine()) {
+					rv->gcache.last_speed = rv->cur_speed; // update displayed road vehicle speed
 					RoadVehUpdateCache(rv);
 					if (_settings_game.vehicle.roadveh_acceleration_model != AM_ORIGINAL) {
 						rv->CargoChanged();
@@ -343,7 +363,7 @@ void AfterLoadVehicles(bool part_of_load)
 	}
 
 	/* Stop non-front engines */
-	if (IsSavegameVersionBefore(112)) {
+	if (part_of_load && IsSavegameVersionBefore(112)) {
 		FOR_ALL_VEHICLES(v) {
 			if (v->type == VEH_TRAIN) {
 				Train *t = Train::From(v);
@@ -469,7 +489,8 @@ const SaveLoad *GetVehicleDescription(VehicleType vt)
 		     SLE_VAR(Vehicle, tick_counter,          SLE_UINT8),
 		 SLE_CONDVAR(Vehicle, running_ticks,         SLE_UINT8,                   88, SL_MAX_VERSION),
 
-		     SLE_VAR(Vehicle, cur_order_index,       SLE_UINT8),
+		     SLE_VAR(Vehicle, cur_auto_order_index,  SLE_UINT8),
+		 SLE_CONDVAR(Vehicle, cur_real_order_index,  SLE_UINT8,                  158, SL_MAX_VERSION),
 		/* num_orders is now part of OrderList and is not saved but counted */
 		SLE_CONDNULL(1,                                                            0, 104),
 

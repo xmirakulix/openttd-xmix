@@ -18,7 +18,6 @@
 #include "company_func.h"
 #include "vehicle_gui.h"
 #include "articulated_vehicles.h"
-#include "newgrf_engine.h"
 #include "newgrf_sound.h"
 #include "pathfinder/yapf/yapf.h"
 #include "strings_func.h"
@@ -85,7 +84,7 @@ static const Trackdir _roadveh_depot_exit_trackdir[DIAGDIR_END] = {
  */
 bool RoadVehicle::IsBus() const
 {
-	assert(this->IsRoadVehFront());
+	assert(this->IsFrontEngine());
 	return IsCargoInClass(this->cargo_type, CC_PASSENGERS);
 }
 
@@ -156,6 +155,11 @@ void DrawRoadVehEngine(int left, int right, int preferred_x, int y, EngineID eng
 	DrawSprite(sprite, pal, preferred_x, y);
 }
 
+/**
+ * Get length of a road vehicle.
+ * @param v Road vehicle to query length.
+ * @return Length of the given road vehicle.
+ */
 static uint GetRoadVehLength(const RoadVehicle *v)
 {
 	uint length = 8;
@@ -168,10 +172,15 @@ static uint GetRoadVehLength(const RoadVehicle *v)
 	return length;
 }
 
+/**
+ * Update the cache of a road vehicle.
+ * @param v Road vehicle needing an update of its cache.
+ * @pre \a v must be first road vehicle.
+ */
 void RoadVehUpdateCache(RoadVehicle *v)
 {
 	assert(v->type == VEH_ROAD);
-	assert(v->IsRoadVehFront());
+	assert(v->IsFrontEngine());
 
 	v->InvalidateNewGRFCacheOfChain();
 
@@ -251,7 +260,7 @@ CommandCost CmdBuildRoadVehicle(TileIndex tile, DoCommandFlag flags, const Engin
 
 		v->cur_image = SPR_IMG_QUERY;
 		v->random_bits = VehicleRandomBits();
-		v->SetRoadVehFront();
+		v->SetFrontEngine();
 
 		v->roadtype = HasBit(e->info.misc_flags, EF_ROAD_TRAM) ? ROADTYPE_TRAM : ROADTYPE_ROAD;
 		v->compatible_roadtypes = RoadTypeToRoadTypes(v->roadtype);
@@ -285,7 +294,7 @@ bool RoadVehicle::IsStoppedInDepot() const
 	TileIndex tile = this->tile;
 
 	if (!IsRoadDepotTile(tile)) return false;
-	if (this->IsRoadVehFront() && !(this->vehstatus & VS_STOPPED)) return false;
+	if (this->IsFrontEngine() && !(this->vehstatus & VS_STOPPED)) return false;
 
 	for (const RoadVehicle *v = this; v != NULL; v = v->Next()) {
 		if (v->state != RVSB_IN_DEPOT || v->tile != tile) return false;
@@ -429,7 +438,7 @@ static void RoadVehSetRandomDirection(RoadVehicle *v)
 		uint32 r = Random();
 
 		v->direction = ChangeDir(v->direction, delta[r & 3]);
-		v->UpdateInclination(false, true);
+		v->UpdateViewport(true, true);
 	} while ((v = v->Next()) != NULL);
 }
 
@@ -461,8 +470,8 @@ static Vehicle *EnumCheckRoadVehCrashTrain(Vehicle *v, void *data)
 
 uint RoadVehicle::Crash(bool flooded)
 {
-	uint pass = Vehicle::Crash(flooded);
-	if (this->IsRoadVehFront()) {
+	uint pass = this->GroundVehicleBase::Crash(flooded);
+	if (this->IsFrontEngine()) {
 		pass += 1; // driver
 
 		/* If we're in a drive through road stop we ought to leave it */
@@ -517,7 +526,7 @@ TileIndex RoadVehicle::GetOrderStationLocation(StationID station)
 	const Station *st = Station::Get(station);
 	if (!CanVehicleUseStation(this, st)) {
 		/* There is no stop left at the station, so don't even TRY to go there */
-		this->IncrementOrderIndex();
+		this->IncrementRealOrderIndex();
 		return 0;
 	}
 
@@ -651,42 +660,16 @@ static void RoadVehArrivesAt(const RoadVehicle *v, Station *st)
  * the distance to drive before moving a step on the map.
  * @return distance to drive.
  */
-static int RoadVehAccelerate(RoadVehicle *v)
+int RoadVehicle::UpdateSpeed()
 {
-	uint oldspeed = v->cur_speed;
-	uint accel = v->overtaking != 0 ? 256 : 0;
-	accel += (_settings_game.vehicle.roadveh_acceleration_model == AM_ORIGINAL) ? 256 : v->GetAcceleration();
-	uint spd = v->subspeed + accel;
+	switch (_settings_game.vehicle.roadveh_acceleration_model) {
+		default: NOT_REACHED();
+		case AM_ORIGINAL:
+			return this->DoUpdateSpeed(this->overtaking != 0 ? 512 : 256, 0, this->GetCurrentMaxSpeed());
 
-	v->subspeed = (uint8)spd;
-
-	int tempmax = v->GetCurrentMaxSpeed();
-	if (v->cur_speed > tempmax) {
-		tempmax = v->cur_speed - (v->cur_speed / 10) - 1;
+		case AM_REALISTIC:
+			return this->DoUpdateSpeed(this->GetAcceleration() + (this->overtaking != 0 ? 256 : 0), this->GetAccelerationStatus() == AS_BRAKE ? 0 : 4, this->GetCurrentMaxSpeed());
 	}
-
-	/* Force a minimum speed of 1 km/h when realistic acceleration is on. */
-	int min_speed = (_settings_game.vehicle.roadveh_acceleration_model == AM_ORIGINAL) ? 0 : 4;
-	v->cur_speed = spd = Clamp(v->cur_speed + ((int)spd >> 8), min_speed, tempmax);
-
-	/* Apply bridge speed limit */
-	if (v->state == RVSB_WORMHOLE && !(v->vehstatus & VS_HIDDEN)) {
-		RoadVehicle *first = v->First();
-		first->cur_speed = min(first->cur_speed, GetBridgeSpec(GetBridgeType(v->tile))->speed * 2);
-	}
-
-	/* Update statusbar only if speed has changed to save CPU time */
-	if (oldspeed != v->cur_speed) {
-		if (_settings_client.gui.vehicle_speed) {
-			SetWindowWidgetDirty(WC_VEHICLE_VIEW, v->index, VVW_WIDGET_START_STOP_VEH);
-		}
-	}
-
-	int scaled_spd = v->GetAdvanceSpeed(spd);
-
-	scaled_spd += v->progress;
-	v->progress = 0;
-	return scaled_spd;
 }
 
 static Direction RoadVehGetNewDirection(const RoadVehicle *v, int x, int y)
@@ -791,14 +774,10 @@ static void RoadVehCheckOvertake(RoadVehicle *v, RoadVehicle *u)
 	od.tile = v->tile + TileOffsByDiagDir(DirToDiagDir(v->direction));
 	if (CheckRoadBlockedForOvertaking(&od)) return;
 
-	if (od.u->cur_speed == 0 || (od.u->vehstatus & VS_STOPPED)) {
-		v->overtaking_ctr = 0x11;
-		v->overtaking = 0x10;
-	} else {
-//		if (CheckRoadBlockedForOvertaking(&od)) return;
-		v->overtaking_ctr = 0;
-		v->overtaking = 0x10;
-	}
+	/* When the vehicle in front of us is stopped we may only take
+	 * half the time to pass it than when the vehicle is moving. */
+	v->overtaking_ctr = (od.u->cur_speed == 0 || (od.u->vehstatus & VS_STOPPED)) ? RV_OVERTAKE_TIMEOUT / 2 : 0;
+	v->overtaking = RVSB_DRIVE_SIDE;
 }
 
 static void RoadZPosAffectSpeed(RoadVehicle *v, byte old_z)
@@ -1062,7 +1041,7 @@ static bool IndividualRoadVehicleController(RoadVehicle *v, const RoadVehicle *p
 		if (IsTileType(v->tile, MP_STATION)) {
 			/* Force us to be not overtaking! */
 			v->overtaking = 0;
-		} else if (++v->overtaking_ctr >= 35) {
+		} else if (++v->overtaking_ctr >= RV_OVERTAKE_TIMEOUT) {
 			/* If overtaking just aborts at a random moment, we can have a out-of-bound problem,
 			 *  if the vehicle started a corner. To protect that, only allow an abort of
 			 *  overtake if we are on straight roads */
@@ -1081,7 +1060,13 @@ static bool IndividualRoadVehicleController(RoadVehicle *v, const RoadVehicle *p
 		/* Vehicle is entering a depot or is on a bridge or in a tunnel */
 		GetNewVehiclePosResult gp = GetNewVehiclePos(v);
 
-		if (v->IsRoadVehFront()) {
+		/* Apply bridge speed limit */
+		if (!(v->vehstatus & VS_HIDDEN)) {
+			RoadVehicle *first = v->First();
+			first->cur_speed = min(first->cur_speed, GetBridgeSpec(GetBridgeType(v->tile))->speed * 2);
+		}
+
+		if (v->IsFrontEngine()) {
 			const Vehicle *u = RoadVehFindCloseTo(v, gp.x, gp.y, v->direction);
 			if (u != NULL) {
 				v->cur_speed = u->First()->cur_speed;
@@ -1114,7 +1099,7 @@ static bool IndividualRoadVehicleController(RoadVehicle *v, const RoadVehicle *p
 		TileIndex tile = v->tile + TileOffsByDiagDir((DiagDirection)(rd.x & 3));
 		Trackdir dir;
 
-		if (v->IsRoadVehFront()) {
+		if (v->IsFrontEngine()) {
 			/* If this is the front engine, look for the right path. */
 			dir = RoadFindPathToDest(v, tile, (DiagDirection)(rd.x & 3));
 		} else {
@@ -1122,7 +1107,7 @@ static bool IndividualRoadVehicleController(RoadVehicle *v, const RoadVehicle *p
 		}
 
 		if (dir == INVALID_TRACKDIR) {
-			if (!v->IsRoadVehFront()) error("Disconnecting road vehicle.");
+			if (!v->IsFrontEngine()) error("Disconnecting road vehicle.");
 			v->cur_speed = 0;
 			return false;
 		}
@@ -1130,6 +1115,9 @@ static bool IndividualRoadVehicleController(RoadVehicle *v, const RoadVehicle *p
 again:
 		uint start_frame = RVC_DEFAULT_START_FRAME;
 		if (IsReversingRoadTrackdir(dir)) {
+			/* When turning around we can't be overtaking. */
+			v->overtaking = 0;
+
 			/* Turning around */
 			if (v->roadtype == ROADTYPE_TRAM) {
 				/* Determine the road bits the tram needs to be able to turn around
@@ -1143,7 +1131,7 @@ again:
 					case TRACKDIR_RVREV_NW: needed = ROAD_SE; break;
 				}
 				if ((v->Previous() != NULL && v->Previous()->tile == tile) ||
-						(v->IsRoadVehFront() && IsNormalRoadTile(tile) && !HasRoadWorks(tile) &&
+						(v->IsFrontEngine() && IsNormalRoadTile(tile) && !HasRoadWorks(tile) &&
 							(needed & GetRoadBits(tile, ROADTYPE_TRAM)) != ROAD_NONE)) {
 					/*
 					 * Taking the 'big' corner for trams only happens when:
@@ -1155,7 +1143,7 @@ again:
 					 *   going to cause the tram to split up.
 					 * - Or the front of the tram can drive over the next tile.
 					 */
-				} else if (!v->IsRoadVehFront() || !CanBuildTramTrackOnTile(v->owner, tile, needed) || ((~needed & GetAnyRoadBits(v->tile, ROADTYPE_TRAM, false)) == ROAD_NONE)) {
+				} else if (!v->IsFrontEngine() || !CanBuildTramTrackOnTile(v->owner, tile, needed) || ((~needed & GetAnyRoadBits(v->tile, ROADTYPE_TRAM, false)) == ROAD_NONE)) {
 					/*
 					 * Taking the 'small' corner for trams only happens when:
 					 * - We are not the from vehicle of an articulated tram.
@@ -1189,7 +1177,7 @@ again:
 		int y = TileY(tile) * TILE_SIZE + rdp[start_frame].y;
 
 		Direction new_dir = RoadVehGetSlidingDirection(v, x, y);
-		if (v->IsRoadVehFront()) {
+		if (v->IsFrontEngine()) {
 			Vehicle *u = RoadVehFindCloseTo(v, x, y, new_dir);
 			if (u != NULL) {
 				v->cur_speed = u->First()->cur_speed;
@@ -1273,7 +1261,7 @@ again:
 				case DIAGDIR_SW: dir = TRACKDIR_RVREV_NE; break;
 			}
 		} else {
-			if (v->IsRoadVehFront()) {
+			if (v->IsFrontEngine()) {
 				/* If this is the front engine, look for the right path. */
 				dir = RoadFindPathToDest(v, v->tile, (DiagDirection)(rd.x & 3));
 			} else {
@@ -1292,7 +1280,7 @@ again:
 		int y = TileY(v->tile) * TILE_SIZE + rdp[turn_around_start_frame].y;
 
 		Direction new_dir = RoadVehGetSlidingDirection(v, x, y);
-		if (v->IsRoadVehFront() && RoadVehFindCloseTo(v, x, y, new_dir) != NULL) return false;
+		if (v->IsFrontEngine() && RoadVehFindCloseTo(v, x, y, new_dir) != NULL) return false;
 
 		uint32 r = VehicleEnterTile(v, v->tile, x, y);
 		if (HasBit(r, VETS_CANNOT_ENTER)) {
@@ -1329,7 +1317,7 @@ again:
 
 	Direction new_dir = RoadVehGetSlidingDirection(v, x, y);
 
-	if (v->IsRoadVehFront() && !IsInsideMM(v->state, RVSB_IN_ROAD_STOP, RVSB_IN_ROAD_STOP_END)) {
+	if (v->IsFrontEngine() && !IsInsideMM(v->state, RVSB_IN_ROAD_STOP, RVSB_IN_ROAD_STOP_END)) {
 		/* Vehicle is not in a road stop.
 		 * Check for another vehicle to overtake */
 		RoadVehicle *u = RoadVehFindCloseTo(v, x, y, new_dir);
@@ -1373,7 +1361,7 @@ again:
 	 * and it's the correct type of stop (bus or truck) and the frame equals the stop frame...
 	 * (the station test and stop type test ensure that other vehicles, using the road stop as
 	 * a through route, do not stop) */
-	if (v->IsRoadVehFront() && ((IsInsideMM(v->state, RVSB_IN_ROAD_STOP, RVSB_IN_ROAD_STOP_END) &&
+	if (v->IsFrontEngine() && ((IsInsideMM(v->state, RVSB_IN_ROAD_STOP, RVSB_IN_ROAD_STOP_END) &&
 			_road_stop_stop_frame[v->state - RVSB_IN_ROAD_STOP + (_settings_game.vehicle.road_side << RVS_DRIVE_SIDE)] == v->frame) ||
 			(IsInsideMM(v->state, RVSB_IN_DT_ROAD_STOP, RVSB_IN_DT_ROAD_STOP_END) &&
 			v->current_order.ShouldStopAtStation(v, GetStationIndex(v->tile)) &&
@@ -1476,7 +1464,7 @@ static bool RoadVehController(RoadVehicle *v)
 	v->ShowVisualEffect();
 
 	/* Check how far the vehicle needs to proceed */
-	int j = RoadVehAccelerate(v);
+	int j = v->UpdateSpeed();
 
 	int adv_spd = v->GetAdvanceDistance();
 	bool blocked = false;
@@ -1498,6 +1486,8 @@ static bool RoadVehController(RoadVehicle *v)
 		/* Test for a collision, but only if another movement will occur. */
 		if (j >= adv_spd && RoadVehCheckTrainCrash(v)) break;
 	}
+
+	v->SetLastSpeed();
 
 	for (RoadVehicle *u = v; u != NULL; u = u->Next()) {
 		if ((u->vehstatus & VS_HIDDEN) != 0) continue;
@@ -1526,7 +1516,7 @@ Money RoadVehicle::GetRunningCost() const
 
 bool RoadVehicle::Tick()
 {
-	if (this->IsRoadVehFront()) {
+	if (this->IsFrontEngine()) {
 		if (!(this->vehstatus & VS_STOPPED)) this->running_ticks++;
 		return RoadVehController(this);
 	}
@@ -1578,7 +1568,7 @@ static void CheckIfRoadVehNeedsService(RoadVehicle *v)
 
 void RoadVehicle::OnNewDay()
 {
-	if (!this->IsRoadVehFront()) return;
+	if (!this->IsFrontEngine()) return;
 
 	if ((++this->day_counter & 7) == 0) DecreaseVehicleValue(this);
 	if (this->blocked_ctr == 0) CheckVehicleBreakdown(this);

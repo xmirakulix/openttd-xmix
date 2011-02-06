@@ -245,7 +245,7 @@ static CommandCost GetRefitCost(EngineID engine_type)
  * This is the vehicle-type independent part of the CmdRefitXXX functions.
  * @param v            The vehicle to refit.
  * @param only_this    Whether to only refit this vehicle, or to check the rest of them.
- * @param num_vehicles Number of vehicles to refit. Zero means the whole chain.
+ * @param num_vehicles Number of vehicles to refit (not counting articulated parts). Zero means the whole chain.
  * @param new_cid      Cargotype to refit to
  * @param new_subtype  Cargo subtype to refit to
  * @param flags        Command flags
@@ -270,19 +270,27 @@ static CommandCost RefitVehicle(Vehicle *v, bool only_this, uint8 num_vehicles, 
 		if (v->type == VEH_TRAIN && !vehicles_to_refit.Contains(v->index) && !only_this) continue;
 
 		const Engine *e = Engine::Get(v->engine_type);
-		if (!e->CanCarryCargo() || !HasBit(e->info.refit_mask, new_cid)) continue;
+		if (!e->CanCarryCargo()) continue;
+
+		/* If the vehicle is not refittable, count its capacity nevertheless if the cargo matches */
+		bool refittable = HasBit(e->info.refit_mask, new_cid);
+		if (!refittable && v->cargo_type != new_cid) continue;
 
 		/* Back up the vehicle's cargo type */
 		CargoID temp_cid = v->cargo_type;
 		byte temp_subtype = v->cargo_subtype;
-		v->cargo_type = new_cid;
-		v->cargo_subtype = new_subtype;
+		if (refittable) {
+			v->cargo_type = new_cid;
+			v->cargo_subtype = new_subtype;
+		}
 
 		uint16 mail_capacity = 0;
 		uint amount = GetVehicleCapacity(v, &mail_capacity);
 		total_capacity += amount;
 		/* mail_capacity will always be zero if the vehicle is not an aircraft. */
 		total_mail_capacity += mail_capacity;
+
+		if (!refittable) continue;
 
 		/* Restore the original cargo type */
 		v->cargo_type = temp_cid;
@@ -316,10 +324,11 @@ static CommandCost RefitVehicle(Vehicle *v, bool only_this, uint8 num_vehicles, 
  * @param flags type of operation
  * @param p1 vehicle ID to refit
  * @param p2 various bitstuffed elements
- * - p2 = (bit 0-7)   - New cargo type to refit to.
+ * - p2 = (bit 0-4)   - New cargo type to refit to.
+ * - p2 = (bit 7)     - Refit only this vehicle. Used only for cloning vehicles.
  * - p2 = (bit 8-15)  - New cargo subtype to refit to.
- * - p2 = (bit 16)    - Refit only this vehicle. Used only for cloning vehicles.
- * - p2 = (bit 17-24) - Number of vehicles to refit. Zero means all vehicles. Only used if "refit only this vehicle" is false.
+ * - p2 = (bit 16-23) - Number of vehicles to refit (not counting articulated parts). Zero means all vehicles.
+ *                      Only used if "refit only this vehicle" is false.
  * @param text unused
  * @return the cost of this operation or an error
  */
@@ -343,13 +352,13 @@ CommandCost CmdRefitVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	if (front->vehstatus & VS_CRASHED) return_cmd_error(STR_ERROR_VEHICLE_IS_DESTROYED);
 
 	/* Check cargo */
-	CargoID new_cid = GB(p2, 0, 8);
+	CargoID new_cid = GB(p2, 0, 5);
 	byte new_subtype = GB(p2, 8, 8);
 	if (new_cid >= NUM_CARGO) return CMD_ERROR;
 
 	/* For ships and aircrafts there is always only one. */
-	bool only_this = HasBit(p2, 16) || front->type == VEH_SHIP || front->type == VEH_AIRCRAFT;
-	uint8 num_vehicles = GB(p2, 17, 8);
+	bool only_this = HasBit(p2, 7) || front->type == VEH_SHIP || front->type == VEH_AIRCRAFT;
+	uint8 num_vehicles = GB(p2, 16, 8);
 
 	CommandCost cost = RefitVehicle(v, only_this, num_vehicles, new_cid, new_subtype, flags);
 
@@ -662,7 +671,7 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
 
-	if (v->type == VEH_TRAIN && (!Train::From(v)->IsFrontEngine() || Train::From(v)->crash_anim_pos >= 4400)) return CMD_ERROR;
+	if (v->type == VEH_TRAIN && (!v->IsFrontEngine() || Train::From(v)->crash_anim_pos >= 4400)) return CMD_ERROR;
 
 	/* check that we can allocate enough vehicles */
 	if (!(flags & DC_EXEC)) {
@@ -710,7 +719,7 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 				SetBit(Train::From(w)->flags, VRF_REVERSE_DIRECTION);
 			}
 
-			if (v->type == VEH_TRAIN && !Train::From(v)->IsFrontEngine()) {
+			if (v->type == VEH_TRAIN && !v->IsFrontEngine()) {
 				/* this s a train car
 				 * add this unit to the end of the train */
 				CommandCost result = DoCommand(0, w->index | 1 << 20, w_rear->index, flags, CMD_MOVE_RAIL_VEHICLE);
@@ -728,7 +737,7 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 			}
 			w_rear = w; // trains needs to know the last car in the train, so they can add more in next loop
 		}
-	} while (v->type == VEH_TRAIN && (v = Train::From(v)->GetNextVehicle()) != NULL);
+	} while (v->type == VEH_TRAIN && (v = v->GetNextVehicle()) != NULL);
 
 	if ((flags & DC_EXEC) && v_front->type == VEH_TRAIN) {
 		/* for trains this needs to be the front engine due to the callback function */
@@ -759,14 +768,12 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 				/* Find out what's the best sub type */
 				byte subtype = GetBestFittingSubType(v, w);
 				if (w->cargo_type != v->cargo_type || w->cargo_subtype != subtype) {
-					CommandCost cost = DoCommand(0, w->index, v->cargo_type | (subtype << 8) | 1U << 16, flags, GetCmdRefitVeh(v));
+					CommandCost cost = DoCommand(0, w->index, v->cargo_type | 1U << 7 | (subtype << 8), flags, GetCmdRefitVeh(v));
 					if (cost.Succeeded()) total_cost.AddCost(cost);
 				}
 
-				if (w->type == VEH_TRAIN && Train::From(w)->HasArticulatedPart()) {
-					w = Train::From(w)->GetNextArticPart();
-				} else if (w->type == VEH_ROAD && RoadVehicle::From(w)->HasArticulatedPart()) {
-					w = w->Next();
+				if (w->IsGroundVehicle() && w->HasArticulatedPart()) {
+					w = w->GetNextArticulatedPart();
 				} else {
 					break;
 				}
@@ -779,17 +786,15 @@ CommandCost CmdCloneVehicle(TileIndex tile, DoCommandFlag flags, uint32 p1, uint
 				}
 			}
 
-			if (v->type == VEH_TRAIN && Train::From(v)->HasArticulatedPart()) {
-				v = Train::From(v)->GetNextArticPart();
-			} else if (v->type == VEH_ROAD && RoadVehicle::From(v)->HasArticulatedPart()) {
-				v = v->Next();
+			if (v->IsGroundVehicle() && v->HasArticulatedPart()) {
+				v = v->GetNextArticulatedPart();
 			} else {
 				break;
 			}
 		} while (v != NULL);
 
-		if ((flags & DC_EXEC) && v->type == VEH_TRAIN) w = Train::From(w)->GetNextVehicle();
-	} while (v->type == VEH_TRAIN && (v = Train::From(v)->GetNextVehicle()) != NULL);
+		if ((flags & DC_EXEC) && v->type == VEH_TRAIN) w = w->GetNextVehicle();
+	} while (v->type == VEH_TRAIN && (v = v->GetNextVehicle()) != NULL);
 
 	if (flags & DC_EXEC) {
 		/*

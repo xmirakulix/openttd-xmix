@@ -75,13 +75,13 @@ CargoPacket::CargoPacket(StationID source, TileIndex source_xy, uint16 count, So
  * that, in contrary to all other pools, does not memset to 0.
  */
 CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, TileIndex source_xy, TileIndex loaded_at_xy, Money feeder_share, SourceType source_type, SourceID source_id) :
-	feeder_share(feeder_share),
-	count(count),
-	days_in_transit(days_in_transit),
-	source_id(source_id),
-	source(source),
-	source_xy(source_xy),
-	loaded_at_xy(loaded_at_xy)
+		feeder_share(feeder_share),
+		count(count),
+		days_in_transit(days_in_transit),
+		source_id(source_id),
+		source(source),
+		source_xy(source_xy),
+		loaded_at_xy(loaded_at_xy)
 {
 	assert(count != 0);
 	this->source_type = source_type;
@@ -94,11 +94,11 @@ CargoPacket::CargoPacket(uint16 count, byte days_in_transit, StationID source, T
  */
 FORCEINLINE CargoPacket *CargoPacket::Split(uint new_size)
 {
-       Money fs = this->feeder_share * new_size / static_cast<uint>(this->count);
-       CargoPacket *cp_new = new CargoPacket(new_size, this->days_in_transit, this->source, this->source_xy, this->loaded_at_xy, fs, this->source_type, this->source_id);
-       this->feeder_share -= fs;
-       this->count -= new_size;
-       return cp_new;
+	Money fs = this->feeder_share * new_size / static_cast<uint>(this->count);
+	CargoPacket *cp_new = new CargoPacket(new_size, this->days_in_transit, this->source, this->source_xy, this->loaded_at_xy, fs, this->source_type, this->source_id);
+	this->feeder_share -= fs;
+	this->count -= new_size;
+	return cp_new;
 }
 
 /**
@@ -107,9 +107,9 @@ FORCEINLINE CargoPacket *CargoPacket::Split(uint new_size)
  */
 FORCEINLINE void CargoPacket::Merge(CargoPacket *cp)
 {
-       this->count += cp->count;
-       this->feeder_share += cp->feeder_share;
-       delete cp;
+	this->count += cp->count;
+	this->feeder_share += cp->feeder_share;
+	delete cp;
 }
 
 /**
@@ -582,7 +582,7 @@ uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, Order
 	GoodsEntry *dest = &this->station->goods[this->cargo];
 	UnloadType action;
 
-	for(VehicleCargoList::Iterator c = source->packets.begin(); c != source->packets.end() && remaining_unload > 0;) {
+	for (VehicleCargoList::Iterator c = source->packets.begin(); c != source->packets.end() && remaining_unload > 0;) {
 		StationID cargo_source = (*c)->source;
 		FlowStatSet &flows = dest->flows[cargo_source];
 		FlowStatSet::iterator begin = flows.begin();
@@ -595,7 +595,7 @@ uint StationCargoList::TakeFrom(VehicleCargoList *source, uint max_unload, Order
 			action = this->WillUnloadOld(flags, cargo_source);
 		}
 
-		switch(action) {
+		switch (action) {
 			case UL_DELIVER:
 				unloaded = source->DeliverPacket(c, remaining_unload, payment);
 				if (via != INVALID_STATION) {
@@ -667,7 +667,7 @@ uint VehicleCargoList::MoveTo(VehicleCargoList *dest, uint cap)
 {
 	uint orig_cap = cap;
 	Iterator it = packets.begin();
-	while(it != packets.end() && cap > 0) {
+	while (it != packets.end() && cap > 0) {
 		cap -= MovePacket(dest, it, cap);
 	}
 	return orig_cap - cap;
@@ -752,7 +752,7 @@ void StationCargoList::Append(StationID next, CargoPacket *cp)
 uint StationCargoList::MovePackets(VehicleCargoList *dest, uint cap, Iterator begin, Iterator end, bool reserve)
 {
 	uint orig_cap = cap;
-	while(begin != end && cap > 0) {
+	while (begin != end && cap > 0) {
 		cap -= this->MovePacket(dest, begin, cap, this->station->xy, reserve);
 	}
 	return orig_cap - cap;
@@ -789,7 +789,7 @@ uint StationCargoList::MoveTo(VehicleCargoList *dest, uint cap, StationID next, 
 void StationCargoList::RerouteStalePackets(StationID to)
 {
 	std::pair<Iterator, Iterator> range(this->packets.equal_range(to));
-	for(Iterator it(range.first); it != range.second && it.GetKey() == to;) {
+	for (Iterator it(range.first); it != range.second && it.GetKey() == to;) {
 		CargoPacket *packet = *it;
 		this->packets.erase(it++);
 		StationID next = this->station->goods[this->cargo].UpdateFlowStatsTransfer(packet->source, packet->count, this->station->index);
@@ -815,7 +815,7 @@ void StationCargoList::CountAndTruncate(uint max_remaining, StationCargoAmountMa
 	uint prev_count = this->count;
 	uint loop = 0;
 	while (this->count > max_remaining) {
-		for(Iterator it(this->packets.begin()); it != this->packets.end();) {
+		for (Iterator it(this->packets.begin()); it != this->packets.end();) {
 			CargoPacket *packet = *it;
 			if (loop == 0) cargo_per_source[packet->source] += packet->count;
 

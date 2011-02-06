@@ -42,6 +42,10 @@ INSTANTIATE_POOL_METHODS(Order)
 OrderListPool _orderlist_pool("OrderList");
 INSTANTIATE_POOL_METHODS(OrderList)
 
+/**
+ * 'Free' the order
+ * @note ONLY use on "current_order" vehicle orders!
+ */
 void Order::Free()
 {
 	this->type  = OT_NOTHING;
@@ -50,6 +54,10 @@ void Order::Free()
 	this->next  = NULL;
 }
 
+/**
+ * Makes this order a Go To Station order.
+ * @param destination the station to go to.
+ */
 void Order::MakeGoToStation(StationID destination)
 {
 	this->type = OT_GOTO_STATION;
@@ -57,6 +65,15 @@ void Order::MakeGoToStation(StationID destination)
 	this->dest = destination;
 }
 
+/**
+ * Makes this order a Go To Depot order.
+ * @param destination   the depot to go to.
+ * @param order         is this order a 'default' order, or an overriden vehicle order?
+ * @param non_stop_type how to get to the depot?
+ * @param action        what to do in the depot?
+ * @param cargo         the cargo type to change to.
+ * @param subtype       the subtype to change to.
+ */
 void Order::MakeGoToDepot(DepotID destination, OrderDepotTypeFlags order, OrderNonStopFlags non_stop_type, OrderDepotActionFlags action, CargoID cargo, byte subtype)
 {
 	this->type = OT_GOTO_DEPOT;
@@ -67,6 +84,10 @@ void Order::MakeGoToDepot(DepotID destination, OrderDepotTypeFlags order, OrderN
 	this->SetRefit(cargo, subtype);
 }
 
+/**
+ * Makes this order a Go To Waypoint order.
+ * @param destination the waypoint to go to.
+ */
 void Order::MakeGoToWaypoint(StationID destination)
 {
 	this->type = OT_GOTO_WAYPOINT;
@@ -74,24 +95,38 @@ void Order::MakeGoToWaypoint(StationID destination)
 	this->dest = destination;
 }
 
+/**
+ * Makes this order a Loading order.
+ * @param ordered is this an ordered stop?
+ */
 void Order::MakeLoading(bool ordered)
 {
 	this->type = OT_LOADING;
 	if (!ordered) this->flags = 0;
 }
 
+/**
+ * Makes this order a Leave Station order.
+ */
 void Order::MakeLeaveStation()
 {
 	this->type = OT_LEAVESTATION;
 	this->flags = 0;
 }
 
+/**
+ * Makes this order a Dummy order.
+ */
 void Order::MakeDummy()
 {
 	this->type = OT_DUMMY;
 	this->flags = 0;
 }
 
+/**
+ * Makes this order an conditional order.
+ * @param order the order to jump to.
+ */
 void Order::MakeConditional(VehicleOrderID order)
 {
 	this->type = OT_CONDITIONAL;
@@ -99,18 +134,33 @@ void Order::MakeConditional(VehicleOrderID order)
 	this->dest = 0;
 }
 
+/**
+ * Makes this order an automatic order.
+ * @param destination the station to go to.
+ */
 void Order::MakeAutomatic(StationID destination)
 {
 	this->type = OT_AUTOMATIC;
 	this->dest = destination;
 }
 
+/**
+ * Make this depot order also a refit order.
+ * @param cargo   the cargo type to change to.
+ * @param subtype the subtype to change to.
+ * @pre IsType(OT_GOTO_DEPOT).
+ */
 void Order::SetRefit(CargoID cargo, byte subtype)
 {
 	this->refit_cargo = cargo;
 	this->refit_subtype = subtype;
 }
 
+/**
+ * Does this order have the same type, flags and destination?
+ * @param other the second order to compare to.
+ * @return true if the type, flags and destination match.
+ */
 bool Order::Equals(const Order &other) const
 {
 	/* In case of go to nearest depot orders we need "only" compare the flags
@@ -128,11 +178,22 @@ bool Order::Equals(const Order &other) const
 	return this->type == other.type && this->flags == other.flags && this->dest == other.dest;
 }
 
+/**
+ * Pack this order into a 32 bits integer, or actually only
+ * the type, flags and destination.
+ * @return the packed representation.
+ * @note unpacking is done in the constructor.
+ */
 uint32 Order::Pack() const
 {
 	return this->dest << 16 | this->flags << 8 | this->type;
 }
 
+/**
+ * Pack this order into a 16 bits integer as close to the TTD
+ * representation as possible.
+ * @return the TTD-like packed representation.
+ */
 uint16 Order::MapOldOrder() const
 {
 	uint16 order = this->GetType();
@@ -155,6 +216,10 @@ uint16 Order::MapOldOrder() const
 	return order;
 }
 
+/**
+ * Create an order based on a packed representation of that order.
+ * @param packed the packed representation.
+ */
 Order::Order(uint32 packed)
 {
 	this->type    = (OrderType)GB(packed,  0,  8);
@@ -191,6 +256,7 @@ void InvalidateVehicleOrder(const Vehicle *v, int data)
  *
  * Assign data to an order (from another order)
  *   This function makes sure that the index is maintained correctly
+ * @param other the data to copy (except next pointer).
  *
  */
 void Order::AssignOrder(const Order &other)
@@ -206,6 +272,11 @@ void Order::AssignOrder(const Order &other)
 	this->travel_time = other.travel_time;
 }
 
+/**
+ * Recomputes everything.
+ * @param chain first order in the chain
+ * @param v one of vehicle that is using this orderlist
+ */
 void OrderList::Initialize(Order *chain, Vehicle *v)
 {
 	this->first = chain;
@@ -230,6 +301,11 @@ void OrderList::Initialize(Order *chain, Vehicle *v)
 	for (const Vehicle *u = v->NextShared(); u != NULL; u = u->NextShared()) ++this->num_vehicles;
 }
 
+/**
+ * Free a complete order chain.
+ * @param keep_orderlist If this is true only delete the orders, otherwise also delete the OrderList.
+ * @note do not use on "current_order" vehicle orders!
+ */
 void OrderList::FreeChain(bool keep_orderlist)
 {
 	Order *next;
@@ -248,6 +324,11 @@ void OrderList::FreeChain(bool keep_orderlist)
 	}
 }
 
+/**
+ * Get a certain order of the order chain.
+ * @param index zero-based index of the order within the chain.
+ * @return the order at position index.
+ */
 Order *OrderList::GetOrderAt(int index) const
 {
 	if (index < 0) return NULL;
@@ -315,6 +396,11 @@ StationID OrderList::GetNextStoppingStation(VehicleOrderID curr_order, StationID
 	}
 }
 
+/**
+ * Insert a new order into the order chain.
+ * @param new_order is the order to insert into the chain.
+ * @param index is the position where the order is supposed to be inserted.
+ */
 void OrderList::InsertOrderAt(Order *new_order, int index)
 {
 	if (this->first == NULL) {
@@ -340,6 +426,10 @@ void OrderList::InsertOrderAt(Order *new_order, int index)
 }
 
 
+/**
+ * Remove an order from the order list and delete it.
+ * @param index is the position of the order which is to be deleted.
+ */
 void OrderList::DeleteOrderAt(int index)
 {
 	if (index >= this->num_orders) return;
@@ -360,6 +450,11 @@ void OrderList::DeleteOrderAt(int index)
 	delete to_remove;
 }
 
+/**
+ * Move an order to another position within the order list.
+ * @param from is the zero-based position of the order to move.
+ * @param to is the zero-based position where the order is moved to.
+ */
 void OrderList::MoveOrder(int from, int to)
 {
 	if (from >= this->num_orders || to >= this->num_orders || from == to) return;
@@ -387,12 +482,21 @@ void OrderList::MoveOrder(int from, int to)
 	}
 }
 
+/**
+ * Removes the vehicle from the shared order list.
+ * @note This is supposed to be called when the vehicle is still in the chain
+ * @param v vehicle to remove from the list
+ */
 void OrderList::RemoveVehicle(Vehicle *v)
 {
 	--this->num_vehicles;
 	if (v == this->first_shared) this->first_shared = v->NextShared();
 }
 
+/**
+ * Checks whether a vehicle is part of the shared vehicle chain.
+ * @param v is the vehicle to search in the shared vehicle chain.
+ */
 bool OrderList::IsVehicleInSharedOrdersList(const Vehicle *v) const
 {
 	for (const Vehicle *v_shared = this->first_shared; v_shared != NULL; v_shared = v_shared->NextShared()) {
@@ -402,6 +506,11 @@ bool OrderList::IsVehicleInSharedOrdersList(const Vehicle *v) const
 	return false;
 }
 
+/**
+ * Gets the position of the given vehicle within the shared order vehicle list.
+ * @param v is the vehicle of which to get the position
+ * @return position of v within the shared vehicle chain.
+ */
 int OrderList::GetPositionInSharedOrderList(const Vehicle *v) const
 {
 	int count = 0;
@@ -409,6 +518,10 @@ int OrderList::GetPositionInSharedOrderList(const Vehicle *v) const
 	return count;
 }
 
+/**
+ * Checks whether all orders of the list have a filled timetable.
+ * @return whether all orders have a filled timetable.
+ */
 bool OrderList::IsCompleteTimetable() const
 {
 	for (Order *o = this->first; o != NULL; o = o->next) {
@@ -419,6 +532,9 @@ bool OrderList::IsCompleteTimetable() const
 	return true;
 }
 
+/**
+ * Checks for internal consistency of order list. Triggers assertion if something is wrong.
+ */
 void OrderList::DebugCheckSanity() const
 {
 	VehicleOrderID check_num_orders = 0;
@@ -560,9 +676,6 @@ CommandCost CmdInsertOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 			/* Non stop only allowed for ground vehicles. */
 			if (new_order.GetNonStopType() != ONSF_STOP_EVERYWHERE && !v->IsGroundVehicle()) return CMD_ERROR;
-
-			/* No load and no unload are mutual exclusive. */
-			if ((new_order.GetLoadType() & OLFB_NO_LOAD) && (new_order.GetUnloadType() & OUFB_NO_UNLOAD)) return CMD_ERROR;
 
 			/* Filter invalid load/unload types. */
 			switch (new_order.GetLoadType()) {
@@ -763,12 +876,21 @@ void InsertOrder(Vehicle *v, Order *new_o, VehicleOrderID sel_ord)
 		assert(v->orders.list == u->orders.list);
 
 		/* If there is added an order before the current one, we need
-		 * to update the selected order */
-		if (sel_ord <= u->cur_order_index) {
-			uint cur = u->cur_order_index + 1;
+		 * to update the selected order. We do not change automatic/real order indices though.
+		 * If the new order is between the current auto order and real order, the auto order will
+		 * later skip the inserted order. */
+		if (sel_ord <= u->cur_real_order_index) {
+			uint cur = u->cur_real_order_index + 1;
 			/* Check if we don't go out of bound */
 			if (cur < u->GetNumOrders()) {
-				u->cur_order_index = cur;
+				u->cur_real_order_index = cur;
+			}
+		}
+		if (sel_ord <= u->cur_auto_order_index) {
+			uint cur = u->cur_auto_order_index + 1;
+			/* Check if we don't go out of bound */
+			if (cur < u->GetNumOrders()) {
+				u->cur_auto_order_index = cur;
 			}
 		}
 		/* Update any possible open window of the vehicle */
@@ -861,14 +983,31 @@ void DeleteOrder(Vehicle *v, VehicleOrderID sel_ord)
 
 		/* NON-stop flag is misused to see if a train is in a station that is
 		 * on his order list or not */
-		if (sel_ord == u->cur_order_index && u->current_order.IsType(OT_LOADING)) {
+		if (sel_ord == u->cur_real_order_index && u->current_order.IsType(OT_LOADING)) {
 			u->current_order.SetNonStopType(ONSF_STOP_EVERYWHERE);
 			/* When full loading, "cancel" that order so the vehicle doesn't
 			 * stay indefinitely at this station anymore. */
 			if (u->current_order.GetLoadType() & OLFB_FULL_LOAD) u->current_order.SetLoadType(OLF_LOAD_IF_POSSIBLE);
 		}
 
-		if (sel_ord < u->cur_order_index) u->cur_order_index--;
+		if (sel_ord < u->cur_real_order_index) {
+			u->cur_real_order_index--;
+		} else if (sel_ord == u->cur_real_order_index) {
+			u->UpdateRealOrderIndex();
+		}
+
+		if (sel_ord < u->cur_auto_order_index) {
+			u->cur_auto_order_index--;
+		} else if (sel_ord == u->cur_auto_order_index) {
+			/* Make sure the index is valid */
+			if (u->cur_auto_order_index >= u->GetNumOrders()) u->cur_auto_order_index = 0;
+
+			/* Skip non-automatic orders for the auto-order-index (e.g. if the current auto order was deleted */
+			while (u->cur_auto_order_index != u->cur_real_order_index && !u->GetOrder(u->cur_auto_order_index)->IsType(OT_AUTOMATIC)) {
+				u->cur_auto_order_index++;
+				if (u->cur_auto_order_index >= u->GetNumOrders()) u->cur_auto_order_index = 0;
+			}
+		}
 
 		/* Update any possible open window of the vehicle */
 		InvalidateVehicleOrder(u, sel_ord | (INVALID_VEH_ORDER_ID << 8));
@@ -911,7 +1050,7 @@ CommandCost CmdSkipToOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 	Vehicle *v = Vehicle::GetIfValid(veh_id);
 
-	if (v == NULL || !v->IsPrimaryVehicle() || sel_ord == v->cur_order_index || sel_ord >= v->GetNumOrders() || v->GetNumOrders() < 2) return CMD_ERROR;
+	if (v == NULL || !v->IsPrimaryVehicle() || sel_ord == v->cur_auto_order_index || sel_ord >= v->GetNumOrders() || v->GetNumOrders() < 2) return CMD_ERROR;
 
 	CommandCost ret = CheckOwnership(v->owner);
 	if (ret.Failed()) return ret;
@@ -919,7 +1058,8 @@ CommandCost CmdSkipToOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 	if (flags & DC_EXEC) {
 		if (v->current_order.IsType(OT_LOADING)) v->LeaveStation();
 
-		v->cur_order_index = sel_ord;
+		v->cur_auto_order_index = v->cur_real_order_index = sel_ord;
+		v->UpdateRealOrderIndex();
 
 		InvalidateVehicleOrder(v, -2);
 	}
@@ -973,13 +1113,36 @@ CommandCost CmdMoveOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32 
 		DeleteOrderWarnings(u);
 
 		for (; u != NULL; u = u->NextShared()) {
-			/* Update the current order */
-			if (u->cur_order_index == moving_order) {
-				u->cur_order_index = target_order;
-			} else if (u->cur_order_index > moving_order && u->cur_order_index <= target_order) {
-				u->cur_order_index--;
-			} else if (u->cur_order_index < moving_order && u->cur_order_index >= target_order) {
-				u->cur_order_index++;
+			/* Update the current order.
+			 * There are multiple ways to move orders, which result in cur_auto_order_index
+			 * and cur_real_order_index to not longer make any sense. E.g. moving another
+			 * real order between them.
+			 *
+			 * Basically one could choose to preserve either of them, but not both.
+			 * While both ways are suitable in this or that case from a human point of view, neither
+			 * of them makes really sense.
+			 * However, from an AI point of view, preserving cur_real_order_index is the most
+			 * predictable and transparent behaviour.
+			 *
+			 * With that decision it basically does not matter what we do to cur_auto_order_index.
+			 * If we change orders between the auto- and real-index, the auto orders are mostly likely
+			 * completely out-dated anyway. So, keep it simple and just keep cur_auto_order_index as well.
+			 * The worst which can happen is that a lot of automatic orders are removed when reaching current_order.
+			 */
+			if (u->cur_real_order_index == moving_order) {
+				u->cur_real_order_index = target_order;
+			} else if (u->cur_real_order_index > moving_order && u->cur_real_order_index <= target_order) {
+				u->cur_real_order_index--;
+			} else if (u->cur_real_order_index < moving_order && u->cur_real_order_index >= target_order) {
+				u->cur_real_order_index++;
+			}
+
+			if (u->cur_auto_order_index == moving_order) {
+				u->cur_auto_order_index = target_order;
+			} else if (u->cur_auto_order_index > moving_order && u->cur_auto_order_index <= target_order) {
+				u->cur_auto_order_index--;
+			} else if (u->cur_auto_order_index < moving_order && u->cur_auto_order_index >= target_order) {
+				u->cur_auto_order_index++;
 			}
 
 			assert(v->orders.list == u->orders.list);
@@ -1148,17 +1311,10 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 
 			case MOF_UNLOAD:
 				order->SetUnloadType((OrderUnloadFlags)data);
-				if ((data & OUFB_NO_UNLOAD) != 0 && (order->GetLoadType() & OLFB_NO_LOAD) != 0) {
-					order->SetLoadType((OrderLoadFlags)(order->GetLoadType() & ~OLFB_NO_LOAD));
-				}
 				break;
 
 			case MOF_LOAD:
 				order->SetLoadType((OrderLoadFlags)data);
-				if ((data & OLFB_NO_LOAD) != 0 && (order->GetUnloadType() & OUFB_NO_UNLOAD) != 0) {
-					/* No load + no unload isn't compatible */
-					order->SetUnloadType((OrderUnloadFlags)(order->GetUnloadType() & ~OUFB_NO_UNLOAD));
-				}
 				break;
 
 			case MOF_DEPOT_ACTION: {
@@ -1237,7 +1393,7 @@ CommandCost CmdModifyOrder(TileIndex tile, DoCommandFlag flags, uint32 p1, uint3
 			 * so do not care and those orders should not be active
 			 * when this function is called.
 			 */
-			if (sel_ord == u->cur_order_index &&
+			if (sel_ord == u->cur_real_order_index &&
 					(u->current_order.IsType(OT_GOTO_STATION) || u->current_order.IsType(OT_LOADING)) &&
 					u->current_order.GetLoadType() != order->GetLoadType()) {
 				u->current_order.SetLoadType(order->GetLoadType());
@@ -1420,7 +1576,7 @@ CommandCost CmdOrderRefit(TileIndex tile, DoCommandFlag flags, uint32 p1, uint32
 			InvalidateVehicleOrder(u, -2);
 
 			/* If the vehicle already got the current depot set as current order, then update current order as well */
-			if (u->cur_order_index == order_number && (u->current_order.GetDepotOrderType() & ODTFB_PART_OF_ORDERS)) {
+			if (u->cur_real_order_index == order_number && (u->current_order.GetDepotOrderType() & ODTFB_PART_OF_ORDERS)) {
 				u->current_order.SetRefit(cargo, subtype);
 			}
 		}
@@ -1596,6 +1752,13 @@ void DeleteVehicleOrders(Vehicle *v, bool keep_orderlist)
 	RecalcFrozenIfLoading(v);
 }
 
+/**
+ * Clamp the service interval to the correct min/max. The actual min/max values
+ * depend on whether it's in percent or days.
+ * @param interval proposed service interval
+ * @param company_id the owner of the vehicle
+ * @return Clamped service interval
+ */
 uint16 GetServiceIntervalClamped(uint interval, CompanyID company_id)
 {
 	return (Company::Get(company_id)->settings.vehicle.servint_ispercent) ? Clamp(interval, MIN_SERVINT_PERCENT, MAX_SERVINT_PERCENT) : Clamp(interval, MIN_SERVINT_DAYS, MAX_SERVINT_DAYS);
@@ -1691,7 +1854,7 @@ bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth)
 		case OT_GOTO_DEPOT:
 			if ((order->GetDepotOrderType() & ODTFB_SERVICE) && !v->NeedsServicing()) {
 				UpdateVehicleTimetable(v, true);
-				v->IncrementOrderIndex();
+				v->IncrementRealOrderIndex();
 				break;
 			}
 
@@ -1720,7 +1883,7 @@ bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth)
 				}
 
 				UpdateVehicleTimetable(v, true);
-				v->IncrementOrderIndex();
+				v->IncrementRealOrderIndex();
 			} else {
 				if (v->type != VEH_AIRCRAFT) {
 					v->dest_tile = Depot::Get(order->GetDestination())->xy;
@@ -1736,12 +1899,15 @@ bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth)
 		case OT_CONDITIONAL: {
 			VehicleOrderID next_order = ProcessConditionalOrder(order, v);
 			if (next_order != INVALID_VEH_ORDER_ID) {
+				/* Jump to next_order. cur_auto_order_index becomes exactly that order,
+				 * cur_real_order_index might come after next_order. */
 				UpdateVehicleTimetable(v, false);
-				v->cur_order_index = next_order;
-				v->current_order_time += v->GetOrder(next_order)->travel_time;
+				v->cur_auto_order_index = v->cur_real_order_index = next_order;
+				v->UpdateRealOrderIndex();
+				v->current_order_time += v->GetOrder(v->cur_real_order_index)->travel_time;
 			} else {
 				UpdateVehicleTimetable(v, true);
-				v->IncrementOrderIndex();
+				v->IncrementRealOrderIndex();
 			}
 			break;
 		}
@@ -1751,18 +1917,22 @@ bool UpdateOrderDest(Vehicle *v, const Order *order, int conditional_depth)
 			return false;
 	}
 
-	assert(v->cur_order_index < v->GetNumOrders());
+	assert(v->cur_auto_order_index < v->GetNumOrders());
+	assert(v->cur_real_order_index < v->GetNumOrders());
 
 	/* Get the current order */
-	order = v->GetNextManualOrder(v->cur_order_index);
-	if (order == NULL) {
-		order = v->GetNextManualOrder(0);
-		if (order == NULL) {
-			v->current_order.Free();
-			v->dest_tile = 0;
-			return false;
-		}
+	order = v->GetOrder(v->cur_real_order_index);
+	if (order != NULL && order->IsType(OT_AUTOMATIC)) {
+		assert(v->GetNumManualOrders() == 0);
+		order = NULL;
 	}
+
+	if (order == NULL) {
+		v->current_order.Free();
+		v->dest_tile = 0;
+		return false;
+	}
+
 	v->current_order = *order;
 	return UpdateOrderDest(v, order, conditional_depth + 1);
 }
@@ -1812,13 +1982,17 @@ bool ProcessOrders(Vehicle *v)
 		 * visited station will cause the vehicle to still stop. */
 		v->last_station_visited = v->current_order.GetDestination();
 		UpdateVehicleTimetable(v, true);
-		v->IncrementOrderIndex();
+		v->IncrementAutoOrderIndex();
 	}
 
 	/* Get the current order */
-	if (v->cur_order_index >= v->GetNumOrders()) v->cur_order_index = 0;
+	v->UpdateRealOrderIndex();
 
-	const Order *order = v->GetNextManualOrder(v->cur_order_index);
+	const Order *order = v->GetOrder(v->cur_real_order_index);
+	if (order != NULL && order->IsType(OT_AUTOMATIC)) {
+		assert(v->GetNumManualOrders() == 0);
+		order = NULL;
+	}
 
 	/* If no order, do nothing. */
 	if (order == NULL || (v->type == VEH_AIRCRAFT && !CheckForValidOrders(v))) {

@@ -14,7 +14,6 @@
 
 #include "gfx_type.h"
 #include "viewport_type.h"
-#include "vehicle_type.h"
 #include "window_type.h"
 #include "tile_type.h"
 
@@ -28,11 +27,6 @@ ViewPort *IsPtInWindowViewport(const Window *w, int x, int y);
 Point GetTileBelowCursor();
 void UpdateViewportPosition(Window *w);
 
-/**
- * Mark all viewports dirty for repaint.
- *
- * @ingroup dirty
- */
 void MarkAllViewportsDirty(int left, int top, int right, int bottom);
 
 bool DoZoomInOutWindow(ZoomStateChange how, Window *w);

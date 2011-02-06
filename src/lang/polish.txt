@@ -1210,10 +1210,10 @@ STR_NEWS_NEW_VEHICLE_NOW_AVAILABLE                              :{BIGFONT}{BLACK
 STR_NEWS_NEW_VEHICLE_TYPE                                       :{BIGFONT}{BLACK}{ENGINE}
 STR_NEWS_NEW_VEHICLE_NOW_AVAILABLE_WITH_TYPE                    :{BLACK}Dostępn{G y a e} now{G y a e} {STRING} - {ENGINE}!
 
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}{STATION} już nie akceptuje {STRING.d}
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO_OR_CARGO               :{WHITE}{STATION} już nie akceptuje {STRING.d} ani {STRING.d}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO                              :{WHITE}{STATION} już akceptuje {STRING}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO_AND_CARGO                    :{WHITE}{STATION} już akceptuje {STRING} i {STRING}
+STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}{STATION} nie akceptuje już {STRING.d}
+STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO_OR_CARGO               :{WHITE}{STATION} nie akceptuje już {STRING.d} ani {STRING.d}
+STR_NEWS_STATION_NOW_ACCEPTS_CARGO                              :{WHITE}{STATION} akceptuje już {STRING}
+STR_NEWS_STATION_NOW_ACCEPTS_CARGO_AND_CARGO                    :{WHITE}{STATION} akceptuje już {STRING} i {STRING}
 
 STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIGFONT}{BLACK}Subsydiowanie wygasło:{}{}{STRING} z {STRING} do {STRING} nie będzie już dotowane
 STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIGFONT}{BLACK}Koniec dotacji:{}{}Przewóz {STRING.d} z {STRING} do {STRING} nie jest już subsydiowany
@@ -1470,12 +1470,10 @@ STR_CONFIG_SETTING_CAPTION                                      :{WHITE}Ustawien
 STR_CONFIG_SETTING_OFF                                          :wył.
 STR_CONFIG_SETTING_ON                                           :wł.
 STR_CONFIG_SETTING_DISABLED                                     :niedostępne
-STR_CONFIG_SETTING_VEHICLESPEED                                 :{LTBLUE}Pokazuj prędkość pojazdów w pasku statusu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_BUILDONSLOPES                                :{LTBLUE}Pozwól budować na pochyłościach i wybrzeżach: {ORANGE}{STRING}
 STR_CONFIG_SETTING_AUTOSLOPE                                    :{LTBLUE}Pozwól na zmiany terenu pod budynkami, torami itp. (autoslope): {ORANGE}{STRING}
 STR_CONFIG_SETTING_CATCHMENT                                    :{LTBLUE}Pozwól na bardziej realistyczny zasięg obejmowania: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXTRADYNAMITE                                :{LTBLUE}Pozwól usuwać drogi, mosty, tunele, itp. należące do miasta: {ORANGE}{STRING}
-STR_CONFIG_SETTING_MAMMOTHTRAINS                                :{LTBLUE}Pozwól budować bardzo długie pociągi: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :{LTBLUE}Ilość dymu / iskier lokomotywy: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SMOKE_AMOUNT_NONE                            :brak
 STR_CONFIG_SETTING_SMOKE_AMOUNT_ORIGINAL                        :oryginalnie
@@ -1489,21 +1487,17 @@ STR_CONFIG_SETTING_ROAD_VEHICLE_ACCELERATION_MODEL_REALISTIC    :realistyczny
 STR_CONFIG_SETTING_TRAIN_SLOPE_STEEPNESS                        :{LTBLUE}Nachylenie zboczy dla pociągów {ORANGE}{STRING}%
 STR_CONFIG_SETTING_ROAD_VEHICLE_SLOPE_STEEPNESS                 :{LTBLUE}Nachylenie zboczy dla samochodów {ORANGE}{STRING}%
 STR_CONFIG_SETTING_FORBID_90_DEG                                :{LTBLUE}Zabroń pociągom i statkom skręcać o 90 stopni: {ORANGE}{STRING}
-STR_CONFIG_SETTING_JOINSTATIONS                                 :{LTBLUE}Połącz stacje budowane jedna obok drugiej: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DISTANT_JOIN_STATIONS                        :{LTBLUE}Pozwól na łączenie stacji nie sąsiadujących bezpośrednio: {ORANGE}{STRING}
 STR_CONFIG_SETTING_IMPROVEDLOAD                                 :{LTBLUE}Użyj ulepszonego algorytmu załadunku: {ORANGE}{STRING}
 STR_CONFIG_SETTING_GRADUAL_LOADING                              :{LTBLUE}Stopniowy załadunek pojazdów: {ORANGE}{STRING}
 STR_CONFIG_SETTING_INFLATION                                    :{LTBLUE}Inflacja: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SELECTGOODS                                  :{LTBLUE}Dostarcz ładunek na stację tylko jeśli jest zapotrzebowanie: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LONGBRIDGES                                  :{LTBLUE}Pozwól budować bardzo długie mosty: {ORANGE}{STRING}
-STR_CONFIG_SETTING_GOTODEPOT                                    :{LTBLUE}Zezwalaj na wysyłanie do zajezdni: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD             :{LTBLUE}Budowa przedsiębiorstw wydobywczych: {ORANGE}{STRING}
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NONE        :budowa niedostępna
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_NORMAL      :jak inne przedsiębiorstwa
 STR_CONFIG_SETTING_RAW_INDUSTRY_CONSTRUCTION_METHOD_PROSPECTING :przez poszukiwanie
 STR_CONFIG_SETTING_INDUSTRY_PLATFORM                            :{LTBLUE}Płaska powierzchnia wokół przedsiębiorstw: {ORANGE}{STRING} p{P 0:1 ole ola ól}
 STR_CONFIG_SETTING_MULTIPINDTOWN                                :{LTBLUE}Pozwól na wiele podobnych przedsiębiorstw w mieście: {ORANGE}{STRING}
-STR_CONFIG_SETTING_LONGDATE                                     :{LTBLUE}Zawsze pokazuj datę w długim formacie w pasku statusu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SIGNALSIDE                                   :{LTBLUE}Pokazuj sygnały po stronie jazdy: {ORANGE}{STRING}
 STR_CONFIG_SETTING_SHOWFINANCES                                 :{LTBLUE}Pokazuj okno finansów na koniec roku: {ORANGE}{STRING}
 STR_CONFIG_SETTING_NONSTOP_BY_DEFAULT                           :{LTBLUE}Nowe polecenia są domyślnie 'bez zatrzymywania się': {ORANGE}{STRING}
@@ -1516,7 +1510,6 @@ STR_CONFIG_SETTING_AUTOSCROLL                                   :{LTBLUE}Przesu�
 STR_CONFIG_SETTING_BRIBE                                        :{LTBLUE}Pozwól dawać łapówki lokalnym władzom: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_EXCLUSIVE                              :{LTBLUE}Pozwól na kupno wyłączności transportowej: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_GIVE_MONEY                             :{LTBLUE}Pozwól na wysyłanie pieniędzy do innych firm: {ORANGE}{STRING}
-STR_CONFIG_SETTING_NONUNIFORM_STATIONS                          :{LTBLUE}Niejednolite stacje: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FREIGHT_TRAINS                               :{LTBLUE}Mnożnik wagi dla symulacji ciężkich pociągów towarowych: {ORANGE}{STRING}
 STR_CONFIG_SETTING_PLANE_SPEED                                  :{LTBLUE}Współczynnik prędkości samolotu: {ORANGE}1 / {STRING}
 STR_CONFIG_SETTING_PLANE_CRASHES                                :{LTBLUE}Liczba katastrof lotniczych: {ORANGE}{STRING}
@@ -1542,8 +1535,8 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE                            :{LTBLUE}Autoodn
 STR_CONFIG_SETTING_AUTORENEW_MONTHS                             :{LTBLUE}Autoodnowienie następuje {ORANGE}{STRING}{LTBLUE} miesięcy przed/po maks. wieku
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :{LTBLUE}Min. ilość pieniędzy potrzebna do autoodnowienia: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :{LTBLUE}Czas trwania komunikatu o błędzie: {ORANGE}{STRING} sekund{P 0:1 a y ""}
-STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Opóźnienie dla akcji przy najechaniu: {ORANGE}{STRING} sekund{P 0:1 a y ""}
-STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Opóźnienie dla akcji przy najechaniu: {ORANGE}wyłączone
+STR_CONFIG_SETTING_HOVER_DELAY                                  :{LTBLUE}Pokaż podpowiedzi: {ORANGE}Po przytrzymaniu kursora przez {STRING} sekund{P 0:1 ę y ""}
+STR_CONFIG_SETTING_HOVER_DELAY_DISABLED                         :{LTBLUE}Pokaż podpowiedzi: {ORANGE}Prawy przycisk myszy
 STR_CONFIG_SETTING_POPULATION_IN_LABEL                          :{LTBLUE}Pokaż populację miasta w jego nazwie: {ORANGE}{STRING}
 
 STR_CONFIG_SETTING_LAND_GENERATOR                               :{LTBLUE}Generator krajobrazu: {ORANGE}{STRING}
@@ -1615,7 +1608,6 @@ STR_CONFIG_SETTING_LOADING_INDICATORS                           :{LTBLUE}Pokazuj
 STR_CONFIG_SETTING_LOADING_INDICATORS_OFF                       :wył.
 STR_CONFIG_SETTING_LOADING_INDICATORS_OWN                       :własnej firmy
 STR_CONFIG_SETTING_LOADING_INDICATORS_ALL                       :wszystkich firm
-STR_CONFIG_SETTING_TIMETABLE_ALLOW                              :{LTBLUE}Uaktywnij rozkłady jazdy pojazdów: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_IN_TICKS                           :{LTBLUE}Pokazuj rozkłady jazdy w tickach, a nie w dniach: {ORANGE}{STRING}
 STR_CONFIG_SETTING_TIMETABLE_SHOW_ARRIVAL_DEPARTURE             :{LTBLUE}Pokazuj przyjazdy i odjazdy w rozkładach: {ORANGE}{STRING}
 STR_CONFIG_SETTING_QUICKGOTO                                    :{LTBLUE}Szybkie tworzenie poleceń pojazdu: {ORANGE}{STRING}
@@ -1627,7 +1619,7 @@ STR_CONFIG_SETTING_SHOW_TRACK_RESERVATION                       :{LTBLUE}Pokaż 
 STR_CONFIG_SETTING_PERSISTENT_BUILDINGTOOLS                     :{LTBLUE}Pozostaw aktywne narzędzia do budowania po ich użyciu: {ORANGE}{STRING}
 STR_CONFIG_SETTING_EXPENSES_LAYOUT                              :{LTBLUE}Pogrupuj wydatki w oknie finsnasów firmy: {ORANGE}{STRING}
 
-STR_CONFIG_SETTING_ALWAYS_BUILD_INFRASTRUCTURE                  :{LTBLUE}Pokaż okno narzędzi budowy, nawet dla niedostępnych pojazdów: {ORANGE}{STRING}
+STR_CONFIG_SETTING_DISABLE_UNSUITABLE_BUILDING                  :{LTBLUE}Zablokuj budowę infrastruktury, kiedy brak odpowiednich pojazdów: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_TRAINS                                   :{LTBLUE}Maks. liczba pociągów na firmę: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_ROAD_VEHICLES                            :{LTBLUE}Maks. liczba samochodów na firmę: {ORANGE}{STRING}
 STR_CONFIG_SETTING_MAX_AIRCRAFT                                 :{LTBLUE}Maks. liczba samolotów na firmę: {ORANGE}{STRING}
@@ -1659,7 +1651,7 @@ STR_CONFIG_SETTING_STARTING_YEAR                                :{LTBLUE}Data ro
 STR_CONFIG_SETTING_SMOOTH_ECONOMY                               :{LTBLUE}Pozwól na łagodną ekonomię (więcej małych zmian): {ORANGE}{STRING}
 STR_CONFIG_SETTING_ALLOW_SHARES                                 :{LTBLUE}Pozwól kupować udziały w innych firmach: {ORANGE}{STRING}
 STR_CONFIG_SETTING_FEEDER_PAYMENT_SHARE                         :{LTBLUE}Udział w zyskach w przypadku częściowego transportu (przeładunku): {ORANGE}{STRING}%
-STR_CONFIG_SETTING_DRAG_SIGNALS_DENSITY                         :{LTBLUE}W trakcie przeciągania ustaw sygnały co: {ORANGE}{STRING} kratk
+STR_CONFIG_SETTING_DRAG_SIGNALS_DENSITY                         :{LTBLUE}W trakcie przeciągania ustaw sygnały co: {ORANGE}{STRING} krat{P kę ki ek}
 STR_CONFIG_SETTING_SEMAPHORE_BUILD_BEFORE_DATE                  :{LTBLUE}Automatycznie buduj semafory przed: {ORANGE}{STRING}
 STR_CONFIG_SETTING_ENABLE_SIGNAL_GUI                            :{LTBLUE}Uaktywnij okno budowania sygnałów: {ORANGE}{STRING}
 STR_CONFIG_SETTING_DEFAULT_SIGNAL_TYPE                          :{LTBLUE}Domyślny typ sygnalizatorów: {ORANGE}{STRING}
@@ -1943,7 +1935,7 @@ STR_NETWORK_SERVER_LIST_CLICK_GAME_TO_SELECT                    :{BLACK}Kliknij 
 STR_NETWORK_SERVER_LIST_LAST_JOINED_SERVER                      :{BLACK}Serwer z którym ostatnio się połączyłeś:
 STR_NETWORK_SERVER_LIST_CLICK_TO_SELECT_LAST                    :{BLACK}Kliknij, aby wybrać serwer na którym grałeś ostatnio
 
-STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}INFO O GRZE
+STR_NETWORK_SERVER_LIST_GAME_INFO                               :{SILVER}INFORMACJE O GRZE
 STR_NETWORK_SERVER_LIST_CLIENTS                                 :{SILVER}Klienci: {WHITE}{COMMA} / {COMMA} - {COMMA} / {COMMA}
 STR_NETWORK_SERVER_LIST_LANGUAGE                                :{SILVER}Język: {WHITE}{STRING}
 STR_NETWORK_SERVER_LIST_LANDSCAPE                               :{SILVER}Krajobraz: {WHITE}{STRING}
@@ -1979,9 +1971,6 @@ STR_NETWORK_START_SERVER_NEW_GAME_NAME                          :{BLACK}Nazwa gr
 STR_NETWORK_START_SERVER_NEW_GAME_NAME_TOOLTIP                  :{BLACK}Nazwa gry będzie wyświetlana u innych graczy w menu gry wieloosobowej
 STR_NETWORK_START_SERVER_SET_PASSWORD                           :{BLACK}Ustaw hasło
 STR_NETWORK_START_SERVER_PASSWORD_TOOLTIP                       :{BLACK}Zabezpiecz grę hasłem jeśli nie chcesz, by była publicznie dostępna
-STR_NETWORK_START_SERVER_SELECT_MAP                             :{BLACK}Wybierz mapę:
-STR_NETWORK_START_SERVER_SELECT_MAP_TOOLTIP                     :{BLACK}Na której mapie chcesz grać?
-STR_NETWORK_START_SERVER_SERVER_RANDOM_GAME                     :Tworzenie losowej nowej gry
 
 STR_NETWORK_START_SERVER_LAN_INTERNET                           :LAN / Internet
 STR_NETWORK_START_SERVER_INTERNET_ADVERTISE                     :Internet (publiczny)
@@ -1996,11 +1985,6 @@ STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS                   :{BLACK}Maksymal
 STR_NETWORK_START_SERVER_NUMBER_OF_SPECTATORS_TOOLTIP           :{BLACK}Ogranicz serwer do określonej ilości widzów
 STR_NETWORK_START_SERVER_LANGUAGE_SPOKEN                        :{BLACK}Używany język:
 STR_NETWORK_START_SERVER_LANGUAGE_TOOLTIP                       :{BLACK}Inni gracze będą poinformowani jaki język jest używany na serwerze
-
-STR_NETWORK_START_SERVER_START_GAME                             :{BLACK}Rozpocznij grę
-STR_NETWORK_START_SERVER_START_GAME_TOOLTIP                     :{BLACK}Uruchom nową grę sieciową z losową mapą lub wybranym scenariuszem
-STR_NETWORK_START_SERVER_LOAD_GAME                              :{BLACK}Wczytaj grę
-STR_NETWORK_START_SERVER_LOAD_GAME_TOOLTIP                      :{BLACK}Przywróć wcześniej zapisaną grę wieloosobową (upewnij się, że połączyłeś się jako odpowiednia firma)
 
 STR_NETWORK_START_SERVER_NEW_GAME_NAME_OSKTITLE                 :{BLACK}Wpisz nazwę dla gry sieciowej
 
@@ -2206,7 +2190,7 @@ STR_NETWORK_MESSAGE_SERVER_SHUTDOWN                             :{WHITE}Serwer z
 STR_NETWORK_MESSAGE_SERVER_REBOOT                               :{WHITE}Restart serwera...{}Proszę czekać...
 
 # Content downloading window
-STR_CONTENT_TITLE                                               :{WHITE}Pobieranie zawartości
+STR_CONTENT_TITLE                                               :{WHITE}Pobieranie dodatkowej zawartości
 STR_CONTENT_TYPE_CAPTION                                        :{BLACK}Typ
 STR_CONTENT_TYPE_CAPTION_TOOLTIP                                :{BLACK}Rodzaj zawartości
 STR_CONTENT_NAME_CAPTION                                        :{BLACK}Nazwa
@@ -2223,7 +2207,7 @@ STR_CONTENT_DOWNLOAD_CAPTION                                    :{BLACK}Pobierz
 STR_CONTENT_DOWNLOAD_CAPTION_TOOLTIP                            :{BLACK}Rozpocznij ściąganie zaznaczonych danych
 STR_CONTENT_TOTAL_DOWNLOAD_SIZE                                 :{SILVER}Całkowity rozmiar: {WHITE}{BYTES}
 STR_CONTENT_DETAIL_TITLE                                        :{SILVER}OPIS ZAWARTOŚCI
-STR_CONTENT_DETAIL_SUBTITLE_UNSELECTED                          :{SILVER}To nie zostało wybrane do ściągnięcia
+STR_CONTENT_DETAIL_SUBTITLE_UNSELECTED                          :{SILVER}Ten dodatek nie został wybrany do pobrania
 STR_CONTENT_DETAIL_SUBTITLE_SELECTED                            :{SILVER}To zostało wybrane do ściągnięcia
 STR_CONTENT_DETAIL_SUBTITLE_AUTOSELECTED                        :{SILVER}Ta zależność została wybrana do ściągnięcia
 STR_CONTENT_DETAIL_SUBTITLE_ALREADY_HERE                        :{SILVER}Już to posiadasz
@@ -2659,7 +2643,7 @@ STR_LAI_BRIDGE_DESCRIPTION_ROAD_TUBULAR_STEEL                   :Cylindryczny mo
 STR_LAI_BRIDGE_DESCRIPTION_AQUEDUCT                             :Akwedukt
 
 STR_LAI_OBJECT_DESCRIPTION_TRANSMITTER                          :Nadajnik
-STR_LAI_OBJECT_DESCRIPTION_LIGHTHOUSE                           :Latarnia
+STR_LAI_OBJECT_DESCRIPTION_LIGHTHOUSE                           :Latarnia morska
 STR_LAI_OBJECT_DESCRIPTION_COMPANY_HEADQUARTERS                 :Siedziba firmy
 STR_LAI_OBJECT_DESCRIPTION_COMPANY_OWNED_LAND                   :Teren w posiadaniu firmy
 
@@ -2805,6 +2789,7 @@ STR_NEWGRF_SETTINGS_PARAMETER                                   :{BLACK}Parametr
 STR_NEWGRF_SETTINGS_NO_INFO                                     :{BLACK}Brak dostępnych informacji
 STR_NEWGRF_SETTINGS_NOT_FOUND                                   :{RED}Nie znaleziono pasującego pliku
 STR_NEWGRF_SETTINGS_DISABLED                                    :{RED}Niedostępny
+STR_NEWGRF_SETTINGS_INCOMPATIBLE                                :{G=n}{RED}Niekompatybilne z tą wersją OpenTTD
 
 STR_NEWGRF_SETTINGS_PARAMETER_QUERY                             :{BLACK}Wprowadź parametry NewGRF
 
@@ -3212,7 +3197,7 @@ STR_PURCHASE_INFO_SPEED_POWER                                   :{BLACK}Prędko�
 STR_PURCHASE_INFO_SPEED                                         :{BLACK}Prędkość: {GOLD}{VELOCITY}
 STR_PURCHASE_INFO_RUNNINGCOST                                   :{BLACK}Koszty użytkowania: {GOLD}{CURRENCY}/rok
 STR_PURCHASE_INFO_CAPACITY                                      :{BLACK}Pojemność: {GOLD}{CARGO} {STRING}
-STR_PURCHASE_INFO_REFITTABLE                                    :(przebudowalny)
+STR_PURCHASE_INFO_REFITTABLE                                    :(przebudowywalny)
 STR_PURCHASE_INFO_DESIGNED_LIFE                                 :{BLACK}Zaprojektowany: {GOLD}{NUM}{BLACK} Żywotność: {GOLD}{COMMA} lat
 STR_PURCHASE_INFO_RELIABILITY                                   :{BLACK}Maksymalna niezawodność: {GOLD}{COMMA}%
 STR_PURCHASE_INFO_COST                                          :{BLACK}Koszt: {GOLD}{CURRENCY}
@@ -3432,23 +3417,14 @@ STR_VEHICLE_STATUS_LEAVING                                      :{LTBLUE}Opuszcz
 STR_VEHICLE_STATUS_CRASHED                                      :{RED}Wypadek!
 STR_VEHICLE_STATUS_BROKEN_DOWN                                  :{RED}Zepsuty
 STR_VEHICLE_STATUS_STOPPED                                      :{RED}Zatrzymany
-STR_VEHICLE_STATUS_TRAIN_STOPPING                               :{RED}Hamowanie
 STR_VEHICLE_STATUS_TRAIN_STOPPING_VEL                           :{RED}Hamowanie, {VELOCITY}
 STR_VEHICLE_STATUS_TRAIN_NO_POWER                               :{RED}Brak zasilania
 STR_VEHICLE_STATUS_TRAIN_STUCK                                  :{ORANGE}Czeka na wolną drogę
 
-STR_VEHICLE_STATUS_HEADING_FOR_STATION                          :{LTBLUE}Zmierza do {STATION}
 STR_VEHICLE_STATUS_HEADING_FOR_STATION_VEL                      :{LTBLUE}Zmierza do {STATION}, {VELOCITY}
-STR_VEHICLE_STATUS_NO_ORDERS                                    :{LTBLUE}Bez poleceń
 STR_VEHICLE_STATUS_NO_ORDERS_VEL                                :{LTBLUE}Bez poleceń, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT                         :{LTBLUE}Zmierza do {WAYPOINT}
 STR_VEHICLE_STATUS_HEADING_FOR_WAYPOINT_VEL                     :{LTBLUE}Zmierza do {WAYPOINT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT                            :{ORANGE}Zmierza do {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_VEL                        :{ORANGE}Zmierza do {DEPOT}, {VELOCITY}
-
-STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE                    :{LTBLUE}Serwisuj w {DEPOT}
 STR_VEHICLE_STATUS_HEADING_FOR_DEPOT_SERVICE_VEL                :{LTBLUE}Serwisuj w {DEPOT}, {VELOCITY}
 
 # Vehicle stopped/started animations
@@ -3484,7 +3460,7 @@ STR_VEHICLE_INFO_CAPACITY                                       :{BLACK}Ładowno
 STR_VEHICLE_INFO_CAPACITY_MULT                                  :{BLACK}Ładowność: {LTBLUE}{CARGO}{3:STRING} (x{4:NUM})
 STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Ładowność: {LTBLUE}{CARGO}, {CARGO}{STRING}
 
-STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Wartość transferu: {LTBLUE}{CURRENCY}
+STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Wartość ładunku: {LTBLUE}{CURRENCY}
 
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS                     :{BLACK}Okres między serwisowaniem: {LTBLUE}{COMMA}dni{BLACK}   Ostatni serwis: {LTBLUE}{DATE_LONG}
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT                  :{BLACK}Okres między serwisowaniem: {LTBLUE}{COMMA}%{BLACK}   Ostatni serwis: {LTBLUE}{DATE_LONG}
@@ -3510,7 +3486,7 @@ STR_VEHICLE_DETAILS_CARGO_FROM_MULT                             :{LTBLUE}{CARGO}
 
 STR_VEHICLE_DETAIL_TAB_CARGO                                    :{BLACK}Ładunek
 STR_VEHICLE_DETAILS_TRAIN_CARGO_TOOLTIP                         :{BLACK}Pokaż szczegóły przewożonych ładunków
-STR_VEHICLE_DETAIL_TAB_INFORMATION                              :{BLACK}Informacja
+STR_VEHICLE_DETAIL_TAB_INFORMATION                              :{BLACK}Informacje
 STR_VEHICLE_DETAILS_TRAIN_INFORMATION_TOOLTIP                   :{BLACK}Pokaż szczegóły pociągu
 STR_VEHICLE_DETAIL_TAB_CAPACITIES                               :{BLACK}Pojemność
 STR_VEHICLE_DETAILS_TRAIN_CAPACITIES_TOOLTIP                    :{BLACK}Pokaż pojemność każdego wagonu
@@ -3869,8 +3845,8 @@ STR_ERROR_GENERIC_OBJECT_IN_THE_WAY                             :{WHITE}{1:STRIN
 STR_ERROR_NOT_ALLOWED_WHILE_PAUSED                              :{WHITE}Niedozwolone w trakcie pauzy
 
 # Local authority errors
-STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}Lokalne władze {TOWN} nie pozwalają na to
-STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}Lokalne władze {TOWN} nie pozwalają na budowę kolejnego lotniska w tym mieście
+STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS                 :{WHITE}Lokalne władze miasta {TOWN} nie pozwalają na to
+STR_ERROR_LOCAL_AUTHORITY_REFUSES_AIRPORT                       :{WHITE}Lokalne władze miasta {TOWN} nie pozwalają na budowę kolejnego lotniska w tym mieście
 STR_ERROR_LOCAL_AUTHORITY_REFUSES_NOISE                         :{WHITE}{TOWN} lokalne władzę odmawiają zgody na lotnisko ze względu na poziom hałasu
 STR_ERROR_BRIBE_FAILED                                          :{WHITE}Twoja próba wręczenia łapówki została
 STR_ERROR_BRIBE_FAILED_2                                        :{WHITE}wykryta przez lokalnych śledczych
@@ -3941,7 +3917,6 @@ STR_ERROR_CAN_T_BUILD_AIRPORT_HERE                              :{WHITE}Nie moż
 
 STR_ERROR_ADJOINS_MORE_THAN_ONE_EXISTING                        :{WHITE}Przylega do więcej niż jednej stacji
 STR_ERROR_STATION_TOO_SPREAD_OUT                                :{WHITE}... stacja zbyt rozległa
-STR_ERROR_NONUNIFORM_STATIONS_DISALLOWED                        :{WHITE}... niejednorodne stacje są niedostępne
 STR_ERROR_TOO_MANY_STATIONS_LOADING                             :{WHITE}Za duzo stacji
 STR_ERROR_TOO_MANY_STATION_SPECS                                :{WHITE}Za dużo części stacji kolejowej
 STR_ERROR_TOO_MANY_BUS_STOPS                                    :{WHITE}Zbyt wiele przystanków autobusowych
@@ -4021,7 +3996,7 @@ STR_ERROR_AUTOREPLACE_MONEY_LIMIT                               :(limit funduszy
 # Rail construction errors
 STR_ERROR_IMPOSSIBLE_TRACK_COMBINATION                          :{WHITE}Niemożliwa kombinacja torów
 STR_ERROR_MUST_REMOVE_SIGNALS_FIRST                             :{WHITE}Należy najpierw usunąć sygnalizację
-STR_ERROR_NO_SUITABLE_RAILROAD_TRACK                            :{WHITE}Nieodpowiednie tory
+STR_ERROR_NO_SUITABLE_RAILROAD_TRACK                            :{WHITE}Nieodpowiednie tory/brak torów
 STR_ERROR_MUST_REMOVE_RAILROAD_TRACK                            :{WHITE}Należy najpierw usunąć tory
 STR_ERROR_CROSSING_ON_ONEWAY_ROAD                               :{WHITE}Droga jest jednokierunkowa lub zablokowana
 STR_ERROR_CROSSING_DISALLOWED                                   :{WHITE}Przejazd kolejowy nie dozwolony dla tego typu torów
@@ -4680,7 +4655,6 @@ STR_COMPANY_MONEY                                               :{WHITE}{CURRENC
 STR_BLACK_DATE_LONG                                             :{BLACK}{DATE_LONG}
 STR_BLACK_CROSS                                                 :{BLACK}{CROSS}
 STR_SILVER_CROSS                                                :{SILVER}{CROSS}
-STR_WHITE_DATE_SHORT                                            :{WHITE}{DATE_SHORT}
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINYFONT}{BLACK}{DATE_LONG}

@@ -1426,6 +1426,7 @@ static ChangeInfoResult BridgeChangeInfo(uint brid, int numinfo, int prop, ByteR
 
 			case 0x0A: // Maximum length
 				bridge->max_length = buf->ReadByte();
+				if (bridge->max_length > 16) bridge->max_length = 0xFFFF;
 				break;
 
 			case 0x0B: // Cost factor
@@ -3209,6 +3210,8 @@ static ChangeInfoResult RailTypeChangeInfo(uint id, int numinfo, int prop, ByteR
 
 			case 0x0E: // Compatible railtype list
 			case 0x0F: // Powered railtype list
+			case 0x18: // Railtype list required for date introduction
+			case 0x19: // Introduced railtype list
 			{
 				/* Rail type compatibility bits are added to the existing bits
 				 * to allow multiple GRFs to modify compatibility with the
@@ -3218,10 +3221,11 @@ static ChangeInfoResult RailTypeChangeInfo(uint id, int numinfo, int prop, ByteR
 					RailTypeLabel label = buf->ReadDWord();
 					RailType rt = GetRailTypeByLabel(BSWAP32(label));
 					if (rt != INVALID_RAILTYPE) {
-						if (prop == 0x0E) {
-							SetBit(rti->compatible_railtypes, rt);
-						} else {
-							SetBit(rti->powered_railtypes, rt);
+						switch (prop) {
+							case 0x0E: SetBit(rti->compatible_railtypes, rt);            break;
+							case 0x0F: SetBit(rti->powered_railtypes, rt);               break;
+							case 0x18: SetBit(rti->introduction_required_railtypes, rt); break;
+							case 0x19: SetBit(rti->introduces_railtypes, rt);            break;
 						}
 					}
 				}
@@ -3254,6 +3258,14 @@ static ChangeInfoResult RailTypeChangeInfo(uint id, int numinfo, int prop, ByteR
 
 			case 0x16: // Map colour
 				rti->map_colour = MapDOSColour(buf->ReadByte());
+				break;
+
+			case 0x17: // Introduction date
+				rti->introduction_date = buf->ReadDWord();
+				break;
+
+			case 0x1A: // Sort order
+				rti->sorting_order = buf->ReadByte();
 				break;
 
 			default:
@@ -3303,6 +3315,8 @@ static ChangeInfoResult RailTypeReserveInfo(uint id, int numinfo, int prop, Byte
 
 			case 0x0E: // Compatible railtype list
 			case 0x0F: // Powered railtype list
+			case 0x18: // Railtype list required for date introduction
+			case 0x19: // Introduced railtype list
 				for (int j = buf->ReadByte(); j != 0; j--) buf->ReadDWord();
 				break;
 
@@ -3311,7 +3325,12 @@ static ChangeInfoResult RailTypeReserveInfo(uint id, int numinfo, int prop, Byte
 			case 0x12: // Station graphic
 			case 0x15: // Acceleration model
 			case 0x16: // Map colour
+			case 0x1A: // Sort order
 				buf->ReadByte();
+				break;
+
+			case 0x17: // Introduction date
+				buf->ReadDWord();
 				break;
 
 			default:
@@ -5111,7 +5130,7 @@ static void CfgApply(ByteReader *buf)
 			uint32 value = GetParamVal(param_num + i / 4, NULL);
 			/* Reset carry flag for each iteration of the variable (only really
 			 * matters if param_size is greater than 4) */
-			if (i == 0) carry = false;
+			if (i % 4 == 0) carry = false;
 
 			if (add_value) {
 				uint new_value = preload_sprite[offset + i] + GB(value, (i % 4) * 8, 8) + (carry ? 1 : 0);
@@ -6883,7 +6902,7 @@ static void InitializeGRFSpecial()
 	_ttdpatch_flags[0] = ((_settings_game.station.never_expire_airports ? 1 : 0) << 0x0C)  // keepsmallairport
 	                   |                                                      (1 << 0x0D)  // newairports
 	                   |                                                      (1 << 0x0E)  // largestations
-	                   |      ((_settings_game.construction.longbridges ? 1 : 0) << 0x0F)  // longbridges
+	                   | ((_settings_game.construction.max_bridge_length > 16 ? 1 : 0) << 0x0F)  // longbridges
 	                   |                                                      (0 << 0x10)  // loadtime
 	                   |                                                      (1 << 0x12)  // presignals
 	                   |                                                      (1 << 0x13)  // extpresignals
@@ -6893,7 +6912,7 @@ static void InitializeGRFSpecial()
 	                   |                                                      (1 << 0x1E); // generalfixes
 
 	_ttdpatch_flags[1] =   ((_settings_game.economy.station_noise_level ? 1 : 0) << 0x07)  // moreairports - based on units of noise
-	                   |        ((_settings_game.vehicle.mammoth_trains ? 1 : 0) << 0x08)  // mammothtrains
+	                   |  ((_settings_game.vehicle.max_train_length > 5 ? 1 : 0) << 0x08)  // mammothtrains
 	                   |                                                      (1 << 0x09)  // trainrefit
 	                   |                                                      (0 << 0x0B)  // subsidiaries
 	                   |         ((_settings_game.order.gradual_loading ? 1 : 0) << 0x0C)  // gradualloading
@@ -6947,7 +6966,7 @@ static void InitializeGRFSpecial()
 	                   |                                                      (1 << 0x0B)  // newcargo
 	                   |                                                      (1 << 0x0C)  // enhancemultiplayer
 	                   |                                                      (1 << 0x0D)  // onewayroads
-	                   |   ((_settings_game.station.nonuniform_stations ? 1 : 0) << 0x0E)  // irregularstations
+	                   |                                                      (1 << 0x0E)  // irregularstations
 	                   |                                                      (1 << 0x0F)  // statistics
 	                   |                                                      (1 << 0x10)  // newsounds
 	                   |                                                      (1 << 0x11)  // autoreplace
