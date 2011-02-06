@@ -374,14 +374,14 @@ void RoadVehicle::UpdateDeltaXY(Direction direction)
 {
 #define MKIT(a, b, c, d) ((a & 0xFF) << 24) | ((b & 0xFF) << 16) | ((c & 0xFF) << 8) | ((d & 0xFF) << 0)
 	static const uint32 _delta_xy_table[8] = {
-		MKIT(3, 3, -1, -1),
-		MKIT(3, 7, -1, -3),
-		MKIT(3, 3, -1, -1),
-		MKIT(7, 3, -3, -1),
-		MKIT(3, 3, -1, -1),
-		MKIT(3, 7, -1, -3),
-		MKIT(3, 3, -1, -1),
-		MKIT(7, 3, -3, -1),
+		MKIT(3, 3, -1, -1),   // N
+		MKIT(3, 14, -1, -3),   // NE
+		MKIT(3, 3, -1, -1),   // E
+		MKIT(7, 3, -3, -1),   // SE
+		MKIT(3, 3, -1, -1),   // S
+		MKIT(3, 14, -1, -3),   // SW
+		MKIT(3, 3, -1, -1),   // W
+		MKIT(7, 3, -3, -1),   // NW
 	};
 #undef MKIT
 
@@ -416,6 +416,10 @@ FORCEINLINE int RoadVehicle::GetCurrentMaxSpeed() const
 	return max_speed;
 }
 
+/**
+ * Delete last vehicle of a chain road vehicles.
+ * @param v First roadvehicle.
+ */
 static void DeleteLastRoadVeh(RoadVehicle *v)
 {
 	Vehicle *u = v;
@@ -442,6 +446,11 @@ static void RoadVehSetRandomDirection(RoadVehicle *v)
 	} while ((v = v->Next()) != NULL);
 }
 
+/**
+ * Road vehicle chain has crashed.
+ * @param v First roadvehicle.
+ * @return whether the chain still exists.
+ */
 static bool RoadVehIsCrashed(RoadVehicle *v)
 {
 	v->crashed_ctr++;
@@ -458,6 +467,12 @@ static bool RoadVehIsCrashed(RoadVehicle *v)
 	return true;
 }
 
+/**
+ * Check routine whether a road and a train vehicle have collided.
+ * @param v    %Train vehicle to test.
+ * @param data Road vehicle to test.
+ * @return %Train vehicle if the vehicles collided, else \c NULL.
+ */
 static Vehicle *EnumCheckRoadVehCrashTrain(Vehicle *v, void *data)
 {
 	const Vehicle *u = (Vehicle*)data;

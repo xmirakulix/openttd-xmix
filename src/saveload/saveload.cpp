@@ -224,7 +224,7 @@
  *  157   21862
  *  158   21933
  *  159   21962
- *  160   21969
+ *  160   21974
  */
 extern const uint16 SAVEGAME_VERSION = SL_EXT_RATING; ///< Current savegame version of OpenTTD.
 

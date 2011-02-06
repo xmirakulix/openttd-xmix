@@ -144,4 +144,4 @@ if [ -n "$BRANCH" ]; then
 	REV="${REV}-$BRANCH"
 fi
 
-echo "$REV	$REV_NR	$MODIFIED	$CLEAN_REV"
+echo "$REV	$REV_NR	$MODIFIED	r$REV_NR"

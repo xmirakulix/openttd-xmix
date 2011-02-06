@@ -14,7 +14,12 @@
 
 #include "base.hpp"
 #include "../core/bitmath_func.hpp"
+#include "../core/math_func.hpp"
 #include "../gfx_func.h"
+#include "../debug.h"
+#include <math.h>
+
+extern int _sat, _li;
 
 class Blitter_32bppBase : public Blitter {
 public:
@@ -101,6 +106,140 @@ public:
 		if (a >= 255) return (colour | 0xFF000000);
 
 		return ComposeColourPANoCheck(colour, a, current);
+	}
+
+	/**
+	 * Blend a colour based on Pixel value and the current pixel value.
+	 */
+	static inline uint ComposeColourBlend(uint colour, uint32 current)
+	{
+		if (colour == current) return colour;
+
+		/* Converting to HSL */
+
+		/* Colour (cc) */
+		int r_colour = GB(colour,  16, 8);
+		int g_colour = GB(colour,  8,  8);
+		int b_colour = GB(colour,  0,  8);
+		int hue = 0;
+		int saturation = 0;
+		int lightness_colour = 0;
+
+		/* Find max and min cc */
+		int min_colour = min(min(r_colour, g_colour),b_colour);
+		
+		if ((r_colour > g_colour) && (r_colour > b_colour)) {
+			if (min_colour != r_colour) {
+				hue = 60 * (g_colour - b_colour) / (r_colour - min_colour) + 360;
+				hue %= 360;
+				if ((r_colour + min_colour) <= 256) {
+					saturation = (r_colour - min_colour) * 255 / (r_colour + min_colour);
+				} else {
+					saturation = (r_colour - min_colour) * 255 / (512 - (r_colour + min_colour));
+				}
+			} else {
+				saturation = 0;
+				lightness_colour = r_colour;
+			}
+		} else if (g_colour > b_colour){
+			if (min_colour != g_colour) {
+				hue = 60 * (b_colour - r_colour) / (g_colour - min_colour) + 120;
+				if ((g_colour + min_colour) <= 256) {
+					saturation = (g_colour - min_colour) * 255 / (g_colour + min_colour);
+				} else {
+					saturation = (g_colour - min_colour) * 255 / (512 - (g_colour + min_colour));
+				}
+			} else {
+				saturation = 0;
+				lightness_colour = g_colour;
+			}
+		} else {
+			if (min_colour != b_colour) {
+				hue = 60 * (r_colour - g_colour) / (b_colour - min_colour) + 240;
+				if ((b_colour + min_colour) <= 256) {
+					saturation = (b_colour - min_colour) * 255 / (b_colour + min_colour);
+				} else {
+					saturation = (b_colour - min_colour) * 255 / (512 - (b_colour + min_colour));
+				}
+			} else {
+				saturation = 0;
+				lightness_colour = b_colour;
+			}
+		}
+
+		/* Original colour */
+		int r_current = GB(current,  16, 8);
+		int g_current = GB(current,  8,  8);
+		int b_current = GB(current,  0,  8);
+		/* Find max and min original colour */
+		int min_current = min(min(r_current, g_current),b_current);
+		int max_current = max(max(r_current, g_current),b_current);
+
+		/* Lightness original colour */
+		int lightness_current = (max_current + min_current) / 2;
+
+		/* Converting to RGB */
+		unsigned int red, green, blue;
+
+		if (saturation == 0) {
+			red = (lightness_colour + lightness_current) / 2;
+			green = red;
+			blue = red;
+		} else {
+			float q;
+			if (lightness_current < 128) {
+				q = lightness_current * (1 + saturation / 255.0);
+			} else {
+				q = lightness_current + saturation - (lightness_current * saturation / 255.0);
+			}
+
+			float p = (2 * lightness_current) - q;
+
+			/* Red */
+			int hue_r = hue + 120;
+			if (hue_r > 360) {
+				hue_r -= 360;
+			}
+			if (hue_r < 60) {
+				red = p + ((q - p) * hue_r / 60.0);
+			} else if (hue_r < 180){
+				red = q;
+			} else if (hue_r < 240) {
+				red = p + ((q - p) * (4.0 - hue_r / 60.0));
+			} else {
+				red = p;
+			}
+
+			/* Green */
+			int hue_g = hue;
+
+			if (hue_g < 60) {
+				green = p + ((q - p) * hue_g / 60.0);
+			} else if (hue_g < 180){
+				green = q;
+			} else if (hue_g < 240) {
+				green = p + ((q - p) * (4.0 - hue_g / 60.0));
+			} else {
+				green = p;
+			}
+
+			/* Blue */
+			int hue_b = hue - 120;
+			if (hue_b < 0.0) {
+				hue_b += 360;
+			} 
+			if (hue_b < 60) {
+				blue = p + ((q - p) * hue_b / 60.0);
+			} else if (hue_b < 180){
+				blue = q;
+			} else if (hue_b < 240) {
+				blue = p + ((q - p) * (4.0 - hue_b / 60.0));
+			} else {
+				blue = p;
+			}
+		}
+
+		return ComposeColour(0xff, red, green, blue);
 	}
 
 	/**

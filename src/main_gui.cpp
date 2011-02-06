@@ -41,6 +41,7 @@
 
 #include "table/sprites.h"
 #include "table/strings.h"
+#include "debug.h"
 
 static int _rename_id = 1;
 static int _rename_what = -1;
@@ -174,8 +175,8 @@ bool DoZoomInOutWindow(ZoomStateChange how, Window *w)
 			break;
 	}
 	if (vp != NULL) { // the vp can be null when how == ZOOM_NONE
-		vp->virtual_left = w->viewport->scrollpos_x;
-		vp->virtual_top = w->viewport->scrollpos_y;
+		vp->virtual_left = UnScaleByZoom(w->viewport->scrollpos_x, vp->zoom);
+		vp->virtual_top = UnScaleByZoom(w->viewport->scrollpos_y, vp->zoom);
 	}
 	/* Update the windows that have zoom-buttons to perhaps disable their buttons */
 	w->InvalidateData();
@@ -214,6 +215,9 @@ static const WindowDesc _main_window_desc(
 	0,
 	_nested_main_window_widgets, lengthof(_nested_main_window_widgets)
 );
+
+int _sat = 0;
+int _li = 0;
 
 enum {
 	GHK_QUIT,
@@ -405,7 +409,18 @@ struct MainWindow : Window
 				}
 				break;
 #endif
-
+			case '3' : _sat = (_sat - 1) % 256;
+				DEBUG(misc, 0, "saturation delta %d ", _sat);
+				break;
+			case '4' : _sat = (_sat + 1) % 256;
+				DEBUG(misc, 0, "saturation delta %d ", _sat);
+				break;
+			case '5' : _li = (_li - 1) % 256;
+				DEBUG(misc, 0, "lightness delta %d ", _li);
+				break;
+			case '6' : _li = (_li + 1) % 256;
+				DEBUG(misc, 0, "lightness delta %d ", _li);
+				break;
 			default: return ES_NOT_HANDLED;
 		}
 		return ES_HANDLED;
@@ -421,7 +436,9 @@ struct MainWindow : Window
 
 	virtual void OnMouseWheel(int wheel)
 	{
-		ZoomInOrOutToCursorWindow(wheel < 0, this);
+		if (_settings_client.gui.scrollwheel_scrolling == 0) {
+			ZoomInOrOutToCursorWindow(wheel < 0, this);
+		}
 	}
 
 	virtual void OnResize()

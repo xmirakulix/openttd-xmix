@@ -1732,7 +1732,7 @@ static void DrawTrackFence_NW(const TileInfo *ti, SpriteID base_image)
 	RailFenceOffset rfo = RFO_FLAT_X;
 	if (ti->tileh != SLOPE_FLAT) rfo = (ti->tileh & SLOPE_S) ? RFO_SLOPE_SW : RFO_SLOPE_NE;
 	AddSortableSpriteToDraw(base_image + rfo, _drawtile_track_palette,
-		ti->x, ti->y + 1, 16, 1, 4, ti->z);
+		ti->x, ti->y, 16, 1, 4, ti->z);
 }
 
 static void DrawTrackFence_SE(const TileInfo *ti, SpriteID base_image)
@@ -1740,7 +1740,7 @@ static void DrawTrackFence_SE(const TileInfo *ti, SpriteID base_image)
 	RailFenceOffset rfo = RFO_FLAT_X;
 	if (ti->tileh != SLOPE_FLAT) rfo = (ti->tileh & SLOPE_S) ? RFO_SLOPE_SW : RFO_SLOPE_NE;
 	AddSortableSpriteToDraw(base_image + rfo, _drawtile_track_palette,
-		ti->x, ti->y + TILE_SIZE - 1, 16, 1, 4, ti->z);
+		ti->x, ti->y + TILE_SIZE, 16, -1, 4, ti->z);
 }
 
 static void DrawTrackFence_NW_SE(const TileInfo *ti, SpriteID base_image)
@@ -1754,7 +1754,7 @@ static void DrawTrackFence_NE(const TileInfo *ti, SpriteID base_image)
 	RailFenceOffset rfo = RFO_FLAT_Y;
 	if (ti->tileh != SLOPE_FLAT) rfo = (ti->tileh & SLOPE_S) ? RFO_SLOPE_SE : RFO_SLOPE_NW;
 	AddSortableSpriteToDraw(base_image + rfo, _drawtile_track_palette,
-		ti->x + 1, ti->y, 1, 16, 4, ti->z);
+		ti->x, ti->y, -6, 16, 4, ti->z);
 }
 
 static void DrawTrackFence_SW(const TileInfo *ti, SpriteID base_image)
@@ -1762,7 +1762,7 @@ static void DrawTrackFence_SW(const TileInfo *ti, SpriteID base_image)
 	RailFenceOffset rfo = RFO_FLAT_Y;
 	if (ti->tileh != SLOPE_FLAT) rfo = (ti->tileh & SLOPE_S) ? RFO_SLOPE_SE : RFO_SLOPE_NW;
 	AddSortableSpriteToDraw(base_image + rfo, _drawtile_track_palette,
-		ti->x + TILE_SIZE - 1, ti->y, 1, 16, 4, ti->z);
+		ti->x + TILE_SIZE, ti->y, -1, 16, 4, ti->z);
 }
 
 static void DrawTrackFence_NE_SW(const TileInfo *ti, SpriteID base_image)
@@ -2674,12 +2674,10 @@ static void GetTileDesc_Track(TileIndex tile, TileDesc *td)
 
 		case RAIL_TILE_DEPOT:
 			td->str = STR_LAI_RAIL_DESCRIPTION_TRAIN_DEPOT;
-			if (_settings_game.vehicle.train_acceleration_model != AM_ORIGINAL) {
-				if (td->rail_speed > 0) {
-					td->rail_speed = min(td->rail_speed, 61);
-				} else {
-					td->rail_speed = 61;
-				}
+			if (td->rail_speed > 0) {
+				td->rail_speed = min(td->rail_speed, 61);
+			} else {
+				td->rail_speed = 61;
 			}
 			td->build_date = Depot::GetByTile(tile)->build_date;
 			break;

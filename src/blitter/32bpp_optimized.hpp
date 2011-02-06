@@ -23,7 +23,13 @@ public:
 
 	/* virtual */ void Draw(Blitter::BlitterParams *bp, BlitterMode mode, ZoomLevel zoom);
 	/* virtual */ Sprite *Encode(SpriteLoader::Sprite *sprite, AllocatorProc *allocator);
-
+					  void RescaleSpriteHalfSize( const SpriteLoader::Sprite *src_sprite,
+															SpriteLoader::Sprite *dest_sprite,
+															bool prevent_alpha_bleeding);
+					  void RescaleSpriteDoubleSize(const SpriteLoader::Sprite *src_sprite,
+															 SpriteLoader::Sprite *dest_sprite);
+					  void FillRGBFromPalette(SpriteLoader::Sprite *sprite);
+					  byte *FillRGBPalette(SpriteID id, byte *remap_data);
 	/* virtual */ const char *GetName() { return "32bpp-optimized"; }
 
 	template <BlitterMode mode> void Draw(const Blitter::BlitterParams *bp, ZoomLevel zoom);

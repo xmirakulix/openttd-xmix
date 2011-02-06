@@ -463,6 +463,10 @@ int ttd_main(int argc, char *argv[])
 #endif
 	;
 
+	DrawPixelInfo dpi;
+	_cur_dpi = &dpi;
+	_cur_dpi->zoom = ZOOM_LVL_NORMAL;
+
 	MyGetOptData mgo(argc - 1, argv + 1, optformat);
 
 	while ((i = MyGetOpt(&mgo)) != -1) {
@@ -659,7 +663,9 @@ int ttd_main(int argc, char *argv[])
 
 	DEBUG(misc, 1, "Loading blitter...");
 	if (blitter == NULL && _ini_blitter != NULL) blitter = strdup(_ini_blitter);
-	if (BlitterFactoryBase::SelectBlitter(blitter) == NULL) {
+	DEBUG(misc, 1, "Force 32bpp-optimized blitter, needed for extra zoom patch");
+	blitter = strdup("32bpp-optimized");
+	if (BlitterFactoryBase::SelectBlitter(blitter) == NULL){
 		StrEmpty(blitter) ?
 			usererror("Failed to autoprobe blitter") :
 			usererror("Failed to select requested blitter '%s'; does it exist?", blitter);
