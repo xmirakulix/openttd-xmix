@@ -303,6 +303,8 @@ struct NetworkChatWindow : public QueryStringBaseWindow {
 		this->SetFocusedWidget(NWCW_TEXTBOX);
 		InvalidateWindowData(WC_NEWS_WINDOW, 0, this->height);
 		_chat_tab_completion_active = false;
+
+		PositionNetworkChatWindow(this);
 	}
 
 	~NetworkChatWindow()
@@ -398,11 +400,11 @@ struct NetworkChatWindow : public QueryStringBaseWindow {
 					/* If we are completing at the begin of the line, skip the ': ' we added */
 					if (tb_buf == pre_buf) {
 						offset = 0;
-						length = (tb->max_bytes - 1) - 2;
+						length = (tb->bytes - 1) - 2;
 					} else {
 						/* Else, find the place we are completing at */
 						offset = strlen(pre_buf) + 1;
-						length = (tb->max_bytes - 1) - offset;
+						length = (tb->bytes - 1) - offset;
 					}
 
 					/* Compare if we have a match */
@@ -457,7 +459,7 @@ struct NetworkChatWindow : public QueryStringBaseWindow {
 
 	virtual Point OnInitialPosition(const WindowDesc *desc, int16 sm_width, int16 sm_height, int window_number)
 	{
-		Point pt = { (_screen.width - max(sm_width, desc->default_width)) / 2, _screen.height - sm_height - FindWindowById(WC_STATUS_BAR, 0)->height };
+		Point pt = { 0, _screen.height - sm_height - FindWindowById(WC_STATUS_BAR, 0)->height };
 		return pt;
 	}
 

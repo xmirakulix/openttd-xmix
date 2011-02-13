@@ -20,7 +20,7 @@
 #include "console_gui.h"
 #include "genworld.h"
 #include "transparency_gui.h"
-#include "functions.h"
+#include "map_func.h"
 #include "sound_func.h"
 #include "transparency.h"
 #include "strings_func.h"
@@ -335,11 +335,8 @@ struct MainWindow : Window
 				break;
 
 			case GHK_MONEY: // Gimme money
-				/* Server can not cheat in advertise mode either! */
-#ifdef ENABLE_NETWORK
-				if (!_networking || !_network_server || !_settings_client.network.server_advertise)
-#endif /* ENABLE_NETWORK */
-					DoCommandP(0, 10000000, 0, CMD_MONEY_CHEAT);
+				/* You can only cheat for money in single player. */
+				if (!_networking) DoCommandP(0, 10000000, 0, CMD_MONEY_CHEAT);
 				break;
 
 			case GHK_UPDATE_COORDS: // Update the coordinates of all station signs

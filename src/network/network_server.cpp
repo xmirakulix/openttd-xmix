@@ -69,7 +69,6 @@ struct PacketWriter : SaveFilter {
 	/** Make sure everything is cleaned up. */
 	~PacketWriter()
 	{
-
 		/* Prevent double frees. */
 		if (this->cs != NULL) {
 			if (this->cs->savegame_mutex != NULL) this->cs->savegame_mutex->BeginCritical();
@@ -99,7 +98,8 @@ struct PacketWriter : SaveFilter {
 
 	/* virtual */ void Write(byte *buf, size_t size)
 	{
-		if (this->cs == NULL) return;
+		/* We want to abort the saving when the socket is closed. */
+		if (this->cs == NULL) SlError(STR_NETWORK_ERROR_LOSTCONNECTION);
 
 		if (this->current == NULL) this->current = new Packet(PACKET_SERVER_MAP_DATA);
 
@@ -125,7 +125,8 @@ struct PacketWriter : SaveFilter {
 
 	/* virtual */ void Finish()
 	{
-		if (this->cs == NULL) return;
+		/* We want to abort the saving when the socket is closed. */
+		if (this->cs == NULL) SlError(STR_NETWORK_ERROR_LOSTCONNECTION);
 
 		if (this->cs->savegame_mutex != NULL) this->cs->savegame_mutex->BeginCritical();
 
@@ -155,6 +156,13 @@ ServerNetworkGameSocketHandler::ServerNetworkGameSocketHandler(SOCKET s) : Netwo
 	this->status = STATUS_INACTIVE;
 	this->client_id = _network_client_id++;
 	this->receive_limit = _settings_client.network.bytes_per_frame_burst;
+
+	/* The Socket and Info pools need to be the same in size. After all,
+	 * each Socket will be associated with at most one Info object. As
+	 * such if the Socket was allocated the Info object can as well. */
+	assert_compile(NetworkClientSocketPool::MAX_SIZE == NetworkClientInfoPool::MAX_SIZE);
+	assert(NetworkClientInfo::CanAllocateItem());
+
 	NetworkClientInfo *ci = new NetworkClientInfo(this->client_id);
 	this->SetInfo(ci);
 	ci->client_playas = COMPANY_INACTIVE_CLIENT;
@@ -174,6 +182,10 @@ ServerNetworkGameSocketHandler::~ServerNetworkGameSocketHandler()
 	if (this->savegame != NULL) this->savegame->cs = NULL;
 
 	if (this->savegame_mutex != NULL) this->savegame_mutex->EndCritical();
+
+	/* Make sure the saving is completely cancelled. */
+	if (this->savegame != NULL) WaitTillSaved();
+
 	delete this->savegame_mutex;
 }
 
@@ -250,7 +262,13 @@ NetworkRecvStatus ServerNetworkGameSocketHandler::CloseConnection(NetworkRecvSta
 /* static */ bool ServerNetworkGameSocketHandler::AllowConnection()
 {
 	extern byte _network_clients_connected;
-	return _network_clients_connected < MAX_CLIENTS && _network_game_info.clients_on < _settings_client.network.max_clients;
+	bool accept = _network_clients_connected < MAX_CLIENTS && _network_game_info.clients_on < _settings_client.network.max_clients;
+
+	/* We can't go over the MAX_CLIENTS limit here. However, the
+	 * pool must have place for all clients and ourself. */
+	assert_compile(NetworkClientSocketPool::MAX_SIZE == MAX_CLIENTS + 1);
+	assert(ServerNetworkGameSocketHandler::CanAllocateItem());
+	return accept;
 }
 
 /** Send the packets for the server sockets. */
