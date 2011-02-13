@@ -19,6 +19,7 @@
 #include "network/network_func.h"
 #include "network/network_base.h"
 #include "network/network_admin.h"
+#include "network/network_client.h"
 #include "command_func.h"
 #include "settings_func.h"
 #include "fios.h"
@@ -35,6 +36,7 @@
 #include "ai/ai_config.hpp"
 #include "newgrf.h"
 #include "console_func.h"
+#include "engine_base.h"
 
 #ifdef ENABLE_NETWORK
 	#include "table/strings.h"
@@ -89,7 +91,7 @@ DEF_CONSOLE_HOOK(ConHookNeedNetwork)
 {
 	if (!NetworkAvailable(echo)) return CHR_DISALLOW;
 
-	if (!_networking) {
+	if (!_networking || (!_network_server && !MyClient::IsConnected())) {
 		if (echo) IConsoleError("Not connected. This command is only available in multiplayer.");
 		return CHR_DISALLOW;
 	}
@@ -138,6 +140,26 @@ DEF_CONSOLE_CMD(ConResetEngines)
 	}
 
 	StartupEngines();
+	return true;
+}
+
+DEF_CONSOLE_CMD(ConResetEnginePool)
+{
+	if (argc == 0) {
+		IConsoleHelp("Reset NewGRF allocations of engine slots. This will remove invalid engine definitions, and might make default engines available again.");
+		return true;
+	}
+
+	if (_game_mode == GM_MENU) {
+		IConsoleError("This command is only available in game and editor.");
+		return true;
+	}
+
+	if (!EngineOverrideManager::ResetToCurrentNewGRFConfig()) {
+		IConsoleError("This can only be done when there are no vehicles in the game.");
+		return true;
+	}
+
 	return true;
 }
 
@@ -1781,6 +1803,7 @@ void IConsoleStdLibRegister()
 	IConsoleCmdRegister("getdate",      ConGetDate);
 	IConsoleCmdRegister("quit",         ConExit);
 	IConsoleCmdRegister("resetengines", ConResetEngines, ConHookNoNetwork);
+	IConsoleCmdRegister("reset_enginepool", ConResetEnginePool, ConHookNoNetwork);
 	IConsoleCmdRegister("return",       ConReturn);
 	IConsoleCmdRegister("screenshot",   ConScreenShot);
 	IConsoleCmdRegister("script",       ConScript);
