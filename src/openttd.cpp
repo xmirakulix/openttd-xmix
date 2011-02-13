@@ -47,7 +47,6 @@
 #include "gamelog.h"
 #include "animated_tile_func.h"
 #include "roadstop_base.h"
-#include "functions.h"
 #include "elrail_func.h"
 #include "rev.h"
 #include "highscore.h"
@@ -76,7 +75,6 @@ void IncreaseDate();
 void DoPaletteAnimations();
 void MusicLoop();
 void ResetMusic();
-void ProcessAsyncSaveFinish();
 void CallWindowTickEvent();
 
 extern void SetDifficultyLevel(int mode, DifficultySettings *gm_opt);
@@ -204,7 +202,7 @@ static void ShowHelp()
 	/* We need to initialize the AI, so it finds the AIs */
 	TarScanner::DoScan();
 	AI::Initialize();
-	p = AI::GetConsoleList(p, lastof(buf));
+	p = AI::GetConsoleList(p, lastof(buf), true);
 	AI::Uninitialize(true);
 
 	/* ShowInfo put output to stderr, but version information should go

@@ -34,7 +34,6 @@
 #include "string_func.h"
 #include "newgrf_cargo.h"
 #include "cheat_type.h"
-#include "functions.h"
 #include "animated_tile_func.h"
 #include "date_func.h"
 #include "subsidy_func.h"
@@ -1757,6 +1756,12 @@ static Town *CreateRandomTown(uint attempts, uint32 townnameparts, TownSize size
 		 * placement is so bad it couldn't grow at all */
 		if (t->population > 0) return t;
 		DoCommand(t->xy, t->index, 0, DC_EXEC, CMD_DELETE_TOWN);
+
+		/* We already know that we can allocate a single town when
+		 * entering this function. However, we create and delete
+		 * a town which "resets" the allocation checks. As such we
+		 * need to check again when assertions are enabled. */
+		assert(Town::CanAllocateItem());
 	} while (--attempts != 0);
 
 	return NULL;
@@ -2525,6 +2530,8 @@ static bool SearchTileForStatue(TileIndex tile, void *user_data)
  */
 static CommandCost TownActionBuildStatue(Town *t, DoCommandFlag flags)
 {
+	if (!Object::CanAllocateItem()) return_cmd_error(STR_ERROR_TOO_MANY_OBJECTS);
+
 	TileIndex tile = t->xy;
 	if (CircularTileSearch(&tile, 9, SearchTileForStatue, NULL)) {
 		if (flags & DC_EXEC) {
